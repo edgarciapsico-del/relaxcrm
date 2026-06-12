@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM Cloud - v13.0 QA Approved</title>
+    <title>Relax Therapy CRM Cloud - v14.0 QA Approved</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -30,7 +30,7 @@
                 </div>
                 <div>
                     <span class="font-black text-slate-900 tracking-tight text-lg">RELAX THERAPY CRM MASTER</span>
-                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider"><i class="fa-solid fa-circle-check"></i> Sincronización v13.0 Activa</span>
+                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider"><i class="fa-solid fa-circle-check"></i> Sincronización v14.0 OK</span>
                 </div>
             </div>
 
@@ -105,7 +105,7 @@
                                 <th class="p-3 text-left">Asesora</th>
                                 <th class="p-3">Contratado Mes ($)</th>
                                 <th class="p-3">Cobrado Mes ($)</th>
-                                <th class="p-3">Gestión Comercial (Meta Diaria)</th>
+                                <th class="p-3">Gestión Comercial (Leads Atendidos / Total)</th>
                                 <th class="p-3">Rendimiento Diario Real</th>
                                 <th class="p-3">Progreso de Meta Personalizada</th>
                             </tr>
@@ -119,8 +119,8 @@
 
     <section class="max-w-[1750px] w-full mx-auto px-4 lg:px-8 mt-4">
         <div class="bg-white px-5 py-3 rounded-xl border flex flex-col md:flex-row items-center justify-between gap-4 shadow-2xs">
-            <div class="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
-                <div class="flex items-center gap-2"><i class="fa-solid fa-filter text-indigo-600"></i><span class="text-xs font-black text-slate-700 uppercase">Visualizar Gestora:</span></div>
+            <div class="flex items-center gap-4 w-full md:w-auto">
+                <div class="text-xs font-black text-slate-700 uppercase">Visualizar Gestora:</div>
                 <div class="flex flex-wrap gap-1.5" id="managers-buttons-box"></div>
             </div>
             <div class="relative w-full md:w-80">
@@ -168,43 +168,39 @@
             <form id="crm-form" onsubmit="handleFormSubmit(event)" class="space-y-4 text-xs">
                 <input type="hidden" id="form-id">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div><label class="block font-bold text-slate-500 mb-1">Nombre Completo del Paciente</label><input type="text" id="form-name" required class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-medium focus:outline-hidden"></div>
-                    <div><label class="block font-bold text-slate-500 mb-1">WhatsApp de Contacto</label><input type="text" id="form-phone" required class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-medium focus:outline-hidden"></div>
+                    <div><label class="block font-bold text-slate-500 mb-1">Paciente</label><input type="text" id="form-name" required class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-medium focus:outline-hidden"></div>
+                    <div><label class="block font-bold text-slate-500 mb-1">WhatsApp</label><input type="text" id="form-phone" required class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-medium focus:outline-hidden"></div>
                 </div>
-
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                        <label class="block font-bold text-slate-500 mb-1">Estado en Embudo</label>
+                        <label class="block font-bold text-slate-500 mb-1">Fase</label>
                         <select id="form-phase" class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-medium focus:outline-hidden">
                             <option value="frio">Tráfico Frío</option><option value="tibio">Tráfico Tibio</option><option value="caliente">Tráfico Caliente</option><option value="agenda">Agenda</option><option value="venta">Venta</option><option value="postventa">Post Venta</option>
                         </select>
                     </div>
-                    <div><label class="block font-bold text-slate-500 mb-1">Valor Venta / Paquete ($)</label><input type="number" id="form-value" step="0.01" oninput="calcularFlujoAbonos()" class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-bold focus:outline-hidden"></div>
-                    <div><label class="block font-bold text-slate-500 mb-1">Fecha de Seguimiento</label><input type="date" id="form-date" required class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-medium focus:outline-hidden"></div>
+                    <div><label class="block font-bold text-slate-500 mb-1">Valor Venta ($)</label><input type="number" id="form-value" step="0.01" oninput="calcularFlujoAbonos()" class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-bold focus:outline-hidden"></div>
+                    <div><label class="block font-bold text-slate-500 mb-1">Fecha Seguimiento</label><input type="date" id="form-date" required class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-medium focus:outline-hidden"></div>
                 </div>
-
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-                    <span class="block text-[10px] font-black text-slate-600 uppercase tracking-wider"><i class="fa-solid fa-coins text-emerald-600"></i> Historial de Abonos Recibidos</span>
+                <div class="bg-slate-50 p-4 rounded-xl border space-y-3">
+                    <span class="block text-[10px] font-black text-slate-600 uppercase"><i class="fa-solid fa-coins text-emerald-600"></i> Desglose Histórico de Abonos</span>
                     <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                        <div><label class="block text-[9px] text-center mb-0.5">Abono 1</label><input type="number" id="form-a1" step="0.01" oninput="calcularFlujoAbonos()" class="w-full px-2 h-8 border rounded-lg text-center font-bold bg-white"></div>
-                        <div><label class="block text-[9px] text-center mb-0.5">Abono 2</label><input type="number" id="form-a2" step="0.01" oninput="calcularFlujoAbonos()" class="w-full px-2 h-8 border rounded-lg text-center font-bold bg-white"></div>
-                        <div><label class="block text-[9px] text-center mb-0.5">Abono 3</label><input type="number" id="form-a3" step="0.01" oninput="calcularFlujoAbonos()" class="w-full px-2 h-8 border rounded-lg text-center font-bold bg-white"></div>
-                        <div><label class="block text-[9px] text-center mb-0.5">Abono 4</label><input type="number" id="form-a4" step="0.01" oninput="calcularFlujoAbonos()" class="w-full px-2 h-8 border rounded-lg text-center font-bold bg-white"></div>
-                        <div><label class="block text-[9px] text-center mb-0.5">Abono 5</label><input type="number" id="form-a5" step="0.01" oninput="calcularFlujoAbonos()" class="w-full px-2 h-8 border rounded-lg text-center font-bold bg-white"></div>
+                        <div><label class="block text-[9px] text-center mb-0.5">A1</label><input type="number" id="form-a1" step="0.01" oninput="calcularFlujoAbonos()" class="w-full px-2 h-8 border rounded-lg text-center font-bold bg-white"></div>
+                        <div><label class="block text-[9px] text-center mb-0.5">A2</label><input type="number" id="form-a2" step="0.01" oninput="calcularFlujoAbonos()" class="w-full px-2 h-8 border rounded-lg text-center font-bold bg-white"></div>
+                        <div><label class="block text-[9px] text-center mb-0.5">A3</label><input type="number" id="form-a3" step="0.01" oninput="calcularFlujoAbonos()" class="w-full px-2 h-8 border rounded-lg text-center font-bold bg-white"></div>
+                        <div><label class="block text-[9px] text-center mb-0.5">A4</label><input type="number" id="form-a4" step="0.01" oninput="calcularFlujoAbonos()" class="w-full px-2 h-8 border rounded-lg text-center font-bold bg-white"></div>
+                        <div><label class="block text-[9px] text-center mb-0.5">A5</label><input type="number" id="form-a5" step="0.01" oninput="calcularFlujoAbonos()" class="w-full px-2 h-8 border rounded-lg text-center font-bold bg-white"></div>
                     </div>
                     <div class="grid grid-cols-2 gap-4 pt-2 border-t text-center">
-                        <div class="bg-emerald-100/60 p-2 rounded-lg"><span class="block text-[9px] font-bold text-emerald-700 uppercase">Efectivo Cobrado</span><strong id="modal-total-abonado" class="text-sm font-black text-emerald-800">$0.00</strong></div>
-                        <div class="bg-rose-100/60 p-2 rounded-lg"><span class="block text-[9px] font-bold text-rose-700 uppercase">Saldo Pendiente</span><strong id="modal-saldo-pendiente" class="text-sm font-black text-rose-800">$0.00</strong></div>
+                        <div class="bg-emerald-100/60 p-2 rounded-lg"><span class="block text-[9px] text-emerald-700 uppercase">Cobrado</span><strong id="modal-total-abonado" class="text-sm font-black text-emerald-800">$0.00</strong></div>
+                        <div class="bg-rose-100/60 p-2 rounded-lg"><span class="block text-[9px] text-rose-700 uppercase">Saldo Pendiente</span><strong id="modal-saldo-pendiente" class="text-sm font-black text-rose-800">$0.00</strong></div>
                     </div>
                 </div>
-
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div><label class="block font-bold text-slate-500 mb-1">Asesora Asignada</label><select id="form-gestor" class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-medium focus:outline-hidden"></select></div>
-                    <div><label class="block font-bold text-slate-500 mb-1">Intentos Realizados</label><input type="number" id="form-touch" value="1" class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-medium focus:outline-hidden"></div>
-                    <div><label class="block font-bold text-rose-600 mb-1">Motivo Descarte</label><select id="form-loss" class="w-full px-3 h-10 bg-rose-50 border border-rose-200 text-rose-700 font-bold rounded-xl focus:outline-hidden"><option value="Ninguno">Ninguno (En Proceso)</option><option value="Fuera de la ciudad">Fuera de la ciudad</option><option value="No le interesa">No le interesa</option><option value="Precios">Precios</option></select></div>
+                    <div><label class="block font-bold text-slate-500 mb-1">Asesora</label><select id="form-gestor" class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-medium focus:outline-hidden"></select></div>
+                    <div><label class="block font-bold text-slate-500 mb-1">Intentos</label><input type="number" id="form-touch" value="1" class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-medium focus:outline-hidden"></div>
+                    <div><label class="block font-bold text-rose-600 mb-1">Pérdida</label><select id="form-loss" class="w-full px-3 h-10 bg-rose-50 border text-rose-700 font-bold rounded-xl focus:outline-hidden"><option value="Ninguno">Ninguno</option><option value="Fuera de la ciudad">Fuera de la ciudad</option><option value="No le interesa">No le interesa</option><option value="Precios">Precios</option></select></div>
                 </div>
-
-                <div><label class="block font-bold text-slate-500 mb-1">Observaciones / Tratamientos Clínicos</label><textarea id="form-desc" rows="2" class="w-full p-3 bg-slate-50 border rounded-xl focus:outline-hidden"></textarea></div>
+                <div><label class="block font-bold text-slate-500 mb-1">Observaciones Clínicas / Tratamiento</label><textarea id="form-desc" rows="2" class="w-full p-3 bg-slate-50 border rounded-xl focus:outline-hidden"></textarea></div>
                 <div class="pt-2 flex justify-end gap-2 border-t">
                     <button type="button" onclick="closeModal()" class="px-4 h-10 font-bold text-slate-500">Cancelar</button>
                     <button type="submit" class="px-5 h-10 bg-emerald-600 text-white font-bold rounded-xl shadow-sm">Guardar Cambios</button>
@@ -305,16 +301,16 @@
 
         async function loadDataFromCloud() {
             const status = document.getElementById('sync-status');
-            status.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Conectando Nube...`;
+            status.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Conectando...`;
             const secureUrl = "https://corsproxy.io/?" + encodeURIComponent(GOOGLE_CSV_READ_URL + "&cache_bust=" + Date.now());
 
             try {
                 const res = await fetch(secureUrl);
                 const text = await res.text();
                 parseSafeCSV(text);
-                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sincronización v13.0 Exitosa`;
+                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sincronización Exitosa v14.0`;
             } catch (err) {
-                status.innerHTML = `<i class="fa-solid fa-hard-drive"></i> Cargado desde Respaldo Local`;
+                status.innerHTML = `<i class="fa-solid fa-hard-drive"></i> Cargado Local de Respaldo`;
                 let local = localStorage.getItem('relax_crm_master_data');
                 if(local) { mainLeadsRegistry = JSON.parse(local); renderApplicationCore(); }
             }
@@ -334,7 +330,7 @@
                 if (!validPhases.includes(safePhase)) { safePhase = "frio"; }
 
                 let cleanName = cols[1] ? cols[1].replace(/"/g, '').trim() : "Paciente Nuevo";
-                let cleanPhone = cols[2] ? cols[2].replace(/"/g, '').trim() : "Sin WhatsApp";
+                let cleanPhone = cols[2] ? cols[2].replace(/"/g, '').trim() : "";
                 let rawDate = cols[5] ? cols[5].replace(/"/g, '').trim() : DATE_TODAY;
                 let rawGestor = cols[7] ? cols[7].replace(/"/g, '').trim() : listadoGestores[0];
                 
@@ -389,8 +385,13 @@
             let phaseCounts = { frio: 0, tibio: 0, caliente: 0, agenda: 0, venta: 0, postventa: 0 };
             let totalLeadsBajoFiltro = 0; let agendasContadasBajoFiltro = 0; let ventasContadasBajoFiltro = 0;
 
-            let gestoresSales = {}; let gestoresContracted = {};
-            listadoGestores.forEach(g => { gestoresSales[g] = 0; gestoresContracted[g] = 0; });
+            let gestoresSales = {}; let gestoresContracted = {}; let gestoresProcessedCount = {}; let gestoresTotalLeadsCount = {};
+            listadoGestores.forEach(g => { 
+                gestoresSales[g] = 0; 
+                gestoresContracted[g] = 0; 
+                gestoresProcessedCount[g] = 0; 
+                gestoresTotalLeadsCount[g] = 0; 
+            });
             
             let yearMonthsData = Array.from({ length: 12 }, () => ({ totalLeads: 0, totalContracted: 0, totalCollected: 0 }));
             let selectedAuditMonth = parseInt(document.getElementById('audit-month-selector').value) || 6;
@@ -402,7 +403,6 @@
                 let valContrato = parseFloat(lead.value) || 0;
                 let totalAbonado = (lead.a1||0)+(lead.a2||0)+(lead.a3||0)+(lead.a4||0)+(lead.a5||0);
                 
-                // CEREBRO DE PARSEO HÍBRIDO LATINO/ISO PARA TRATAMIENTO DE FECHAS DESDE GOOGLE
                 let leadMonth = 0;
                 let dateStr = String(lead.date).trim();
                 if (dateStr.includes('-')) {
@@ -422,6 +422,11 @@
                     if (gestoresSales[gName] !== undefined) { 
                         gestoresSales[gName] += totalAbonado; 
                         gestoresContracted[gName] += valContrato;
+                        gestoresTotalLeadsCount[gName] += 1;
+                        // Se cuenta como gestionado si ha avanzado de fase o tiene notas/abonos/intentos registrados
+                        if (currentPhase !== 'frio' || lead.desc || totalAbonado > 0) {
+                            gestoresProcessedCount[gName] += 1;
+                        }
                     }
                 }
 
@@ -439,11 +444,24 @@
 
                 pipelineSum += valContrato; salesSum += totalAbonado; phaseCounts[currentPhase]++;
 
+                // LIMPIEZA DE TELÉFONO PARA LLAMADAS DIRECTAS O TRÁFICO WHATSAPP
+                let cleanDigits = String(lead.phone).replace(/[^0-9]/g, '');
+                let whatsappButtonHTML = "";
+                if (cleanDigits) {
+                    whatsappButtonHTML = `
+                        <div class="pt-2">
+                            <a href="https://wa.me/${cleanDigits}" target="_blank" class="flex items-center justify-center gap-1.5 w-full bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold py-1.5 px-3 rounded-lg transition-all shadow-2xs">
+                                <i class="fa-brands fa-whatsapp text-sm"></i> Chatear / Llamar
+                            </a>
+                        </div>
+                    `;
+                }
+
                 const card = document.createElement('div');
                 card.className = `p-3 rounded-xl border bg-white shadow-2xs space-y-2 cursor-grab active:cursor-grabbing hover:border-indigo-500 transition-all ${isToday ? 'border-fuchsia-400 bg-fuchsia-50/20 shadow-xs' : 'border-slate-200'}`;
                 card.innerHTML = `
                     <div class="font-bold text-xs text-slate-800 hover:text-indigo-600 cursor-pointer underline decoration-dotted block truncate" onclick="openModal('edit', ${lead.id})">${lead.name}</div>
-                    <p class="text-[10px] text-slate-500 line-clamp-2">${lead.desc || 'Sin observaciones tratamiento'}</p>
+                    <p class="text-[10px] text-slate-500 line-clamp-2">${lead.desc || 'Sin notas'}</p>
                     <div class="text-[9px] bg-slate-50 p-1 rounded flex justify-between text-slate-400">
                         <span>Seguimiento: ${lead.date}</span>
                         <span class="font-bold text-indigo-600">${lead.gestor}</span>
@@ -452,11 +470,12 @@
                         <span class="text-emerald-600 font-bold">Cobrado: $${totalAbonado.toFixed(2)}</span>
                         <span class="text-slate-400 text-[10px]">Total: $${valContrato.toFixed(2)}</span>
                     </div>
+                    ${whatsappButtonHTML}
                 `;
                 document.getElementById(`col-${currentPhase}`).appendChild(card);
             });
 
-            // RENDERIZADO CUADRÍCULA HISTÓRICO MENSUAL
+            // HISTORIAL MENSUAL INTERACTIVO
             const mContainer = document.getElementById('months-grid-container'); mContainer.innerHTML = '';
             yearMonthsData.forEach((mData, idx) => {
                 let isCurrentFilter = (selectedMonthInteractiveFilter === (idx + 1));
@@ -475,7 +494,7 @@
                     </div>`;
             });
 
-            // RENDERIZADO DE RENDIMIENTO Y GESTIÓN ASESORAS
+            // TABLA METAS ASESORAS (CON MÉTRICAS DE TOTAL DE GESTIÓN)
             const gBody = document.getElementById('goals-table-body'); gBody.innerHTML = '';
             Object.keys(gestoresSales).forEach(g => {
                 let isF = (g === 'Fernando');
@@ -484,13 +503,16 @@
                 let promedioDiarioReal = totCobradoMes / 22;
                 let metaPersonalizada = metasGestores[g] ?? 1100;
                 let pctAvance = metaPersonalizada > 0 ? Math.min(Math.round((totCobradoMes / metaPersonalizada) * 100), 100) : 0;
+                
+                let gestionRealizada = gestoresProcessedCount[g] || 0;
+                let gestionTotal = gestoresTotalLeadsCount[g] || 0;
 
                 gBody.innerHTML += `
                     <tr class="border-b h-11 hover:bg-slate-50/80 transition-all">
                         <td class="p-2 font-bold text-slate-700 text-left pl-4">${g}</td>
                         <td class="p-2 font-semibold text-slate-500">$${totContratadoMes.toFixed(2)}</td>
                         <td class="p-2 font-black text-emerald-600">$${totCobradoMes.toFixed(2)}</td>
-                        <td class="p-2">${isF ? '<span class="text-slate-400">Exento</span>' : '<span class="font-bold text-slate-700">30 / día Metas</span>'}</td>
+                        <td class="p-2 font-bold text-slate-700">${isF ? '<span class="text-slate-400">Exento</span>' : `${gestionRealizada} / ${gestionTotal} Leads`}</td>
                         <td class="p-2">${isF ? '<span class="text-slate-400">Exento</span>' : `$${promedioDiarioReal.toFixed(2)}/día`}</td>
                         <td class="p-2 font-bold text-indigo-600">${isF ? 'Gerencia' : `${pctAvance}% de $${metaPersonalizada}`}</td>
                     </tr>`;
@@ -561,7 +583,7 @@
         }
 
         function exportBackupExcel() {
-            let ws = XLSX.utils.json_to_sheet(mainLeadsRegistry); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Backup"); XLSX.writeFile(wb, "Respaldo_CRM_v13.0.xlsx");
+            let ws = XLSX.utils.json_to_sheet(mainLeadsRegistry); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Backup"); XLSX.writeFile(wb, "Respaldo_CRM_v14.0.xlsx");
         }
     </script>
 </body>
