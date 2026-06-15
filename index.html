@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM Cloud - v16.0 QA Ultimate</title>
+    <title>Relax Therapy CRM Cloud - v17.0 QA Live Alerts</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -30,7 +30,7 @@
                 </div>
                 <div>
                     <span class="font-black text-slate-900 tracking-tight text-lg">RELAX THERAPY CRM MASTER</span>
-                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider"><i class="fa-solid fa-circle-check"></i> Sincronización v16.0 OK</span>
+                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider"><i class="fa-solid fa-circle-check"></i> Sincronización v17.0 Live</span>
                 </div>
             </div>
 
@@ -79,7 +79,7 @@
                 <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100"><span class="text-[10px] font-bold text-emerald-600 uppercase">Ingresos Reales Filtro</span><h3 id="kpi-sales" class="text-lg font-black text-emerald-700 mt-0.5">$0.00</h3></div>
                 <div class="bg-blue-50 p-4 rounded-xl border border-blue-100"><span class="text-[10px] font-bold text-blue-600 uppercase">Tasa Agendamiento</span><h3 id="kpi-scheduling-rate" class="text-lg font-black text-blue-700 mt-0.5">0%</h3><span id="sub-kpi-agendas" class="block text-[10px] font-medium text-blue-500 mt-0.5">0 de 0 Leads</span></div>
                 <div class="bg-violet-50 p-4 rounded-xl border border-violet-100"><span class="text-[10px] font-bold text-violet-600 uppercase">Tasa Cierre Global</span><h3 id="kpi-conversion" class="text-lg font-black text-violet-700 mt-0.5">0%</h3><span id="sub-kpi-cierres" class="block text-[10px] font-medium text-violet-500 mt-0.5">0 Ventas</span></div>
-                <div onclick="toggleTodayAlertsFilter()" id="btn-kpi-alerts" class="bg-fuchsia-50 p-4 rounded-xl border border-fuchsia-100 cursor-pointer hover:bg-fuchsia-100/70 transition-all group shadow-2xs"><span class="text-[10px] font-bold text-fuchsia-600 uppercase flex items-center justify-between">Filtrar Llamadas Hoy <i class="fa-solid fa-filter text-[9px]"></i></span><h3 id="kpi-alerts" class="text-lg font-black text-fuchsia-700 mt-0.5">0</h3></div>
+                <div onclick="toggleTodayAlertsFilter()" id="btn-kpi-alerts" class="bg-fuchsia-50 p-4 rounded-xl border border-fuchsia-100 cursor-pointer hover:bg-fuchsia-100/70 transition-all group shadow-2xs"><span class="text-[10px] font-bold text-fuchsia-600 uppercase flex items-center justify-between">Llamadas Hoy <i class="fa-solid fa-filter text-[9px]"></i></span><h3 id="kpi-alerts" class="text-lg font-black text-fuchsia-700 mt-0.5">0</h3></div>
             </div>
 
             <div class="bg-slate-50 p-4 rounded-xl border space-y-2">
@@ -220,7 +220,14 @@
         const GOOGLE_SCRIPT_API = "https://script.google.com/macros/s/AKfycbw6Ln0N9XJezPsGlQU_z7KHoBCBLKfnDVQSBPGEFyVbvYKfE0EIyek3sfV8FMboiViD/exec"; 
         const GOOGLE_CSV_READ_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQHCnaAP2Sm7I9jrP03YkHlkmn7DoUVwUVIpdQ_s6RExN9KD2iduuYzTsbRRWp64QCWtQex8MrYyTs4/pub?gid=491726568&single=true&output=csv";
         
-        const DATE_TODAY = "2026-06-12";
+        // MOTOR DE TIEMPO REAL: Detecta el día exacto del calendario de tu Laptop/Celular automáticamente
+        const dateTodayObj = new Date();
+        const yearStr = dateTodayObj.getFullYear();
+        const monthStr = String(dateTodayObj.getMonth() + 1).padStart(2, '0');
+        const dayStr = String(dateTodayObj.getDate()).padStart(2, '0');
+        const DATE_TODAY_ISO = `${yearStr}-${monthStr}-${dayStr}`;
+        const DATE_TODAY_LATIN_SLASH = `${dayStr}/${monthStr}/${yearStr}`;
+        const DATE_TODAY_LATIN_DASH = `${dayStr}-${monthStr}-${yearStr}`;
         
         let mainLeadsRegistry = [];
         let currentManagerFilter = 'all';
@@ -250,7 +257,7 @@
 
             const selectAudit = document.getElementById('audit-month-selector');
             if(selectAudit.innerHTML === "") {
-                let currentMonthNum = parseInt(DATE_TODAY.split('-')[1]);
+                let currentMonthNum = dateTodayObj.getMonth() + 1;
                 monthsNames.forEach((m, idx) => {
                     let opt = document.createElement('option'); opt.value = idx + 1; opt.innerText = m;
                     if(idx + 1 === currentMonthNum) opt.selected = true;
@@ -292,7 +299,18 @@
 
         function setManagerFilter(m) { currentManagerFilter = m; buildDynamicButtonsFilters(); renderApplicationCore(); }
         function executeLiveSearch() { activeSearchQuery = document.getElementById('crm-search-bar').value.toLowerCase().trim(); renderApplicationCore(); }
-        function toggleTodayAlertsFilter() { filterOnlyTodayAlerts = !filterOnlyTodayAlerts; renderApplicationCore(); }
+        function toggleTodayAlertsFilter() { 
+            filterOnlyTodayAlerts = !filterOnlyTodayAlerts; 
+            const btn = document.getElementById('btn-kpi-alerts');
+            if(filterOnlyTodayAlerts) {
+                btn.classList.replace('bg-fuchsia-50', 'bg-fuchsia-600');
+                btn.classList.replace('text-fuchsia-700', 'text-white');
+            } else {
+                btn.classList.replace('bg-fuchsia-600', 'bg-fuchsia-50');
+                btn.classList.replace('text-white', 'text-fuchsia-700');
+            }
+            renderApplicationCore(); 
+        }
 
         function triggerMonthInteractiveFilter(monthIndex) {
             let targetMonth = monthIndex + 1;
@@ -308,14 +326,14 @@
 
         async function loadDataFromCloud() {
             const status = document.getElementById('sync-status');
-            status.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Conectando...`;
+            status.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Sincronizando...`;
             const secureUrl = "https://corsproxy.io/?" + encodeURIComponent(GOOGLE_CSV_READ_URL + "&cache_bust=" + Date.now());
 
             try {
                 const res = await fetch(secureUrl);
                 const text = await res.text();
                 parseSafeCSV(text);
-                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sincronización Exitosa v16.0`;
+                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sincronización Exitosa v17.0`;
             } catch (err) {
                 status.innerHTML = `<i class="fa-solid fa-hard-drive"></i> Cargado Local de Respaldo`;
                 let local = localStorage.getItem('relax_crm_master_data');
@@ -338,7 +356,7 @@
 
                 let cleanName = cols[1] ? cols[1].replace(/"/g, '').trim() : "Paciente Nuevo";
                 let cleanPhone = cols[2] ? cols[2].replace(/"/g, '').trim() : "";
-                let rawDate = cols[5] ? cols[5].replace(/"/g, '').trim() : DATE_TODAY;
+                let rawDate = cols[5] ? cols[5].replace(/"/g, '').trim() : DATE_TODAY_ISO;
                 let rawGestor = cols[7] ? cols[7].replace(/"/g, '').trim() : listadoGestores[0];
                 
                 if (rawGestor) {
@@ -405,7 +423,7 @@
             });
             
             let yearMonthsData = Array.from({ length: 12 }, () => ({ totalLeads: 0, totalContracted: 0, totalCollected: 0 }));
-            let selectedAuditMonth = parseInt(document.getElementById('audit-month-selector').value) || 6;
+            let selectedAuditMonth = parseInt(document.getElementById('audit-month-selector').value) || (dateTodayObj.getMonth() + 1);
 
             phases.forEach(p => document.getElementById(`col-${p}`).innerHTML = '');
 
@@ -417,7 +435,8 @@
                 let leadMonth = 0;
                 let dateStr = String(lead.date).trim();
                 if (dateStr.includes('-')) {
-                    leadMonth = parseInt(dateStr.split('-')[1]);
+                    let parts = dateStr.split('-');
+                    leadMonth = parts[0].length === 4 ? parseInt(parts[1]) : parseInt(parts[1]); 
                 } else if (dateStr.includes('/')) {
                     leadMonth = parseInt(dateStr.split('/')[1]); 
                 }
@@ -429,7 +448,9 @@
                 }
 
                 let gName = lead.gestor || listadoGestores[0];
-                let isToday = (dateStr === "2026-06-12" || dateStr === "12/06/2026");
+                
+                // DETECTOR DINÁMICO DE HOY: Valida contra formatos ISO (YYYY-MM-DD) y Latinos (DD/MM/YYYY o DD-MM-YYYY)
+                let isToday = (dateStr === DATE_TODAY_ISO || dateStr === DATE_TODAY_LATIN_SLASH || dateStr === DATE_TODAY_LATIN_DASH);
 
                 if(leadMonth === selectedAuditMonth) {
                     if (gestoresSales[gName] !== undefined) { 
@@ -458,16 +479,12 @@
 
                 pipelineSum += valContrato; salesSum += totalAbonado; phaseCounts[currentPhase]++;
 
-                // BLINDAJE DE MOTOR DE WHATSAPP (SOPORTA PC, MAC Y DISPOSITIVOS MÓVILES)
                 let cleanDigits = String(lead.phone).replace(/[^0-9]/g, '');
-                
-                // Formateador automático de código de país para Ecuador si viene solo como 09...
                 if (cleanDigits.startsWith('09') && cleanDigits.length === 10) {
                     cleanDigits = '593' + cleanDigits.substring(1);
                 }
 
                 let whatsappButtonHTML = "";
-                // Si el número es extremadamente corto (ej: solo viene 593), se desactiva el botón para evitar errores
                 if (cleanDigits.length >= 8) {
                     whatsappButtonHTML = `
                         <div class="pt-2 flex gap-1 items-center">
@@ -493,7 +510,7 @@
                 }
 
                 const card = document.createElement('div');
-                card.className = `p-3 rounded-xl border bg-white shadow-2xs space-y-2 cursor-grab active:cursor-grabbing hover:border-indigo-500 transition-all ${isToday ? 'border-fuchsia-400 bg-fuchsia-50/20 shadow-xs' : 'border-slate-200'}`;
+                card.className = `p-3 rounded-xl border bg-white shadow-2xs space-y-2 cursor-grab active:cursor-grabbing hover:border-indigo-500 transition-all ${isToday ? 'border-fuchsia-500 bg-fuchsia-50/40 ring-2 ring-fuchsia-400/30 shadow-xs' : 'border-slate-200'}`;
                 card.innerHTML = `
                     <div class="font-bold text-xs text-slate-800 hover:text-indigo-600 cursor-pointer underline decoration-dotted block truncate" onclick="openModal('edit', ${lead.id})">${lead.name}</div>
                     <p class="text-[10px] text-slate-500 line-clamp-2">${lead.desc || 'Sin notas'}</p>
@@ -510,7 +527,7 @@
                 document.getElementById(`col-${currentPhase}`).appendChild(card);
             });
 
-            // CUADRÍCULA INDEPENDIENTE
+            // HISTORIAL MENSUAL INTERACTIVO
             const mContainer = document.getElementById('months-grid-container'); mContainer.innerHTML = '';
             yearMonthsData.forEach((mData, idx) => {
                 let isCurrentFilter = (selectedMonthInteractiveFilter === (idx + 1));
@@ -529,7 +546,7 @@
                     </div>`;
             });
 
-            // TABLA DE ASESORAS
+            // TABLA DE METAS
             const gBody = document.getElementById('goals-table-body'); gBody.innerHTML = '';
             Object.keys(gestoresSales).forEach(g => {
                 let isF = (g === 'Fernando');
@@ -613,8 +630,25 @@
         async function handleFormSubmit(e) {
             e.preventDefault();
             const id = document.getElementById('form-id').value;
+            
+            // NORMALIZACIÓN DE FECHA: Asegura el formato correcto antes de enviar a Google Sheets
+            let dateInput = document.getElementById('form-date').value;
+            
             let payload = {
-                id: id ? parseInt(id) : Date.now(), name: document.getElementById('form-name').value, phone: document.getElementById('form-phone').value, phase: document.getElementById('form-phase').value, value: parseFloat(document.getElementById('form-value').value) || 0, date: document.getElementById('form-date').value, gestor: document.getElementById('form-gestor').value, loss: document.getElementById('form-loss').value, desc: document.getElementById('form-desc').value, a1: parseFloat(document.getElementById('form-a1').value) || 0, a2: parseFloat(document.getElementById('form-a2').value) || 0, a3: parseFloat(document.getElementById('form-a3').value) || 0, a4: parseFloat(document.getElementById('form-a4').value) || 0, a5: parseFloat(document.getElementById('form-a5').value) || 0
+                id: id ? parseInt(id) : Date.now(), 
+                name: document.getElementById('form-name').value, 
+                phone: document.getElementById('form-phone').value, 
+                phase: document.getElementById('form-phase').value, 
+                value: parseFloat(document.getElementById('form-value').value) || 0, 
+                date: dateInput, 
+                gestor: document.getElementById('form-gestor').value, 
+                loss: document.getElementById('form-loss').value, 
+                desc: document.getElementById('form-desc').value, 
+                a1: parseFloat(document.getElementById('form-a1').value) || 0, 
+                a2: parseFloat(document.getElementById('form-a2').value) || 0, 
+                a3: parseFloat(document.getElementById('form-a3').value) || 0, 
+                a4: parseFloat(document.getElementById('form-a4').value) || 0, 
+                a5: parseFloat(document.getElementById('form-a5').value) || 0
             };
             if (id) {
                 let idx = mainLeadsRegistry.findIndex(l => l.id === parseInt(id)); if(idx !== -1) mainLeadsRegistry[idx] = payload;
@@ -624,7 +658,7 @@
         }
 
         function exportBackupExcel() {
-            let ws = XLSX.utils.json_to_sheet(mainLeadsRegistry); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Backup"); XLSX.writeFile(wb, "Respaldo_CRM_v16.0.xlsx");
+            let ws = XLSX.utils.json_to_sheet(mainLeadsRegistry); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Backup"); XLSX.writeFile(wb, "Respaldo_CRM_v17.0.xlsx");
         }
     </script>
 </body>
