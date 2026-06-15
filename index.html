@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM Cloud - v19.0 QA Certified</title>
+    <title>Relax Therapy CRM Cloud - v20.0 QA Pro Master</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -30,7 +30,7 @@
                 </div>
                 <div>
                     <span class="font-black text-slate-900 tracking-tight text-lg">RELAX THERAPY CRM MASTER</span>
-                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider"><i class="fa-solid fa-circle-check"></i> Sincronización v19.0 Estable</span>
+                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider"><i class="fa-solid fa-circle-check"></i> Sincronización v20.0 Lista</span>
                 </div>
             </div>
 
@@ -76,7 +76,13 @@
         <div class="bg-white p-6 rounded-2xl border border-slate-200 space-y-6 shadow-xs">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div class="bg-slate-50 p-4 rounded-xl border"><span class="text-[10px] font-bold text-slate-400 uppercase">Pipeline Activo Filtro</span><h3 id="kpi-pipeline" class="text-lg font-black text-slate-800 mt-0.5">$0.00</h3></div>
-                <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100"><span class="text-[10px] font-bold text-emerald-600 uppercase">Ingresos Reales Filtro</span><h3 id="kpi-sales" class="text-lg font-black text-emerald-700 mt-0.5">$0.00</h3></div>
+                
+                <div onclick="togglePendingDebtFilter()" id="btn-kpi-sales" class="bg-emerald-50 p-4 rounded-xl border border-emerald-100 cursor-pointer hover:bg-emerald-100/70 transition-all group shadow-2xs select-none">
+                    <span class="text-[10px] font-bold text-emerald-600 uppercase flex items-center justify-between">Ingresos Reales Filtro <i class="fa-solid fa-filter text-[9px]"></i></span>
+                    <h3 id="kpi-sales" class="text-lg font-black text-emerald-700 mt-0.5">$0.00</h3>
+                    <span id="sub-kpi-debt" class="block text-[10px] font-medium text-emerald-600 mt-0.5">Click: Ver por Cobrar</span>
+                </div>
+
                 <div class="bg-blue-50 p-4 rounded-xl border border-blue-100"><span class="text-[10px] font-bold text-blue-600 uppercase">Tasa Agendamiento</span><h3 id="kpi-scheduling-rate" class="text-lg font-black text-blue-700 mt-0.5">0%</h3><span id="sub-kpi-agendas" class="block text-[10px] font-medium text-blue-500 mt-0.5">0 de 0 Leads</span></div>
                 <div class="bg-violet-50 p-4 rounded-xl border border-violet-100"><span class="text-[10px] font-bold text-violet-600 uppercase">Tasa Cierre Global</span><h3 id="kpi-conversion" class="text-lg font-black text-violet-700 mt-0.5">0%</h3><span id="sub-kpi-cierres" class="block text-[10px] font-medium text-violet-500 mt-0.5">0 Ventas</span></div>
                 <div onclick="toggleTodayAlertsFilter()" id="btn-kpi-alerts" class="bg-fuchsia-50 p-4 rounded-xl border border-fuchsia-100 cursor-pointer text-fuchsia-700 hover:bg-fuchsia-100/70 transition-all group shadow-2xs select-none"><span class="text-[10px] font-bold text-fuchsia-600 uppercase flex items-center justify-between">Filtrar Llamadas Hoy <i class="fa-solid fa-filter text-[9px]"></i></span><h3 id="kpi-alerts" class="text-lg font-black text-fuchsia-700 mt-0.5">0</h3></div>
@@ -203,7 +209,7 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div><label class="block font-bold text-slate-500 mb-1">Asesora</label><select id="form-gestor" class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-medium focus:outline-hidden"></select></div>
-                    <div><label class="block font-bold text-slate-500 mb-1">Intentos</label><input type="number" id="form-touch" value="1" class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-medium focus:outline-hidden"></div>
+                    <div><label class="block font-bold text-slate-500 mb-1">Intentos / Gestiones</label><input type="number" id="form-touch" value="1" class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-medium focus:outline-hidden"></div>
                     <div><label class="block font-bold text-rose-600 mb-1">Motivo Descarte</label><select id="form-loss" class="w-full px-3 h-10 bg-rose-50 border border-rose-200 text-rose-700 font-bold rounded-xl focus:outline-hidden"><option value="Ninguno">Ninguno</option><option value="Fuera de la ciudad">Fuera de la ciudad</option><option value="No le interesa">No le interesa</option><option value="Precios">Precios</option></select></div>
                 </div>
 
@@ -228,6 +234,7 @@
         let mainLeadsRegistry = [];
         let currentManagerFilter = 'all';
         let filterOnlyTodayAlerts = false;
+        let filterOnlyPendingDebt = false; // VARIABLE DE CONTROL PARA FILTRAR DEUDAS
         let activeSearchQuery = "";
         let selectedMonthInteractiveFilter = null; 
         
@@ -306,6 +313,23 @@
             renderApplicationCore(); 
         }
 
+        // CONTROLADOR DE FILTRO INTERACTIVO DE SALDOS PENDIENTES
+        function togglePendingDebtFilter() {
+            filterOnlyPendingDebt = !filterOnlyPendingDebt;
+            const btn = document.getElementById('btn-kpi-sales');
+            const subText = document.getElementById('sub-kpi-debt');
+            if(filterOnlyPendingDebt) {
+                btn.className = "bg-rose-600 p-4 rounded-xl border border-rose-700 cursor-pointer text-white transition-all group shadow-md select-none";
+                subText.innerText = "Filtro: Viendo por Cobrar ⚠️";
+                subText.className = "block text-[10px] font-bold text-rose-100 mt-0.5 animate-pulse";
+            } else {
+                btn.className = "bg-emerald-50 p-4 rounded-xl border border-emerald-100 cursor-pointer text-emerald-700 hover:bg-emerald-100/70 transition-all group shadow-2xs select-none";
+                subText.innerText = "Click: Ver por Cobrar";
+                subText.className = "block text-[10px] font-medium text-emerald-600 mt-0.5";
+            }
+            renderApplicationCore();
+        }
+
         function triggerMonthInteractiveFilter(monthIndex) {
             let targetMonth = monthIndex + 1;
             const badge = document.getElementById('active-month-filter-badge');
@@ -327,7 +351,7 @@
                 const res = await fetch(secureUrl);
                 const text = await res.text();
                 parseSafeCSV(text);
-                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sincronización Exitosa v19.0`;
+                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sincronización Exitosa v20.0`;
             } catch (err) {
                 status.innerHTML = `<i class="fa-solid fa-hard-drive"></i> Cargado Local de Respaldo`;
                 let local = localStorage.getItem('relax_crm_master_data');
@@ -352,6 +376,7 @@
                 let cleanPhone = cols[2] ? cols[2].replace(/"/g, '').trim() : "";
                 let rawDate = cols[5] ? cols[5].replace(/"/g, '').trim() : "";
                 let rawGestor = cols[7] ? cols[7].replace(/"/g, '').trim() : listadoGestores[0];
+                let rawTouch = cols[11] ? parseInt(cols[11].replace(/"/g, '')) || 1 : 1; // Intentos comerciales
                 
                 if (rawGestor) {
                     rawGestor = rawGestor.charAt(0).toUpperCase() + rawGestor.slice(1).toLowerCase();
@@ -369,9 +394,10 @@
                     a1: cols[8] ? parseFloat(cols[8]) || 0 : 0, 
                     a2: cols[9] ? parseFloat(cols[9]) || 0 : 0, 
                     a3: cols[10] ? parseFloat(cols[10]) || 0 : 0, 
-                    a4: cols[11] ? parseFloat(cols[11]) || 0 : 0,
+                    touch: rawTouch,
                     desc: cols[12] ? cols[12].replace(/"/g, '') : "", 
-                    a5: cols[13] ? parseFloat(cols[13]) || 0 : 0
+                    a4: cols[13] ? parseFloat(cols[13]) || 0 : 0,
+                    a5: cols[14] ? parseFloat(cols[14]) || 0 : 0
                 });
             }
             mainLeadsRegistry = cleanRegistry;
@@ -425,254 +451,12 @@
                 let currentPhase = lead.phase || 'frio';
                 let valContrato = parseFloat(lead.value) || 0;
                 let totalAbonado = (lead.a1||0)+(lead.a2||0)+(lead.a3||0)+(lead.a4||0)+(lead.a5||0);
+                let saldoPendiente = valContrato - totalAbonado;
+                let gestionesRealizadas = lead.touch || 1;
                 
-                // CONTROL DE EXCEPCIONES: Blindaje absoluto contra celdas de fechas vacías
                 let leadDay = 0; let leadMonth = 0; let leadYear = 0;
                 let dateStr = lead.date ? String(lead.date).trim() : "";
                 
                 if (dateStr) {
                     try {
-                        if (dateStr.includes('-')) {
-                            let parts = dateStr.split('-');
-                            if(parts[0].length === 4) {
-                                leadYear = parseInt(parts[0]) || 0; leadMonth = parseInt(parts[1]) || 0; leadDay = parseInt(parts[2]) || 0;
-                            } else {
-                                leadDay = parseInt(parts[0]) || 0; leadMonth = parseInt(parts[1]) || 0; leadYear = parseInt(parts[2]) || 0;
-                            }
-                        } else if (dateStr.includes('/')) {
-                            let parts = dateStr.split('/');
-                            if(parts[0].length === 4) {
-                                leadYear = parseInt(parts[0]) || 0; leadMonth = parseInt(parts[1]) || 0; leadDay = parseInt(parts[2]) || 0;
-                            } else {
-                                leadDay = parseInt(parts[0]) || 0; leadMonth = parseInt(parts[1]) || 0; leadYear = parseInt(parts[2]) || 0;
-                            }
-                        }
-                    } catch(err) { console.error("Error procesando fecha", err); }
-                }
-
-                if(leadMonth >= 1 && leadMonth <= 12) {
-                    yearMonthsData[leadMonth - 1].totalLeads++;
-                    yearMonthsData[leadMonth - 1].totalContracted += valContrato;
-                    yearMonthsData[leadMonth - 1].totalCollected += totalAbonado;
-                }
-
-                let gName = lead.gestor || listadoGestores[0];
-                let isToday = (leadDay === CURRENT_DAY_NUM && leadMonth === CURRENT_MONTH_NUM && leadYear === CURRENT_YEAR_NUM);
-
-                if(leadMonth === selectedAuditMonth) {
-                    if (gestoresSales[gName] !== undefined) { 
-                        gestoresSales[gName] += totalAbonado; 
-                        gestoresContracted[gName] += valContrato;
-                        if(currentPhase !== 'frio' || lead.desc || totalAbonado > 0) {
-                            gestoresMonthTotalCount[gName] += 1;
-                        }
-                    }
-                }
-
-                if(isToday && gestoresTodayCount[gName] !== undefined) {
-                    gestoresTodayCount[gName] += 1;
-                }
-
-                if (isToday) todayAlerts++;
-
-                // LÓGICA DE VISUALIZACIÓN DINÁMICA DE FILTROS (No borra el arreglo base)
-                let matchesMonthFilter = (selectedMonthInteractiveFilter === null || leadMonth === selectedMonthInteractiveFilter);
-                let matchesTodayFilter = (!filterOnlyTodayAlerts || isToday);
-                let matchesSearch = (activeSearchQuery === "" || lead.name.toLowerCase().includes(activeSearchQuery));
-                let matchesGestor = (currentManagerFilter === 'all' || lead.gestor === currentManagerFilter);
-
-                if (matchesMonthFilter && matchesTodayFilter && matchesSearch && matchesGestor) {
-                    totalLeadsBajoFiltro++;
-                    if (currentPhase === 'agenda') agendasContadasBajoFiltro++;
-                    if (currentPhase === 'venta' || currentPhase === 'postventa') ventasContadasBajoFiltro++;
-
-                    pipelineSum += valContrato; salesSum += totalAbonado; phaseCounts[currentPhase]++;
-
-                    let cleanDigits = String(lead.phone).replace(/[^0-9]/g, '');
-                    if (cleanDigits.startsWith('09') && cleanDigits.length === 10) {
-                        cleanDigits = '593' + cleanDigits.substring(1);
-                    }
-
-                    let whatsappButtonHTML = "";
-                    if (cleanDigits.length >= 8) {
-                        whatsappButtonHTML = `
-                            <div class="pt-2 flex gap-1 items-center">
-                                <a href="https://wa.me/${cleanDigits}" target="_blank" rel="noopener noreferrer" class="flex-1 flex items-center justify-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold py-1.5 px-2 rounded-lg transition-all shadow-2xs">
-                                    <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp Activo
-                                </a>
-                                <button onclick="deleteLeadEngine(${lead.id})" class="p-1 text-slate-300 hover:text-rose-500 rounded transition-all" title="Eliminar del embudo">
-                                    <i class="fa-solid fa-trash-can text-xs"></i>
-                                </button>
-                            </div>
-                        `;
-                    } else {
-                        whatsappButtonHTML = `
-                            <div class="pt-2 flex gap-1 items-center">
-                                <button disabled class="flex-1 flex items-center justify-center gap-1 bg-slate-200 text-slate-400 text-[10px] font-bold py-1.5 px-2 rounded-lg cursor-not-allowed">
-                                    <i class="fa-solid fa-phone-slash"></i> Sin Celular Válido
-                                </button>
-                                <button onclick="deleteLeadEngine(${lead.id})" class="p-1 text-slate-300 hover:text-rose-500 rounded transition-all" title="Eliminar del embudo">
-                                    <i class="fa-solid fa-trash-can text-xs"></i>
-                                </button>
-                            </div>
-                        `;
-                    }
-
-                    const card = document.createElement('div');
-                    card.className = `p-3 rounded-xl border bg-white shadow-2xs space-y-2 cursor-grab active:cursor-grabbing hover:border-indigo-500 transition-all ${isToday ? 'border-fuchsia-500 bg-fuchsia-50/50 ring-2 ring-fuchsia-400 shadow-xs' : 'border-slate-200'}`;
-                    card.innerHTML = `
-                        <div class="font-bold text-xs text-slate-800 hover:text-indigo-600 cursor-pointer underline decoration-dotted block truncate" onclick="openModal('edit', ${lead.id})">${lead.name}</div>
-                        <p class="text-[10px] text-slate-500 line-clamp-2">${lead.desc || 'Sin notas'}</p>
-                        <div class="text-[9px] bg-slate-50 p-1 rounded flex justify-between text-slate-400">
-                            <span>Seguimiento: ${lead.date || 'Sin fecha'}</span>
-                            <span class="font-bold text-indigo-600">${lead.gestor}</span>
-                        </div>
-                        <div class="flex items-center justify-between text-[11px] pt-1">
-                            <span class="text-emerald-600 font-bold">Cobrado: $${totalAbonado.toFixed(2)}</span>
-                            <span class="text-slate-400 text-[10px]">Total: $${valContrato.toFixed(2)}</span>
-                        </div>
-                        ${whatsappButtonHTML}
-                    `;
-                    document.getElementById(`col-${currentPhase}`).appendChild(card);
-                }
-            });
-
-            // HISTORIAL MENSUAL INTERACTIVO
-            const mContainer = document.getElementById('months-grid-container'); mContainer.innerHTML = '';
-            yearMonthsData.forEach((mData, idx) => {
-                let isCurrentFilter = (selectedMonthInteractiveFilter === (idx + 1));
-                let borderStyle = isCurrentFilter ? 'border-indigo-600 bg-indigo-50/40 ring-2 ring-indigo-600/20' : 'border-slate-200 bg-white hover:border-slate-400';
-                let pctCierreMes = mData.totalContracted > 0 ? Math.round((mData.totalCollected / mData.totalContracted) * 100) : 0;
-
-                mContainer.innerHTML += `
-                    <div onclick="triggerMonthInteractiveFilter(${idx})" class="p-2.5 rounded-xl border text-center shadow-2xs cursor-pointer transition-all ${borderStyle}">
-                        <span class="block font-black text-slate-700 border-b pb-1 mb-1.5 text-[11px] uppercase">${monthsNames[idx]}</span>
-                        <div class="text-left text-[10px] text-slate-500 space-y-0.5">
-                            <div class="flex justify-between"><span>Leads:</span> <strong class="text-slate-700">${mData.totalLeads}</strong></div>
-                            <div class="flex justify-between font-bold text-indigo-600"><span>Ventas:</span> <strong>$${mData.totalContracted.toFixed(2)}</strong></div>
-                            <div class="flex justify-between font-bold text-emerald-600"><span>Cobrado:</span> <strong>$${mData.totalCollected.toFixed(2)}</strong></div>
-                            <div class="flex justify-between font-bold text-violet-600 border-t pt-0.5 mt-0.5"><span>Cierre:</span> <strong>${pctCierreMes}%</strong></div>
-                        </div>
-                    </div>`;
-            });
-
-            // TABLA DE METAS
-            const gBody = document.getElementById('goals-table-body'); gBody.innerHTML = '';
-            Object.keys(gestoresSales).forEach(g => {
-                let isF = (g === 'Fernando');
-                let totCobradoMes = gestoresSales[g];
-                let totContratadoMes = gestoresContracted[g];
-                let metaPersonalizada = metasGestores[g] ?? 1100;
-                let pctAvance = metaPersonalizada > 0 ? Math.min(Math.round((totCobradoMes / metaPersonalizada) * 100), 100) : 0;
-                
-                let hoyGestiones = gestoresTodayCount[g] || 0;
-                let acumuladoMesLeads = gestoresMonthTotalCount[g] || 0;
-
-                gBody.innerHTML += `
-                    <tr class="border-b h-11 hover:bg-slate-50/80 transition-all">
-                        <td class="p-2 font-bold text-slate-700 text-left pl-4">${g}</td>
-                        <td class="p-2 font-semibold text-slate-500">$${totContratadoMes.toFixed(2)}</td>
-                        <td class="p-2 font-black text-emerald-600">$${totCobradoMes.toFixed(2)}</td>
-                        <td class="p-2 font-bold text-fuchsia-700">${isF ? '<span class="text-slate-400">Exento</span>' : `${hoyGestiones} / 30 Gestiones`}</td>
-                        <td class="p-2 font-semibold text-slate-700">${isF ? '<span class="text-slate-400">Exento</span>' : `${acumuladoMesLeads} Leads`}</td>
-                        <td class="p-2 font-bold text-indigo-600">${isF ? 'Gerencia' : `${pctAvance}% de $${metaPersonalizada}`}</td>
-                    </tr>`;
-            });
-
-            document.getElementById('kpi-pipeline').innerText = `$${pipelineSum.toFixed(2)}`;
-            document.getElementById('kpi-sales').innerText = `$${salesSum.toFixed(2)}`;
-            document.getElementById('kpi-alerts').innerText = todayAlerts;
-            
-            let rateScheduling = totalLeadsBajoFiltro > 0 ? Math.round((agendasContadasBajoFiltro / totalLeadsBajoFiltro) * 100) : 0;
-            let rateConversion = totalLeadsBajoFiltro > 0 ? Math.round((ventasContadasBajoFiltro / totalLeadsBajoFiltro) * 100) : 0;
-
-            document.getElementById('b-frio').innerText = phaseCounts['frio'];
-            document.getElementById('b-tibio').innerText = phaseCounts['tibio'];
-            document.getElementById('b-caliente').innerText = phaseCounts['caliente'];
-            document.getElementById('b-agenda').innerText = phaseCounts['agenda'];
-            document.getElementById('b-venta').innerText = phaseCounts['venta'];
-            document.getElementById('b-postventa').innerText = phaseCounts['postventa'];
-
-            document.getElementById('kpi-scheduling-rate').innerText = `${rateScheduling}%`;
-            document.getElementById('sub-kpi-agendas').innerText = `${agendasContadasBajoFiltro} Agendas de ${totalLeadsBajoFiltro} Leads`;
-            document.getElementById('kpi-conversion').innerText = `${rateConversion}%`;
-            document.getElementById('sub-kpi-cierres').innerText = `${ventasContadasBajoFiltro} Ventas de ${totalLeadsBajoFiltro} Leads`;
-        }
-
-        function importDataEngine(event) {
-            const file = event.target.files[0]; if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const data = new Uint8Array(e.target.result); const wb = XLSX.read(data, { type: 'array' });
-                const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
-                let cleanLines = [];
-                for(let i=1; i<json.length; i++) { if(json[i][1]) cleanLines.push(json[i].join(',')); }
-                parseSafeCSV("id,name,phone,phase,value,date,loss,gestor,a1,a2,a3,a4,desc,a5\n" + cleanLines.join('\n'));
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
-        function openModal(mode, id = null) {
-            document.getElementById('lead-modal').classList.remove('hidden');
-            const delBtn = document.getElementById('modal-delete-btn');
-            
-            if (mode === 'create') {
-                document.getElementById('crm-form').reset(); document.getElementById('form-id').value = ""; 
-                delBtn.classList.add('hidden'); calcularFlujoAbonos();
-            } else if (mode === 'edit' && id) {
-                const lead = mainLeadsRegistry.find(l => l.id === id);
-                if (lead) {
-                    delBtn.classList.remove('hidden');
-                    delBtn.onclick = function() { deleteLeadEngine(lead.id); };
-                    
-                    document.getElementById('form-id').value = lead.id; document.getElementById('form-name').value = lead.name; document.getElementById('form-phone').value = lead.phone; document.getElementById('form-phase').value = lead.phase; document.getElementById('form-value').value = lead.value; 
-                    
-                    let targetDate = lead.date;
-                    if(String(lead.date).includes('/')) {
-                        let segments = String(lead.date).split('/');
-                        if(segments[2] && segments[1] && segments[0]) targetDate = `${segments[2]}-${segments[1].padStart(2,'0')}-${segments[0].padStart(2,'0')}`;
-                    }
-                    document.getElementById('form-date').value = targetDate;
-                    document.getElementById('form-gestor').value = lead.gestor; document.getElementById('form-loss').value = lead.loss || "Ninguno"; document.getElementById('form-desc').value = lead.desc;
-                    document.getElementById('form-a1').value = lead.a1 || 0; document.getElementById('form-a2').value = lead.a2 || 0; document.getElementById('form-a3').value = lead.a3 || 0; document.getElementById('form-a4').value = lead.a4 || 0; document.getElementById('form-a5').value = lead.a5 || 0;
-                    calcularFlujoAbonos();
-                }
-            }
-        }
-        
-        function closeModal() { document.getElementById('lead-modal').classList.add('hidden'); }
-
-        async function handleFormSubmit(e) {
-            e.preventDefault();
-            const id = document.getElementById('form-id').value;
-            let dateInput = document.getElementById('form-date').value;
-            
-            let payload = {
-                id: id ? parseInt(id) : Date.now(), 
-                name: document.getElementById('form-name').value, 
-                phone: document.getElementById('form-phone').value, 
-                phase: document.getElementById('form-phase').value, 
-                value: parseFloat(document.getElementById('form-value').value) || 0, 
-                date: dateInput, 
-                gestor: document.getElementById('form-gestor').value, 
-                loss: document.getElementById('form-loss').value, 
-                desc: document.getElementById('form-desc').value, 
-                a1: parseFloat(document.getElementById('form-a1').value) || 0, 
-                a2: parseFloat(document.getElementById('form-a2').value) || 0, 
-                a3: parseFloat(document.getElementById('form-a3').value) || 0, 
-                a4: parseFloat(document.getElementById('form-a4').value) || 0, 
-                a5: parseFloat(document.getElementById('form-a5').value) || 0
-            };
-            if (id) {
-                let idx = mainLeadsRegistry.findIndex(l => l.id === parseInt(id)); if(idx !== -1) mainLeadsRegistry[idx] = payload;
-            } else { mainLeadsRegistry.push(payload); }
-            commitDatabaseState(); renderApplicationCore(); await saveLeadToCloudAPI(payload);
-            closeModal();
-        }
-
-        function exportBackupExcel() {
-            let ws = XLSX.utils.json_to_sheet(mainLeadsRegistry); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Backup"); XLSX.writeFile(wb, "Respaldo_CRM_v19.0.xlsx");
-        }
-    </script>
-</body>
-</html>
+                        if (dateStr.includes
