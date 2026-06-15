@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM Cloud - v21.0 QA Certified Master</title>
+    <title>Relax Therapy CRM Cloud - v22.0 QA Anti-Crash</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -30,7 +30,7 @@
                 </div>
                 <div>
                     <span class="font-black text-slate-900 tracking-tight text-lg">RELAX THERAPY CRM MASTER</span>
-                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider"><i class="fa-solid fa-circle-check"></i> Sincronización v21.0 Online</span>
+                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider"><i class="fa-solid fa-circle-check"></i> Sincronización v22.0 Online</span>
                 </div>
             </div>
 
@@ -42,6 +42,9 @@
                     <i class="fa-solid fa-file-excel text-emerald-600 font-bold"></i>
                     <input type="file" id="file-uploader" accept=".xlsx,.xls,.csv" onchange="importDataEngine(event)" class="w-40 text-slate-600 text-[11px] cursor-pointer">
                 </div>
+                <button onclick="forceResetLocalStorage()" class="bg-rose-600 hover:bg-rose-700 text-white px-3 h-10 rounded-xl font-bold flex items-center gap-1 shadow-sm" title="Limpiar datos corruptos">
+                    <i class="fa-solid fa-trash-can"></i> Forzar Limpieza Caché
+                </button>
                 <button onclick="loadDataFromCloud()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 h-10 rounded-xl font-bold flex items-center gap-1 shadow-sm">
                     <i class="fa-solid fa-arrows-rotate"></i> Actualizar Tablero
                 </button>
@@ -247,6 +250,13 @@
             loadDataFromCloud();
         };
 
+        // ENGIN DE AUTOLIMPIEZA DE EMERGENCIA SST
+        function forceResetLocalStorage() {
+            localStorage.removeItem('relax_crm_master_data');
+            mainLeadsRegistry = [];
+            loadDataFromCloud();
+        }
+
         function initPersonalizationConfig() {
             let savedNames = localStorage.getItem('relax_gestores_names');
             if(savedNames) { listadoGestores = JSON.parse(savedNames); }
@@ -350,7 +360,7 @@
                 const res = await fetch(secureUrl);
                 const text = await res.text();
                 parseSafeCSV(text);
-                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sincronización Exitosa v21.0`;
+                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sincronización Exitosa v22.0`;
             } catch (err) {
                 status.innerHTML = `<i class="fa-solid fa-hard-drive"></i> Cargado Local de Respaldo`;
                 let local = localStorage.getItem('relax_crm_master_data');
@@ -376,10 +386,11 @@
                 let rawDate = cols[5] ? cols[5].replace(/"/g, '').trim() : "";
                 let rawGestor = cols[7] ? cols[7].replace(/"/g, '').trim() : listadoGestores[0];
                 
-                // MEJORA RECEPTOR COMPATIBLE AUTOMÁTICO: Evita romper la app si la columna no viene alineada en Sheets
+                // PARSER INDEPENDIENTE ANTI-COLAPSO: Si la columna se movió, no rompe la carga
                 let rawTouch = 1;
-                if(cols[11] && !isNaN(cols[11].replace(/"/g, ''))) {
-                    rawTouch = parseInt(cols[11].replace(/"/g, '')) || 1;
+                if(cols.length > 11 && cols[11] !== undefined) {
+                    let possibleTouch = parseInt(cols[11].replace(/"/g, ''));
+                    if(!isNaN(possibleTouch)) rawTouch = possibleTouch;
                 }
 
                 if (rawGestor) {
@@ -454,7 +465,7 @@
             mainLeadsRegistry.forEach(lead => {
                 let currentPhase = lead.phase || 'frio';
                 let valContrato = parseFloat(lead.value) || 0;
-                let totalAbonado = (lead.a1||0)+(lead.a2||0)+(lead.a3||0)+(lead.a4||0)+(lead.a5||0);
+                let totalAbonado = (parseFloat(lead.a1)||0)+(parseFloat(lead.a2)||0)+(parseFloat(lead.a3||0))+(parseFloat(lead.a4)||0)+(parseFloat(lead.a5)||0);
                 let saldoPendiente = valContrato - totalAbonado;
                 let gestionesRealizadas = lead.touch || 1;
                 
@@ -506,10 +517,9 @@
 
                 if (isToday) todayAlerts++;
 
-                // LÓGICA DE CONDICIONALES DE FILTRADO MÚLTIPLE BLINDADA
                 let matchesMonthFilter = (selectedMonthInteractiveFilter === null || leadMonth === selectedMonthInteractiveFilter);
                 let matchesTodayFilter = (!filterOnlyTodayAlerts || isToday);
-                let matchesPendingDebt = (!filterOnlyPendingDebt || saldoPendiente > 0.01); 
+                let matchesPendingDebt = (!filterOnlyPendingDebt || saldoPendiente > 0.05); 
                 let matchesSearch = (activeSearchQuery === "" || lead.name.toLowerCase().includes(activeSearchQuery));
                 let matchesGestor = (currentManagerFilter === 'all' || lead.gestor === currentManagerFilter);
 
@@ -606,4 +616,123 @@
                 gBody.innerHTML += `
                     <tr class="border-b h-11 hover:bg-slate-50/80 transition-all">
                         <td class="p-2 font-bold text-slate-700 text-left pl-4">${g}</td>
-                        <td class="p-2 font-semibold text-slate
+                        <td class="p-2 font-semibold text-slate-500">$${totContratadoMes.toFixed(2)}</td>
+                        <td class="p-2 font-black text-emerald-600">$${totCobradoMes.toFixed(2)}</td>
+                        <td class="p-2 font-bold text-fuchsia-700">${isF ? '<span class="text-slate-400">Exento</span>' : `${hoyGestiones} / 30 Gestiones`}</td>
+                        <td class="p-2 font-semibold text-slate-700">${isF ? '<span class="text-slate-400">Exento</span>' : `${acumuladoMesLeads} Leads`}</td>
+                        <td class="p-2 font-bold text-indigo-600">${isF ? 'Gerencia' : `${pctAvance}% de $${metaPersonalizada}`}</td>
+                    </tr>`;
+            });
+
+            document.getElementById('kpi-pipeline').innerText = `$${pipelineSum.toFixed(2)}`;
+            document.getElementById('kpi-sales').innerText = `$${salesSum.toFixed(2)}`;
+            document.getElementById('kpi-alerts').innerText = todayAlerts;
+            
+            let rateScheduling = totalLeadsBajoFiltro > 0 ? Math.round((agendasContadasBajoFiltro / totalLeadsBajoFiltro) * 100) : 0;
+            let rateConversion = totalLeadsBajoFiltro > 0 ? Math.round((ventasContadasBajoFiltro / totalLeadsBajoFiltro) * 100) : 0;
+
+            document.getElementById('b-frio').innerText = phaseCounts['frio'];
+            document.getElementById('b-tibio').innerText = phaseCounts['tibio'];
+            document.getElementById('b-caliente').innerText = phaseCounts['caliente'];
+            document.getElementById('b-agenda').innerText = phaseCounts['agenda'];
+            document.getElementById('b-venta').innerText = phaseCounts['venta'];
+            document.getElementById('b-postventa').innerText = phaseCounts['postventa'];
+
+            document.getElementById('kpi-scheduling-rate').innerText = `${rateScheduling}%`;
+            document.getElementById('sub-kpi-agendas').innerText = `${agendasContadasBajoFiltro} Agendas de ${totalLeadsBajoFiltro} Leads`;
+            document.getElementById('kpi-conversion').innerText = `${rateConversion}%`;
+            document.getElementById('sub-kpi-cierres').innerText = `${ventasContadasBajoFiltro} Ventas de ${totalLeadsBajoFiltro} Leads`;
+        }
+
+        function importDataEngine(event) {
+            const file = event.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result); const wb = XLSX.read(data, { type: 'array' });
+                const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
+                let cleanLines = [];
+                for(let i=1; i<json.length; i++) { if(json[i][1]) cleanLines.push(json[i].join(',')); }
+                parseSafeCSV("id,name,phone,phase,value,date,loss,gestor,a1,a2,a3,desc,a4,a5\n" + cleanLines.join('\n'));
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function openModal(mode, id = null) {
+            document.getElementById('lead-modal').classList.remove('hidden');
+            const delBtn = document.getElementById('modal-delete-btn');
+            
+            if (mode === 'create') {
+                document.getElementById('crm-form').reset(); document.getElementById('form-id').value = ""; 
+                delBtn.classList.add('hidden'); calcularFlujoAbonos();
+            } else if (mode === 'edit' && id) {
+                const lead = mainLeadsRegistry.find(l => l.id === id);
+                if (lead) {
+                    delBtn.classList.remove('hidden');
+                    delBtn.onclick = function() { deleteLeadEngine(lead.id); };
+                    
+                    document.getElementById('form-id').value = lead.id; document.getElementById('form-name').value = lead.name; document.getElementById('form-phone').value = lead.phone; document.getElementById('form-phase').value = lead.phase; document.getElementById('form-value').value = lead.value; 
+                    
+                    let targetDate = lead.date;
+                    if(String(lead.date).includes('/')) {
+                        let segments = String(lead.date).split('/');
+                        if(segments[2] && segments[1] && segments[0]) targetDate = `${segments[2]}-${segments[1].padStart(2,'0')}-${segments[0].padStart(2,'0')}`;
+                    }
+                    document.getElementById('form-date').value = targetDate;
+                    document.getElementById('form-gestor').value = lead.gestor; document.getElementById('form-loss').value = lead.loss || "Ninguno"; document.getElementById('form-desc').value = lead.desc;
+                    document.getElementById('form-touch').value = lead.touch || 1;
+                    document.getElementById('form-a1').value = lead.a1 || 0; document.getElementById('form-a2').value = lead.a2 || 0; document.getElementById('form-a3').value = lead.a3 || 0; document.getElementById('form-a4').value = lead.a4 || 0; document.getElementById('form-a5').value = lead.a5 || 0;
+                    calcularFlujoAbonos();
+                }
+            }
+        }
+        
+        function closeModal() { document.getElementById('lead-modal').classList.add('hidden'); }
+
+        function calcularFlujoAbonos() {
+            let valTotal = parseFloat(document.getElementById('form-value').value) || 0;
+            let a1 = parseFloat(document.getElementById('form-a1').value) || 0;
+            let a2 = parseFloat(document.getElementById('form-a2').value) || 0;
+            let a3 = parseFloat(document.getElementById('form-a3').value) || 0;
+            let a4 = parseFloat(document.getElementById('form-a4').value) || 0;
+            let a5 = parseFloat(document.getElementById('form-a5').value) || 0;
+            let totAbonado = a1 + a2 + a3 + a4 + a5;
+            let saldo = valTotal - totAbonado;
+            document.getElementById('modal-total-abonado').innerText = `$${totAbonado.toFixed(2)}`;
+            document.getElementById('modal-saldo-pendiente').innerText = `$${saldo.toFixed(2)}`;
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('form-id').value;
+            let dateInput = document.getElementById('form-date').value;
+            
+            let payload = {
+                id: id ? parseInt(id) : Date.now(), 
+                name: document.getElementById('form-name').value, 
+                phone: document.getElementById('form-phone').value, 
+                phase: document.getElementById('form-phase').value, 
+                value: parseFloat(document.getElementById('form-value').value) || 0, 
+                date: dateInput, 
+                gestor: document.getElementById('form-gestor').value, 
+                loss: document.getElementById('form-loss').value, 
+                desc: document.getElementById('form-desc').value, 
+                touch: parseInt(document.getElementById('form-touch').value) || 1,
+                a1: parseFloat(document.getElementById('form-a1').value) || 0, 
+                a2: parseFloat(document.getElementById('form-a2').value) || 0, 
+                a3: parseFloat(document.getElementById('form-a3').value) || 0, 
+                a4: parseFloat(document.getElementById('form-a4').value) || 0, 
+                a5: parseFloat(document.getElementById('form-a5').value) || 0
+            };
+            if (id) {
+                let idx = mainLeadsRegistry.findIndex(l => l.id === parseInt(id)); if(idx !== -1) mainLeadsRegistry[idx] = payload;
+            } else { mainLeadsRegistry.push(payload); }
+            commitDatabaseState(); renderApplicationCore(); await saveLeadToCloudAPI(payload);
+            closeModal();
+        }
+
+        function exportBackupExcel() {
+            let ws = XLSX.utils.json_to_sheet(mainLeadsRegistry); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Backup"); XLSX.writeFile(wb, "Respaldo_CRM_v22.0.xlsx");
+        }
+    </script>
+</body>
+</html>
