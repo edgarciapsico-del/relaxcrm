@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM Cloud - v29.0 QA Engine Ultra-Parse</title>
+    <title>Relax Therapy CRM Cloud - v29.1 QA Case-Insensitive</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -30,7 +30,7 @@
                 </div>
                 <div>
                     <span class="font-black text-slate-900 tracking-tight text-lg">RELAX THERAPY CRM MASTER</span>
-                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider"><i class="fa-solid fa-circle-check"></i> Sincronización v29.0 Certificada</span>
+                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider"><i class="fa-solid fa-circle-check"></i> Sincronización v29.1 Activa</span>
                 </div>
             </div>
 
@@ -111,7 +111,7 @@
             </div>
 
             <div class="bg-slate-50 p-4 rounded-xl border space-y-2">
-                <h4 class="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-chart-line text-indigo-500"></i> Historial Comercial Independiente (Haz clic en un mes para aislarlo)</h4>
+                <h4 class="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-chart-line text-indigo-500"></i> Historial Comercial Independiente</h4>
                 <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3" id="months-grid-container"></div>
             </div>
 
@@ -133,7 +133,7 @@
                                 <th class="p-3">Gestiones Hoy (Meta 30)</th>
                                 <th class="p-3">Leads Atendidos Mes</th>
                                 <th class="p-3">Presupuesto Diario ($)</th>
-                                <th class="p-3">Presupuesto收藏 Mensual ($)</th>
+                                <th class="p-3">Presupuesto Mensual ($)</th>
                                 <th class="p-3 w-48">Cumplimiento Comercial</th>
                             </tr>
                         </thead>
@@ -189,9 +189,9 @@
     <div id="lead-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl w-full max-w-2xl p-6 shadow-xl border mx-4 max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between mb-4 border-b pb-2">
-                <h3 id="modal-title" class="text-xs font-black uppercase text-slate-700">Ficha Técnica e Historial Comercial</h3>
+                <h3 id="modal-title" class="text-xs font-black uppercase text-slate-700">Ficha Técnica</h3>
                 <div class="flex items-center gap-3">
-                    <button type="button" id="modal-delete-btn" class="text-rose-500 hover:text-rose-700 hidden" title="Eliminar Lead"><i class="fa-solid fa-trash-can text-base"></i></button>
+                    <button type="button" id="modal-delete-btn" class="text-rose-500 hover:text-rose-700 hidden"><i class="fa-solid fa-trash-can text-base"></i></button>
                     <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
                 </div>
             </div>
@@ -234,7 +234,7 @@
                     <div><label class="block font-bold text-rose-600 mb-1">Motivo Descarte</label><select id="form-loss" class="w-full px-3 h-10 bg-rose-50 border border-rose-200 text-rose-700 font-bold rounded-xl focus:outline-hidden"><option value="Ninguno">Ninguno</option><option value="Fuera de la ciudad">Fuera de la ciudad</option><option value="No le interesa">No le interesa</option><option value="Precios">Precios</option></select></div>
                 </div>
 
-                <div><label class="block font-bold text-slate-500 mb-1">Observaciones / Historial Clínico</label><textarea id="form-desc" rows="2" class="w-full p-3 bg-slate-50 border rounded-xl focus:outline-hidden"></textarea></div>
+                <div><label class="block font-bold text-slate-500 mb-1">Observaciones</label><textarea id="form-desc" rows="2" class="w-full p-3 bg-slate-50 border rounded-xl focus:outline-hidden"></textarea></div>
                 <div class="pt-2 flex justify-end gap-2 border-t">
                     <button type="button" onclick="closeModal()" class="px-4 h-10 font-bold text-slate-500">Cancelar</button>
                     <button type="submit" id="btn-submit-form" class="px-5 h-10 bg-emerald-600 text-white font-bold rounded-xl shadow-sm">Guardar Cambios</button>
@@ -245,8 +245,6 @@
 
     <script>
         const GOOGLE_SCRIPT_API = "https://script.google.com/macros/s/AKfycbw6Ln0N9XJezPsGlQU_z7KHoBCBLKfnDVQSBPGEFyVbvYKfE0EIyek3sfV8FMboiViD/exec"; 
-        
-        // URL DE EXPORTACIÓN DIRECTA DE LA NUEVA BASE DE DATOS
         const GOOGLE_CSV_READ_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR6U9Z7x4f87mX8K6zGk0_N_X-3wT5-L-8y9Oo/pub?gid=0&single=true&output=csv";
         
         const liveClock = new Date();
@@ -262,7 +260,6 @@
         let selectedMonthInteractiveFilter = null; 
         
         let listadoGestores = ["Brenda", "Joselyne", "Naty", "Fernando"];
-        
         let metasMensualesDinamicas = { "Brenda": 1100, "Joselyne": 1100, "Naty": 1100, "Fernando": 0 };
         let metasDiariasDinamicas = { "Brenda": 50, "Joselyne": 50, "Naty": 50, "Fernando": 0 };
         
@@ -294,10 +291,8 @@
 
             document.getElementById('meta-d-g1').value = metasDiariasDinamicas[listadoGestores[0]] ?? 50;
             document.getElementById('meta-m-g1').value = metasMensualesDinamicas[listadoGestores[0]] ?? 1100;
-
             document.getElementById('meta-d-g2').value = metasDiariasDinamicas[listadoGestores[1]] ?? 50;
             document.getElementById('meta-m-g2').value = metasMensualesDinamicas[listadoGestores[1]] ?? 1100;
-
             document.getElementById('meta-d-g3').value = metasDiariasDinamicas[listadoGestores[2]] ?? 50;
             document.getElementById('meta-m-g3').value = metasMensualesDinamicas[listadoGestores[2]] ?? 1100;
 
@@ -314,7 +309,6 @@
 
         function toggleConfigPanel() { document.getElementById('config-panel').classList.toggle('hidden'); }
 
-        // COHECCIÓN DE ENTRADA DINÁMICA
         function updateEquipoConfig() {
             listadoGestores = [
                 document.getElementById('cfg-g1').value.trim(),
@@ -322,20 +316,16 @@
                 document.getElementById('cfg-g3').value.trim(),
                 document.getElementById('cfg-g4').value.trim()
             ];
-
             metasDiariasDinamicas[listadoGestores[0]] = parseFloat(document.getElementById('meta-d-g1').value) || 0;
             metasMensualesDinamicas[listadoGestores[0]] = parseFloat(document.getElementById('meta-m-g1').value) || 0;
-
             metasDiariasDinamicas[listadoGestores[1]] = parseFloat(document.getElementById('meta-d-g2').value) || 0;
             metasMensualesDinamicas[listadoGestores[1]] = parseFloat(document.getElementById('meta-m-g2').value) || 0;
-
             metasDiariasDinamicas[listadoGestores[2]] = parseFloat(document.getElementById('meta-d-g3').value) || 0;
             metasMensualesDinamicas[listadoGestores[2]] = parseFloat(document.getElementById('meta-m-g3').value) || 0;
 
             localStorage.setItem('relax_gestores_names', JSON.stringify(listadoGestores));
             localStorage.setItem('relax_mm_dinamicas', JSON.stringify(metasMensualesDinamicas));
             localStorage.setItem('relax_md_dinamicas', JSON.stringify(metasDiariasDinamicas));
-            
             buildDynamicButtonsFilters(); renderApplicationCore();
         }
 
@@ -386,10 +376,9 @@
         async function loadDataFromCloud() {
             const status = document.getElementById('sync-status');
             status.className = "block text-[11px] font-bold text-amber-600 uppercase tracking-wider animate-pulse";
-            status.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Cargando base central de Google Sheets...`;
+            status.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Conectando a Google Sheets...`;
             
             const secureUrl = "https://corsproxy.io/?" + encodeURIComponent(GOOGLE_CSV_READ_URL + "&cache_bust=" + Date.now());
-
             try {
                 const res = await fetch(secureUrl);
                 const text = await res.text();
@@ -404,28 +393,31 @@
             }
         }
 
+        // QA CRITICAL MAPPER FIX: Case Insensitive absoluto para absorber NAME, ID, VALUE en mayúsculas de la nueva base
         function parseSafeCSV(text) {
             let lines = text.split(/\r\n|\n/);
             if (lines.length === 0) return;
             
-            // Limpieza de encabezados flexible para absorber variaciones o espacios invisibles de tu Sheets
             let headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim().toLowerCase());
+            
+            let findHeaderIdx = (token) => headers.findIndex(h => h === token || h.includes(token));
+
             let idxMap = {
-                id: headers.findIndex(h => h.includes('id')),
-                name: headers.findIndex(h => h.includes('name')),
-                phone: headers.findIndex(h => h.includes('phone')),
-                phase: headers.findIndex(h => h.includes('phase')),
-                value: headers.findIndex(h => h.includes('value')),
-                date: headers.findIndex(h => h.includes('date')),
-                loss: headers.findIndex(h => h.includes('loss')),
-                gestor: headers.findIndex(h => h.includes('gestor')),
-                a1: headers.findIndex(h => h === 'a1'),
-                a2: headers.findIndex(h => h === 'a2'),
-                a3: headers.findIndex(h => h === 'a3'),
-                a4: headers.findIndex(h => h === 'a4'),
-                a5: headers.findIndex(h => h === 'a5'),
-                touch: headers.findIndex(h => h.includes('touch')),
-                desc: headers.findIndex(h => h.includes('desc'))
+                id: findHeaderIdx('id'),
+                name: findHeaderIdx('name'),
+                phone: findHeaderIdx('phone'),
+                phase: findHeaderIdx('phase'),
+                value: findHeaderIdx('value'),
+                date: findHeaderIdx('date'),
+                loss: findHeaderIdx('loss'),
+                gestor: findHeaderIdx('gestor'),
+                a1: headers.indexOf('a1'),
+                a2: headers.indexOf('a2'),
+                a3: headers.indexOf('a3'),
+                a4: headers.indexOf('a4'),
+                a5: headers.indexOf('a5'),
+                touch: findHeaderIdx('touch'),
+                desc: findHeaderIdx('desc')
             };
 
             let cleanRegistry = [];
@@ -433,7 +425,7 @@
             
             for (let i = 1; i < lines.length; i++) {
                 let line = lines[i].trim(); if (!line) continue;
-                let cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                let cols = line.split(/,(?=(?:?:[^"]*"){2})*[^"]*$)/);
                 if (cols.length < 3) continue;
 
                 let getVal = (field, fallback = "") => {
@@ -503,9 +495,7 @@
                 let index = mainLeadsRegistry.findIndex(l => l.id === id);
                 if(index !== -1) {
                     mainLeadsRegistry.splice(index, 1);
-                    commitDatabaseState();
-                    renderApplicationCore();
-                    closeModal();
+                    commitDatabaseState(); renderApplicationCore(); closeModal();
                     try {
                         let deletePayload = { action: "delete", id: id };
                         await fetch(GOOGLE_SCRIPT_API, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(deletePayload) });
@@ -538,21 +528,18 @@
                 let saldoPendiente = valContrato - totalAbonado;
                 let gestionesRealizadas = lead.touch || 1;
                 
-                // CONTROL DE CALIDAD AVANZADO DE FECHAS (Soporta múltiples delimitadores sin corromper el mes)
-                let leadDay = CURRENT_DAY_NUM; 
-                let leadMonth = CURRENT_MONTH_NUM; 
-                let leadYear = CURRENT_YEAR_NUM;
+                let leadDay = CURRENT_DAY_NUM; let leadMonth = CURRENT_MONTH_NUM; let leadYear = CURRENT_YEAR_NUM;
                 let dateStr = lead.date ? String(lead.date).trim() : "";
                 
                 if (dateStr) {
-                    let cleanedDate = dateStr.replace(/\//g, '-'); // Unificar barras a guiones
+                    let cleanedDate = dateStr.replace(/\//g, '-');
                     let parts = cleanedDate.split('-');
                     if(parts.length === 3) {
-                        if(parts[0].length === 4) { // Formato AAAA-MM-DD
+                        if(parts[0].length === 4) {
                             leadYear = parseInt(parts[0]) || CURRENT_YEAR_NUM;
                             leadMonth = parseInt(parts[1]) || CURRENT_MONTH_NUM;
                             leadDay = parseInt(parts[2]) || CURRENT_DAY_NUM;
-                        } else { // Formato DD-MM-AAAA o MM-DD-AAAA
+                        } else {
                             leadDay = parseInt(parts[0]) || CURRENT_DAY_NUM;
                             leadMonth = parseInt(parts[1]) || CURRENT_MONTH_NUM;
                             leadYear = parseInt(parts[2]) || CURRENT_YEAR_NUM;
@@ -560,7 +547,6 @@
                     }
                 }
 
-                // Asegurar rango seguro del mes para evitar desbordamientos en la cuadrícula mensual
                 if(leadMonth < 1 || leadMonth > 12) leadMonth = CURRENT_MONTH_NUM;
 
                 yearMonthsData[leadMonth - 1].totalLeads++;
@@ -604,9 +590,6 @@
                             <a href="https://wa.me/${cleanDigits}" target="_blank" rel="noopener noreferrer" class="flex-1 flex items-center justify-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold py-1.5 px-2 rounded-lg transition-all shadow-2xs">
                                 <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp Activo
                             </a>
-                            <button onclick="deleteLeadEngine(${lead.id})" class="p-1 text-slate-300 hover:text-rose-500 rounded transition-all">
-                                <i class="fa-solid fa-trash-can text-xs"></i>
-                            </button>
                         </div>`;
 
                     const card = document.createElement('div');
@@ -630,7 +613,7 @@
                 }
             });
 
-            // INYECCIÓN VISUAL DEL HISTORIAL MENSUAL
+            // HISTORIAL MENSUAL
             const mContainer = document.getElementById('months-grid-container'); mContainer.innerHTML = '';
             yearMonthsData.forEach((mData, idx) => {
                 let isCurrentFilter = (selectedMonthInteractiveFilter === (idx + 1));
@@ -646,7 +629,7 @@
                     </div>`;
             });
 
-            // TABLA DE METAS DINÁMICAS REESTABLECIDA
+            // TABLA DE METAS DINÁMICAS REINTEGRADA
             const gBody = document.getElementById('goals-table-body'); gBody.innerHTML = '';
             Object.keys(gestoresSales).forEach(g => {
                 let isF = (g === 'Fernando');
@@ -791,7 +774,7 @@
         }
 
         function exportBackupExcel() {
-            let ws = XLSX.utils.json_to_sheet(mainLeadsRegistry); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Backup"); XLSX.writeFile(wb, "Respaldo_CRM_v29.0.xlsx");
+            let ws = XLSX.utils.json_to_sheet(mainLeadsRegistry); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Backup"); XLSX.writeFile(wb, "Respaldo_CRM_v29.1.xlsx");
         }
     </script>
 </body>
