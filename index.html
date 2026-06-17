@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM Cloud - v24.0 Live Lock Engine</title>
+    <title>Relax Therapy CRM Cloud - v28.0 Dynamic Goals Master</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -30,20 +30,20 @@
                 </div>
                 <div>
                     <span class="font-black text-slate-900 tracking-tight text-lg">RELAX THERAPY CRM MASTER</span>
-                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider"><i class="fa-solid fa-circle-check"></i> Sincronización v24.0 Blindada</span>
+                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider"><i class="fa-solid fa-circle-check"></i> Sincronización v28.0 Activa</span>
                 </div>
             </div>
 
             <div class="flex flex-wrap items-center gap-2 text-xs">
                 <button onclick="toggleConfigPanel()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 h-10 rounded-xl font-bold flex items-center gap-1.5 border transition-all">
-                    <i class="fa-solid fa-user-gear text-indigo-600"></i> Configurar Equipo
+                    <i class="fa-solid fa-user-gear text-indigo-600"></i> <span class="text-rose-600 font-black">⚙️ Configurar Metas Asesoras</span>
                 </button>
                 <div class="flex items-center gap-2 bg-slate-50 border px-3 py-1.5 rounded-xl border-slate-200 shadow-2xs">
                     <i class="fa-solid fa-file-excel text-emerald-600 font-bold"></i>
                     <input type="file" id="file-uploader" accept=".xlsx,.xls,.csv" onchange="importDataEngine(event)" class="w-40 text-slate-600 text-[11px] cursor-pointer">
                 </div>
                 <button onclick="forceResetLocalStorage()" class="bg-rose-600 hover:bg-rose-700 text-white px-3 h-10 rounded-xl font-bold flex items-center gap-1 shadow-sm">
-                    <i class="fa-solid fa-arrows-rotate"></i> Limpiar y Forzar Descarga Cloud
+                    <i class="fa-solid fa-arrows-rotate"></i> Forzar Descarga Cloud
                 </button>
                 <button onclick="loadDataFromCloud()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 h-10 rounded-xl font-bold flex items-center gap-1 shadow-sm">
                     <i class="fa-solid fa-arrows-rotate"></i> Actualizar Tablero
@@ -60,12 +60,37 @@
 
     <section id="config-panel" class="max-w-[1750px] w-full mx-auto px-4 lg:px-8 mt-4 hidden">
         <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-            <h4 class="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1"><i class="fa-solid fa-sliders text-indigo-600"></i> Panel de Control Administrativo</h4>
-            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
-                <div><label class="block font-bold text-slate-400 mb-1">Gestor 1</label><input type="text" id="cfg-g1" value="Brenda" onchange="updateEquipoConfig()" class="w-full px-3 h-9 bg-slate-50 border rounded-xl font-semibold"></div>
-                <div><label class="block font-bold text-slate-400 mb-1">Gestor 2</label><input type="text" id="cfg-g2" value="Joselyne" onchange="updateEquipoConfig()" class="w-full px-3 h-9 bg-slate-50 border rounded-xl font-semibold"></div>
-                <div><label class="block font-bold text-slate-400 mb-1">Gestor 3</label><input type="text" id="cfg-g3" value="Naty" onchange="updateEquipoConfig()" class="w-full px-3 h-9 bg-slate-50 border rounded-xl font-semibold"></div>
-                <div><label class="block font-bold text-slate-400 mb-1">Gestor 4 (Admin)</label><input type="text" id="cfg-g4" value="Fernando" onchange="updateEquipoConfig()" class="w-full px-3 h-9 bg-slate-50 border rounded-xl font-semibold"></div>
+            <h4 class="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1"><i class="fa-solid fa-sliders text-indigo-600"></i> Presupuesto Comercial Dinámico por Vendedor</h4>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+                <div class="p-4 bg-slate-50 border rounded-xl space-y-3">
+                    <div class="flex items-center gap-2 border-b pb-1"><i class="fa-solid fa-user text-indigo-600 text-xs"></i><input type="text" id="cfg-g1" value="Brenda" onchange="updateEquipoConfig()" class="font-black text-slate-800 bg-transparent focus:outline-hidden text-xs uppercase"></div>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div><label class="block text-slate-400 font-bold mb-0.5">Meta Diaria ($)</label><input type="number" id="meta-d-g1" value="50" onchange="updateEquipoConfig()" class="w-full px-2 h-8 bg-white border rounded-lg font-black text-indigo-600"></div>
+                        <div><label class="block text-slate-400 font-bold mb-0.5">Meta Mensual ($)</label><input type="number" id="meta-m-g1" value="1100" onchange="updateEquipoConfig()" class="w-full px-2 h-8 bg-white border rounded-lg font-black text-indigo-600"></div>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-slate-50 border rounded-xl space-y-3">
+                    <div class="flex items-center gap-2 border-b pb-1"><i class="fa-solid fa-user text-indigo-600 text-xs"></i><input type="text" id="cfg-g2" value="Joselyne" onchange="updateEquipoConfig()" class="font-black text-slate-800 bg-transparent focus:outline-hidden text-xs uppercase"></div>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div><label class="block text-slate-400 font-bold mb-0.5">Meta Diaria ($)</label><input type="number" id="meta-d-g2" value="50" onchange="updateEquipoConfig()" class="w-full px-2 h-8 bg-white border rounded-lg font-black text-indigo-600"></div>
+                        <div><label class="block text-slate-400 font-bold mb-0.5">Meta Mensual ($)</label><input type="number" id="meta-m-g2" value="1100" onchange="updateEquipoConfig()" class="w-full px-2 h-8 bg-white border rounded-lg font-black text-indigo-600"></div>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-slate-50 border rounded-xl space-y-3">
+                    <div class="flex items-center gap-2 border-b pb-1"><i class="fa-solid fa-user text-indigo-600 text-xs"></i><input type="text" id="cfg-g3" value="Naty" onchange="updateEquipoConfig()" class="font-black text-slate-800 bg-transparent focus:outline-hidden text-xs uppercase"></div>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div><label class="block text-slate-400 font-bold mb-0.5">Meta Diaria ($)</label><input type="number" id="meta-d-g3" value="50" onchange="updateEquipoConfig()" class="w-full px-2 h-8 bg-white border rounded-lg font-black text-indigo-600"></div>
+                        <div><label class="block text-slate-400 font-bold mb-0.5">Meta Mensual ($)</label><input type="number" id="meta-m-g3" value="1100" onchange="updateEquipoConfig()" class="w-full px-2 h-8 bg-white border rounded-lg font-black text-indigo-600"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-2 border-t text-xs">
+                <label class="font-bold text-slate-400">Usuario Administrador Principal / Auditor Técnico:</label>
+                <input type="text" id="cfg-g4" value="Fernando" onchange="updateEquipoConfig()" class="ml-2 px-3 py-1 bg-slate-100 border rounded-lg font-bold text-slate-700 uppercase focus:outline-hidden">
             </div>
         </div>
     </section>
@@ -81,24 +106,21 @@
                     <span id="sub-kpi-debt" class="block text-[10px] font-medium text-emerald-600 mt-0.5">Click: Ver por Cobrar</span>
                 </div>
 
-                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100"><span class="text-[10px] font-bold text-blue-600 uppercase">Tasa Agendamiento</span><h3 id="kpi-scheduling-rate" class="text-lg font-black text-blue-700 mt-0.5">0%</h3><span id="sub-kpi-agendas" class="block text-[10px] font-medium text-blue-500 mt-0.5">0 de 0 Leads</span></div>
+                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100"><span class="text-[10px] font-bold text-blue-600 uppercase">Tasa Agendamiento</span><h3 id="kpi-scheduling-rate" class="text-lg font-black text-blue-700 mt-0.5">0%</h3><span id="sub-kpi-agendas" class="block text-[10px] font-medium text-blue-500 mt-0.5">0 Agendas</span></div>
                 <div class="bg-violet-50 p-4 rounded-xl border border-violet-100"><span class="text-[10px] font-bold text-violet-600 uppercase">Tasa Cierre Global</span><h3 id="kpi-conversion" class="text-lg font-black text-violet-700 mt-0.5">0%</h3><span id="sub-kpi-cierres" class="block text-[10px] font-medium text-violet-500 mt-0.5">0 Ventas</span></div>
                 <div onclick="toggleTodayAlertsFilter()" id="btn-kpi-alerts" class="bg-fuchsia-50 p-4 rounded-xl border border-fuchsia-100 cursor-pointer text-fuchsia-700 hover:bg-fuchsia-100/70 transition-all group shadow-2xs select-none"><span class="text-[10px] font-bold text-fuchsia-600 uppercase flex items-center justify-between">Filtrar Llamadas Hoy <i class="fa-solid fa-filter text-[9px]"></i></span><h3 id="kpi-alerts" class="text-lg font-black text-fuchsia-700 mt-0.5">0</h3></div>
             </div>
 
             <div class="bg-slate-50 p-4 rounded-xl border space-y-2">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                    <h4 class="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-chart-line text-indigo-500"></i> Historial Comercial Independiente</h4>
-                    <span id="active-month-filter-badge" class="hidden bg-indigo-600 text-white font-bold text-[10px] px-2 py-0.5 rounded-md uppercase"></span>
-                </div>
+                <h4 class="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-chart-line text-indigo-500"></i> Historial Comercial Independiente</h4>
                 <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3" id="months-grid-container"></div>
             </div>
 
             <div class="bg-slate-50 p-4 rounded-xl border">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 gap-2">
-                    <h4 class="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-trophy text-amber-500"></i> Indicadores Comercial por Asesora</h4>
+                    <h4 class="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-trophy text-amber-500"></i> Verificación e Indicadores de Gestión Comercial</h4>
                     <div class="flex items-center gap-1.5 text-xs">
-                        <span class="text-[11px] text-slate-400 font-bold uppercase">Evaluar Mes:</span>
+                        <span class="text-[11px] text-slate-400 font-bold uppercase">Mes Evaluado:</span>
                         <select id="audit-month-selector" onchange="renderApplicationCore()" class="bg-white border rounded-lg px-2 py-1 font-bold text-indigo-600 focus:outline-hidden"></select>
                     </div>
                 </div>
@@ -106,11 +128,14 @@
                     <table class="w-full text-left border-collapse bg-white border rounded-xl overflow-hidden text-xs">
                         <thead>
                             <tr class="bg-slate-800 text-white font-bold uppercase text-center">
-                                <th class="p-3 text-left">Asesora</th>
-                                <th class="p-3">Contratado Mes ($)</th>
-                                <th class="p-3">Cobrado Mes ($)</th>
+                                <th class="p-3 text-left">Asesora Comercial</th>
+                                <th class="p-3">Contratado ($)</th>
+                                <th class="p-3">Cobrado Real ($)</th>
                                 <th class="p-3">Gestiones Hoy (Meta 30)</th>
-                                <th class="p-3">Acumulado Mes (Leads Atendidos)</th>
+                                <th class="p-3">Leads Atendidos Mes</th>
+                                <th class="p-3">Presupuesto Diario ($)</th>
+                                <th class="p-3">Presupuesto Mensual ($)</th>
+                                <th class="p-3 w-48">Cumplimiento Comercial</th>
                             </tr>
                         </thead>
                         <tbody id="goals-table-body" class="text-center font-medium divide-y"></tbody>
@@ -128,7 +153,7 @@
             </div>
             <div class="relative w-full md:w-80">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400"><i class="fa-solid fa-magnifying-glass"></i></span>
-                <input type="text" id="crm-search-bar" oninput="executeLiveSearch()" placeholder="Buscar paciente..." class="w-full pl-9 pr-4 h-10 text-xs bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-hidden focus:bg-white focus:border-indigo-500 transition-all">
+                <input type="text" id="crm-search-bar" oninput="executeLiveSearch()" placeholder="Buscar paciente por nombre..." class="w-full pl-9 pr-4 h-10 text-xs bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-hidden focus:bg-white focus:border-indigo-500 transition-all">
             </div>
         </div>
     </section>
@@ -175,7 +200,7 @@
                 <input type="hidden" id="form-id">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div><label class="block font-bold text-slate-500 mb-1">Nombre del Paciente</label><input type="text" id="form-name" required class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-medium focus:outline-hidden"></div>
-                    <div><label class="block font-bold text-slate-500 mb-1">WhatsApp</label><input type="text" id="form-phone" required class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-medium focus:outline-hidden"></div>
+                    <div><label class="block font-bold text-slate-500 mb-1">WhatsApp de Contacto</label><input type="text" id="form-phone" required class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-medium focus:outline-hidden"></div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -210,10 +235,10 @@
                     <div><label class="block font-bold text-rose-600 mb-1">Motivo Descarte</label><select id="form-loss" class="w-full px-3 h-10 bg-rose-50 border border-rose-200 text-rose-700 font-bold rounded-xl focus:outline-hidden"><option value="Ninguno">Ninguno</option><option value="Fuera de la ciudad">Fuera de la ciudad</option><option value="No le interesa">No le interesa</option><option value="Precios">Precios</option></select></div>
                 </div>
 
-                <div><label class="block font-bold text-slate-500 mb-1">Observaciones</label><textarea id="form-desc" rows="2" class="w-full p-3 bg-slate-50 border rounded-xl focus:outline-hidden"></textarea></div>
+                <div><label class="block font-bold text-slate-500 mb-1">Observaciones / Historial Clínico</label><textarea id="form-desc" rows="2" class="w-full p-3 bg-slate-50 border rounded-xl focus:outline-hidden"></textarea></div>
                 <div class="pt-2 flex justify-end gap-2 border-t">
                     <button type="button" onclick="closeModal()" class="px-4 h-10 font-bold text-slate-500">Cancelar</button>
-                    <button type="submit" class="px-5 h-10 bg-emerald-600 text-white font-bold rounded-xl shadow-sm">Guardar Cambios</button>
+                    <button type="submit" id="btn-submit-form" class="px-5 h-10 bg-emerald-600 text-white font-bold rounded-xl shadow-sm">Guardar Cambios</button>
                 </div>
             </form>
         </div>
@@ -236,7 +261,11 @@
         let selectedMonthInteractiveFilter = null; 
         
         let listadoGestores = ["Brenda", "Joselyne", "Naty", "Fernando"];
-        let metasGestores = { "Brenda": 1100, "Joselyne": 1100, "Naty": 1100, "Fernando": 0 };
+        
+        // ESTRUCTURA DE PRESUPUESTOS DINÁMICOS POR INDIVIDUO
+        let metasMensualesDinamicas = { "Brenda": 1100, "Joselyne": 1100, "Naty": 1100, "Fernando": 0 };
+        let metasDiariasDinamicas = { "Brenda": 50, "Joselyne": 50, "Naty": 50, "Fernando": 0 };
+        
         const monthsNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
         window.onload = function() {
@@ -245,7 +274,7 @@
         };
 
         function forceResetLocalStorage() {
-            localStorage.removeItem('relax_crm_master_data');
+            localStorage.clear();
             mainLeadsRegistry = [];
             loadDataFromCloud();
         }
@@ -253,6 +282,36 @@
         function initPersonalizationConfig() {
             let savedNames = localStorage.getItem('relax_gestores_names');
             if(savedNames) { listadoGestores = JSON.parse(savedNames); }
+            
+            let savedMM = localStorage.getItem('relax_mm_dinamicas');
+            if(savedMM) { metasMensualesDinamicas = JSON.parse(savedMM); }
+            
+            let savedMD = localStorage.getItem('relax_md_dinamicas');
+            if(savedMD) { metasDiariasDinamicas = JSON.parse(savedMD); }
+            
+            // Asignar valores a las celdas del panel
+            document.getElementById('cfg-g1').value = listadoGestores[0] || "Brenda";
+            document.getElementById('cfg-g2').value = listadoGestores[1] || "Joselyne";
+            document.getElementById('cfg-g3').value = listadoGestores[2] || "Naty";
+            document.getElementById('cfg-g4').value = listadoGestores[3] || "Fernando";
+
+            document.getElementById('meta-d-g1').value = metasDiariasDinamicas[listadoGestores[0]] ?? 50;
+            document.getElementById('meta-m-g1').value = metasMensualesDinamicas[listadoGestores[0]] ?? 1100;
+
+            document.getElementById('meta-d-g2').value = metasDiariasDinamicas[listadoGestores[1]] ?? 50;
+            document.getElementById('meta-m-g2').value = metasMensualesDinamicas[listadoGestores[1]] ?? 1100;
+
+            document.getElementById('meta-d-g3').value = metasDiariasDinamicas[listadoGestores[2]] ?? 50;
+            document.getElementById('meta-m-g3').value = metasMensualesDinamicas[listadoGestores[2]] ?? 1100;
+
+            const selectAudit = document.getElementById('audit-month-selector');
+            if(selectAudit.innerHTML === "") {
+                monthsNames.forEach((m, idx) => {
+                    let opt = document.createElement('option'); opt.value = idx + 1; opt.innerText = m;
+                    if(idx + 1 === CURRENT_MONTH_NUM) opt.selected = true;
+                    selectAudit.appendChild(opt);
+                });
+            }
             buildDynamicButtonsFilters();
         }
 
@@ -265,7 +324,20 @@
                 document.getElementById('cfg-g3').value.trim(),
                 document.getElementById('cfg-g4').value.trim()
             ];
+
+            metasDiariasDinamicas[listadoGestores[0]] = parseFloat(document.getElementById('meta-d-g1').value) || 0;
+            metasMensualesDinamicas[listadoGestores[0]] = parseFloat(document.getElementById('meta-m-g1').value) || 0;
+
+            metasDiariasDinamicas[listadoGestores[1]] = parseFloat(document.getElementById('meta-d-g2').value) || 0;
+            metasMensualesDinamicas[listadoGestores[1]] = parseFloat(document.getElementById('meta-m-g2').value) || 0;
+
+            metasDiariasDinamicas[listadoGestores[2]] = parseFloat(document.getElementById('meta-d-g3').value) || 0;
+            metasMensualesDinamicas[listadoGestores[2]] = parseFloat(document.getElementById('meta-m-g3').value) || 0;
+
             localStorage.setItem('relax_gestores_names', JSON.stringify(listadoGestores));
+            localStorage.setItem('relax_mm_dinamicas', JSON.stringify(metasMensualesDinamicas));
+            localStorage.setItem('relax_md_dinamicas', JSON.stringify(metasDiariasDinamicas));
+            
             buildDynamicButtonsFilters(); renderApplicationCore();
         }
 
@@ -287,11 +359,7 @@
         function toggleTodayAlertsFilter() { 
             filterOnlyTodayAlerts = !filterOnlyTodayAlerts; 
             const btn = document.getElementById('btn-kpi-alerts');
-            if(filterOnlyTodayAlerts) {
-                btn.className = "bg-fuchsia-600 p-4 rounded-xl border border-fuchsia-700 cursor-pointer text-white transition-all group shadow-md select-none";
-            } else {
-                btn.className = "bg-fuchsia-50 p-4 rounded-xl border border-fuchsia-100 cursor-pointer text-fuchsia-700 hover:bg-fuchsia-100/70 transition-all group shadow-2xs select-none";
-            }
+            btn.className = filterOnlyTodayAlerts ? "bg-fuchsia-600 p-4 rounded-xl border border-fuchsia-700 cursor-pointer text-white transition-all group shadow-md select-none" : "bg-fuchsia-50 p-4 rounded-xl border border-fuchsia-100 cursor-pointer text-fuchsia-700 hover:bg-fuchsia-100/70 transition-all group shadow-2xs select-none";
             renderApplicationCore(); 
         }
 
@@ -313,28 +381,26 @@
 
         function triggerMonthInteractiveFilter(monthIndex) {
             let targetMonth = monthIndex + 1;
-            const badge = document.getElementById('active-month-filter-badge');
-            if (selectedMonthInteractiveFilter === targetMonth) {
-                selectedMonthInteractiveFilter = null; badge.classList.add('hidden');
-            } else {
-                selectedMonthInteractiveFilter = targetMonth;
-                badge.innerText = `Filtro Activo: ${monthsNames[monthIndex]}`; badge.classList.remove('hidden');
-            }
+            selectedMonthInteractiveFilter = (selectedMonthInteractiveFilter === targetMonth) ? null : targetMonth;
             renderApplicationCore();
         }
 
         async function loadDataFromCloud() {
             const status = document.getElementById('sync-status');
-            status.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Sincronizando...`;
+            status.className = "block text-[11px] font-bold text-amber-600 uppercase tracking-wider animate-pulse";
+            status.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Cargando base central de Google Sheets...`;
+            
             const secureUrl = "https://corsproxy.io/?" + encodeURIComponent(GOOGLE_CSV_READ_URL + "&cache_bust=" + Date.now());
 
             try {
                 const res = await fetch(secureUrl);
                 const text = await res.text();
                 parseSafeCSV(text);
-                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sincronización Exitosa v24.0`;
+                status.className = "block text-[11px] font-bold text-emerald-600 uppercase tracking-wider";
+                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sincronización v28.0 Exitosa`;
             } catch (err) {
-                status.innerHTML = `<i class="fa-solid fa-hard-drive"></i> Error de Sincronización`;
+                status.className = "block text-[11px] font-bold text-rose-600 uppercase tracking-wider";
+                status.innerHTML = `<i class="fa-solid fa-hard-drive"></i> Error de Red - Leyendo Local`;
                 let local = localStorage.getItem('relax_crm_master_data');
                 if(local) { mainLeadsRegistry = JSON.parse(local); renderApplicationCore(); }
             }
@@ -345,7 +411,6 @@
             if (lines.length === 0 || !lines[0].includes(',')) return;
             
             let headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim().toLowerCase());
-            
             let idxMap = {
                 id: headers.indexOf('id'), name: headers.indexOf('name'), phone: headers.indexOf('phone'),
                 phase: headers.indexOf('phase'), value: headers.indexOf('value'), date: headers.indexOf('date'),
@@ -359,7 +424,7 @@
             
             for (let i = 1; i < lines.length; i++) {
                 let line = lines[i].trim(); if (!line) continue;
-                let cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                let cols = line.split(/,(?=(?:?:[^"]*"){2})*[^"]*$)/);
                 if (cols.length < 4) continue;
 
                 let getVal = (field, fallback = "") => {
@@ -410,7 +475,6 @@
             }
         }
 
-        // QA LIVE SYNC: Descarga la base real antes de guardar para evitar sobreescritura accidental
         async function saveLeadToCloudAPI(leadData) {
             try {
                 let serializedData = {
@@ -423,9 +487,12 @@
             } catch(e) { console.error(e); }
         }
 
-        // ELIMINACIÓN UNIFICADA MEDIANTE PAYLOAD POST
         async function deleteLeadEngine(id) {
-            if(confirm("¿Estás seguro de eliminar permanentemente este registro del CRM y de la base de datos central?")) {
+            if(confirm("¿Estás seguro de eliminar este registro permanentemente de la nube?")) {
+                const status = document.getElementById('sync-status');
+                status.className = "block text-[11px] font-bold text-rose-600 uppercase tracking-wider animate-pulse";
+                status.innerHTML = `<i class="fa-solid fa-trash-can animate-bounce"></i> Eliminando en Google Sheets...`;
+                
                 let index = mainLeadsRegistry.findIndex(l => l.id === id);
                 if(index !== -1) {
                     mainLeadsRegistry.splice(index, 1);
@@ -436,7 +503,8 @@
                     try {
                         let deletePayload = { action: "delete", id: id };
                         await fetch(GOOGLE_SCRIPT_API, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(deletePayload) });
-                    } catch(e) { console.error(e); }
+                        setTimeout(() => { loadDataFromCloud(); }, 1600);
+                    } catch(e) { console.error(e); loadDataFromCloud(); }
                 }
             }
         }
@@ -500,9 +568,7 @@
                     if (gestoresSales[gName] !== undefined) { 
                         gestoresSales[gName] += totalAbonado; 
                         gestoresContracted[gName] += valContrato;
-                        if(currentPhase !== 'frio' || lead.desc || totalAbonado > 0) {
-                            gestoresMonthTotalCount[gName] += 1;
-                        }
+                        gestoresMonthTotalCount[gName] += 1;
                     }
                 }
 
@@ -563,8 +629,6 @@
             yearMonthsData.forEach((mData, idx) => {
                 let isCurrentFilter = (selectedMonthInteractiveFilter === (idx + 1));
                 let borderStyle = isCurrentFilter ? 'border-indigo-600 bg-indigo-50/40 ring-2 ring-indigo-600/20' : 'border-slate-200 bg-white hover:border-slate-400';
-                let pctCierreMes = mData.totalContracted > 0 ? Math.round((mData.totalCollected / mData.totalContracted) * 100) : 0;
-
                 mContainer.innerHTML += `
                     <div onclick="triggerMonthInteractiveFilter(${idx})" class="p-2.5 rounded-xl border text-center shadow-2xs cursor-pointer transition-all ${borderStyle}">
                         <span class="block font-black text-slate-700 border-b pb-1 mb-1.5 text-[11px] uppercase">${monthsNames[idx]}</span>
@@ -576,22 +640,35 @@
                     </div>`;
             });
 
-            // TABLA DE METAS
+            // TABLA CON PROCESAMIENTO DINÁMICO DE ENTRADAS DE METAS MENSUALES Y DIARIAS REALES
             const gBody = document.getElementById('goals-table-body'); gBody.innerHTML = '';
             Object.keys(gestoresSales).forEach(g => {
                 let isF = (g === 'Fernando');
-                let totCobradoMes = gestoresSales[g];
-                let totContratadoMes = gestoresContracted[g];
+                let totCobradoMes = gestoresSales[g] || 0;
+                let totContratadoMes = gestoresContracted[g] || 0;
                 let hoyGestiones = gestoresTodayCount[g] || 0;
                 let acumuladoMesLeads = gestoresMonthTotalCount[g] || 0;
+                
+                let metaMensualBase = metasMensualesDinamicas[g] ?? 1100;
+                let metaDiariaBase = metasDiariasDinamicas[g] ?? 50;
+                let pctAvance = metaMensualBase > 0 ? Math.min(Math.round((totCobradoMes / metaMensualBase) * 100), 100) : 0;
 
                 gBody.innerHTML += `
-                    <tr class="border-b h-11 hover:bg-slate-50/80 transition-all">
+                    <tr class="border-b h-11 hover:bg-slate-50/80 transition-all text-center">
                         <td class="p-2 font-bold text-slate-700 text-left pl-4">${g}</td>
                         <td class="p-2 font-semibold text-slate-500">$${totContratadoMes.toFixed(2)}</td>
                         <td class="p-2 font-black text-emerald-600">$${totCobradoMes.toFixed(2)}</td>
                         <td class="p-2 font-bold text-fuchsia-700">${isF ? '<span class="text-slate-400">Exento</span>' : `${hoyGestiones} / 30`}</td>
                         <td class="p-2 font-semibold text-slate-700">${isF ? '<span class="text-slate-400">Exento</span>' : `${acumuladoMesLeads} Leads`}</td>
+                        <td class="p-2 font-bold text-blue-600">${isF ? '-' : `$${metaDiariaBase.toFixed(2)}`}</td>
+                        <td class="p-2 font-bold text-indigo-600">$${metaMensualBase.toFixed(2)}</td>
+                        <td class="p-2">
+                            ${isF ? '<span class="text-slate-400 text-[10px]">Gerencia</span>' : `
+                            <div class="w-full bg-slate-200 rounded-full h-2.5 shadow-2xs">
+                                <div class="bg-indigo-600 h-2.5 rounded-full transition-all" style="width: ${pctAvance}%"></div>
+                            </div>
+                            <span class="text-[10px] font-bold text-slate-500">${pctAvance}% alcanzado</span>`}
+                        </td>
                     </tr>`;
             });
 
@@ -671,9 +748,17 @@
             document.getElementById('modal-saldo-pendiente').innerText = `$${saldo.toFixed(2)}`;
         }
 
-        // CONTROL DE CALIDAD - FUSION LIVE: Descarga los últimos cambios de internet antes de inyectar el guardado
         async function handleFormSubmit(e) {
             e.preventDefault();
+            
+            const btnSubmit = document.getElementById('btn-submit-form');
+            const status = document.getElementById('sync-status');
+            
+            btnSubmit.disabled = true;
+            btnSubmit.innerText = "Guardando...";
+            status.className = "block text-[11px] font-bold text-amber-600 uppercase tracking-wider animate-pulse";
+            status.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Sincronizando con Google Sheets Cloud...`;
+
             const id = document.getElementById('form-id').value;
             let dateInput = document.getElementById('form-date').value;
             
@@ -688,14 +773,6 @@
                 a5: parseFloat(document.getElementById('form-a5').value) || 0
             };
 
-            // Volver a descargar datos frescos de la nube para no pisar lo que ingresó otra asesora
-            const secureUrl = "https://corsproxy.io/?" + encodeURIComponent(GOOGLE_CSV_READ_URL + "&cache_bust=" + Date.now());
-            try {
-                const res = await fetch(secureUrl);
-                const text = await res.text();
-                parseSafeCSV(text); // Actualiza el registro local con lo que hay en internet ahora mismo
-            } catch(err) { console.error("Fallo preventivo de refresco de red", err); }
-
             if (id) {
                 let idx = mainLeadsRegistry.findIndex(l => l.id === parseInt(id)); 
                 if(idx !== -1) mainLeadsRegistry[idx] = payload;
@@ -705,12 +782,15 @@
             
             commitDatabaseState(); 
             renderApplicationCore(); 
+            
             await saveLeadToCloudAPI(payload);
             closeModal();
+            
+            setTimeout(() => { loadDataFromCloud(); }, 1600);
         }
 
         function exportBackupExcel() {
-            let ws = XLSX.utils.json_to_sheet(mainLeadsRegistry); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Backup"); XLSX.writeFile(wb, "Respaldo_CRM_v24.0.xlsx");
+            let ws = XLSX.utils.json_to_sheet(mainLeadsRegistry); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Backup"); XLSX.writeFile(wb, "Respaldo_CRM_v28.0.xlsx");
         }
     </script>
 </body>
