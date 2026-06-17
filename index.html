@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM Cloud - v29.1 QA Case-Insensitive</title>
+    <title>Relax Therapy CRM Cloud - v30.0 Smart Auto-Parse</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -30,7 +30,7 @@
                 </div>
                 <div>
                     <span class="font-black text-slate-900 tracking-tight text-lg">RELAX THERAPY CRM MASTER</span>
-                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider"><i class="fa-solid fa-circle-check"></i> Sincronización v29.1 Activa</span>
+                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider"><i class="fa-solid fa-circle-check"></i> Sincronización v30.0 Lista</span>
                 </div>
             </div>
 
@@ -393,13 +393,19 @@
             }
         }
 
-        // QA CRITICAL MAPPER FIX: Case Insensitive absoluto para absorber NAME, ID, VALUE en mayúsculas de la nueva base
+        // QA CRITICAL MULTI-DELIMITER ENGINE: Detecta dinámicamente comas (,) o puntos y comas (;) de Google
         function parseSafeCSV(text) {
             let lines = text.split(/\r\n|\n/);
             if (lines.length === 0) return;
             
-            let headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim().toLowerCase());
+            // Evaluar dinámicamente el separador regional del Sheets (Coma o Punto y Coma)
+            let firstLine = lines[0];
+            let delimiter = ",";
+            if (firstLine.includes(";") && (firstLine.split(";").length > firstLine.split(",").length)) {
+                delimiter = ";";
+            }
             
+            let headers = firstLine.split(delimiter).map(h => h.replace(/"/g, '').trim().toLowerCase());
             let findHeaderIdx = (token) => headers.findIndex(h => h === token || h.includes(token));
 
             let idxMap = {
@@ -425,7 +431,14 @@
             
             for (let i = 1; i < lines.length; i++) {
                 let line = lines[i].trim(); if (!line) continue;
-                let cols = line.split(/,(?=(?:?:[^"]*"){2})*[^"]*$)/);
+                
+                // Regex dinámico acoplado al delimitador detectado
+                let cols = [];
+                if (delimiter === ",") {
+                    cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                } else {
+                    cols = line.split(/;(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                }
                 if (cols.length < 3) continue;
 
                 let getVal = (field, fallback = "") => {
@@ -543,239 +556,3 @@
                             leadDay = parseInt(parts[0]) || CURRENT_DAY_NUM;
                             leadMonth = parseInt(parts[1]) || CURRENT_MONTH_NUM;
                             leadYear = parseInt(parts[2]) || CURRENT_YEAR_NUM;
-                        }
-                    }
-                }
-
-                if(leadMonth < 1 || leadMonth > 12) leadMonth = CURRENT_MONTH_NUM;
-
-                yearMonthsData[leadMonth - 1].totalLeads++;
-                yearMonthsData[leadMonth - 1].totalContracted += valContrato;
-                yearMonthsData[leadMonth - 1].totalCollected += totalAbonado;
-
-                let gName = lead.gestor || listadoGestores[0];
-                let isToday = (leadDay === CURRENT_DAY_NUM && leadMonth === CURRENT_MONTH_NUM && leadYear === CURRENT_YEAR_NUM);
-
-                if(leadMonth === selectedAuditMonth) {
-                    if (gestoresSales[gName] !== undefined) { 
-                        gestoresSales[gName] += totalAbonado; 
-                        gestoresContracted[gName] += valContrato;
-                        gestoresMonthTotalCount[gName] += 1;
-                    }
-                }
-
-                if(isToday && gestoresTodayCount[gName] !== undefined) gestoresTodayCount[gName] += 1;
-                if (isToday) todayAlerts++;
-
-                let matchesMonthFilter = (selectedMonthInteractiveFilter === null || leadMonth === selectedMonthInteractiveFilter);
-                let matchesTodayFilter = (!filterOnlyTodayAlerts || isToday);
-                let matchesPendingDebt = (!filterOnlyPendingDebt || saldoPendiente > 0.05); 
-                let matchesSearch = (activeSearchQuery === "" || lead.name.toLowerCase().includes(activeSearchQuery));
-                let matchesGestor = (currentManagerFilter === 'all' || lead.gestor === currentManagerFilter);
-
-                if (matchesMonthFilter && matchesTodayFilter && matchesPendingDebt && matchesSearch && matchesGestor) {
-                    totalLeadsBajoFiltro++;
-                    if (currentPhase === 'agenda') agendasContadasBajoFiltro++;
-                    if (currentPhase === 'venta' || currentPhase === 'postventa') ventasContadasBajoFiltro++;
-
-                    pipelineSum += valContrato; salesSum += totalAbonado; phaseCounts[currentPhase]++;
-
-                    let cleanDigits = String(lead.phone).replace(/[^0-9]/g, '');
-                    if (cleanDigits.startsWith('09') && cleanDigits.length === 10) {
-                        cleanDigits = '593' + cleanDigits.substring(1);
-                    }
-
-                    let whatsappButtonHTML = `
-                        <div class="pt-2 flex gap-1 items-center">
-                            <a href="https://wa.me/${cleanDigits}" target="_blank" rel="noopener noreferrer" class="flex-1 flex items-center justify-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold py-1.5 px-2 rounded-lg transition-all shadow-2xs">
-                                <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp Activo
-                            </a>
-                        </div>`;
-
-                    const card = document.createElement('div');
-                    card.className = `p-3 rounded-xl border bg-white shadow-2xs space-y-2 hover:border-indigo-500 transition-all ${isToday ? 'border-fuchsia-500 bg-fuchsia-50/50 ring-2 ring-fuchsia-400 shadow-xs' : 'border-slate-200'}`;
-                    card.innerHTML = `
-                        <div class="flex items-start justify-between gap-1">
-                            <div class="font-bold text-xs text-slate-800 hover:text-indigo-600 cursor-pointer underline decoration-dotted truncate flex-1" onclick="openModal('edit', ${lead.id})">${lead.name}</div>
-                            <span class="bg-indigo-50 text-indigo-700 font-bold text-[9px] px-1.5 py-0.5 rounded-sm whitespace-nowrap"><i class="fa-solid fa-phone-volume"></i> ${gestionesRealizadas}</span>
-                        </div>
-                        <p class="text-[10px] text-slate-500 line-clamp-2">${lead.desc || 'Sin notas'}</p>
-                        <div class="text-[9px] bg-slate-50 p-1 rounded flex justify-between text-slate-400">
-                            <span>Seguimiento: ${lead.date || 'Sin fecha'}</span>
-                            <span class="font-bold text-indigo-600">${lead.gestor}</span>
-                        </div>
-                        <div class="grid grid-cols-2 gap-1.5 text-[10px] pt-1 border-t border-slate-100 font-medium">
-                            <div class="text-emerald-600 font-bold">Cobrado: $${totalAbonado.toFixed(2)}</div>
-                            <div class="${saldoPendiente > 0.05 ? 'text-rose-600 font-black' : 'text-slate-400'} text-right">Pend: $${saldoPendiente.toFixed(2)}</div>
-                        </div>
-                        ${whatsappButtonHTML}`;
-                    document.getElementById(`col-${currentPhase}`).appendChild(card);
-                }
-            });
-
-            // HISTORIAL MENSUAL
-            const mContainer = document.getElementById('months-grid-container'); mContainer.innerHTML = '';
-            yearMonthsData.forEach((mData, idx) => {
-                let isCurrentFilter = (selectedMonthInteractiveFilter === (idx + 1));
-                let borderStyle = isCurrentFilter ? 'border-indigo-600 bg-indigo-50/40 ring-2 ring-indigo-600/20' : 'border-slate-200 bg-white hover:border-slate-400';
-                mContainer.innerHTML += `
-                    <div onclick="triggerMonthInteractiveFilter(${idx})" class="p-2.5 rounded-xl border text-center shadow-2xs cursor-pointer transition-all ${borderStyle}">
-                        <span class="block font-black text-slate-700 border-b pb-1 mb-1.5 text-[11px] uppercase">${monthsNames[idx]}</span>
-                        <div class="text-left text-[10px] text-slate-500 space-y-0.5">
-                            <div class="flex justify-between"><span>Leads:</span> <strong class="text-slate-700">${mData.totalLeads}</strong></div>
-                            <div class="flex justify-between font-bold text-indigo-600"><span>Ventas:</span> <strong>$${mData.totalContracted.toFixed(2)}</strong></div>
-                            <div class="flex justify-between font-bold text-emerald-600"><span>Cobrado:</span> <strong>$${mData.totalCollected.toFixed(2)}</strong></div>
-                        </div>
-                    </div>`;
-            });
-
-            // TABLA DE METAS DINÁMICAS REINTEGRADA
-            const gBody = document.getElementById('goals-table-body'); gBody.innerHTML = '';
-            Object.keys(gestoresSales).forEach(g => {
-                let isF = (g === 'Fernando');
-                let totCobradoMes = gestoresSales[g] || 0;
-                let totContratadoMes = gestoresContracted[g] || 0;
-                let hoyGestiones = gestoresTodayCount[g] || 0;
-                let acumuladoMesLeads = gestoresMonthTotalCount[g] || 0;
-                
-                let metaMensualBase = metasMensualesDinamicas[g] ?? 1100;
-                let metaDiariaBase = metasDiariasDinamicas[g] ?? 50;
-                let pctAvance = metaMensualBase > 0 ? Math.min(Math.round((totCobradoMes / metaMensualBase) * 100), 100) : 0;
-
-                gBody.innerHTML += `
-                    <tr class="border-b h-11 hover:bg-slate-50/80 transition-all text-center">
-                        <td class="p-2 font-bold text-slate-700 text-left pl-4">${g}</td>
-                        <td class="p-2 font-semibold text-slate-500">$${totContratadoMes.toFixed(2)}</td>
-                        <td class="p-2 font-black text-emerald-600">$${totCobradoMes.toFixed(2)}</td>
-                        <td class="p-2 font-bold text-fuchsia-700">${isF ? '<span class="text-slate-400">Exento</span>' : `${hoyGestiones} / 30`}</td>
-                        <td class="p-2 font-semibold text-slate-700">${isF ? '<span class="text-slate-400">Exento</span>' : `${acumuladoMesLeads} Leads`}</td>
-                        <td class="p-2 font-bold text-blue-600">${isF ? '-' : `$${metaDiariaBase.toFixed(2)}`}</td>
-                        <td class="p-2 font-bold text-indigo-600">$${metaMensualBase.toFixed(2)}</td>
-                        <td class="p-2">
-                            ${isF ? '<span class="text-slate-400 text-[10px]">Gerencia</span>' : `
-                            <div class="w-full bg-slate-200 rounded-full h-2.5 shadow-2xs">
-                                <div class="bg-indigo-600 h-2.5 rounded-full transition-all" style="width: ${pctAvance}%"></div>
-                            </div>
-                            <span class="text-[10px] font-bold text-slate-500">${pctAvance}% alcanzado</span>`}
-                        </td>
-                    </tr>`;
-            });
-
-            document.getElementById('kpi-pipeline').innerText = `$${pipelineSum.toFixed(2)}`;
-            document.getElementById('kpi-sales').innerText = `$${salesSum.toFixed(2)}`;
-            document.getElementById('kpi-alerts').innerText = todayAlerts;
-            
-            document.getElementById('b-frio').innerText = phaseCounts['frio'];
-            document.getElementById('b-tibio').innerText = phaseCounts['tibio'];
-            document.getElementById('b-caliente').innerText = phaseCounts['caliente'];
-            document.getElementById('b-agenda').innerText = phaseCounts['agenda'];
-            document.getElementById('b-venta').innerText = phaseCounts['venta'];
-            document.getElementById('b-postventa').innerText = phaseCounts['postventa'];
-
-            let rateScheduling = totalLeadsBajoFiltro > 0 ? Math.round((agendasContadasBajoFiltro / totalLeadsBajoFiltro) * 100) : 0;
-            let rateConversion = totalLeadsBajoFiltro > 0 ? Math.round((ventasContadasBajoFiltro / totalLeadsBajoFiltro) * 100) : 0;
-            document.getElementById('kpi-scheduling-rate').innerText = `${rateScheduling}%`;
-            document.getElementById('sub-kpi-agendas').innerText = `${agendasContadasBajoFiltro} Agendas`;
-            document.getElementById('kpi-conversion').innerText = `${rateConversion}%`;
-            document.getElementById('sub-kpi-cierres').innerText = `${ventasContadasBajoFiltro} Ventas`;
-        }
-
-        function importDataEngine(event) {
-            const file = event.target.files[0]; if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const data = new Uint8Array(e.target.result); const wb = XLSX.read(data, { type: 'array' });
-                const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
-                let cleanLines = [];
-                for(let i=1; i<json.length; i++) { if(json[i][1]) cleanLines.push(json[i].join(',')); }
-                parseSafeCSV("id,name,phone,phase,value,date,loss,gestor,a1,a2,a3,desc,a4,a5\n" + cleanLines.join('\n'));
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
-        function openModal(mode, id = null) {
-            document.getElementById('lead-modal').classList.remove('hidden');
-            const delBtn = document.getElementById('modal-delete-btn');
-            
-            if (mode === 'create') {
-                document.getElementById('crm-form').reset(); document.getElementById('form-id').value = ""; 
-                delBtn.classList.add('hidden'); calcularFlujoAbonos();
-            } else if (mode === 'edit' && id) {
-                const lead = mainLeadsRegistry.find(l => l.id === id);
-                if (lead) {
-                    delBtn.classList.remove('hidden');
-                    delBtn.onclick = function() { deleteLeadEngine(lead.id); };
-                    
-                    document.getElementById('form-id').value = lead.id; document.getElementById('form-name').value = lead.name; document.getElementById('form-phone').value = lead.phone; document.getElementById('form-phase').value = lead.phase; document.getElementById('form-value').value = lead.value; 
-                    
-                    let targetDate = lead.date;
-                    if(String(lead.date).includes('/')) {
-                        let segments = String(lead.date).split('/');
-                        if(segments[2] && segments[1] && segments[0]) targetDate = `${segments[2]}-${segments[1].padStart(2,'0')}-${segments[0].padStart(2,'0')}`;
-                    }
-                    document.getElementById('form-date').value = targetDate;
-                    document.getElementById('form-gestor').value = lead.gestor; document.getElementById('form-loss').value = lead.loss || "Ninguno"; document.getElementById('form-desc').value = lead.desc;
-                    document.getElementById('form-touch').value = lead.touch || 1;
-                    document.getElementById('form-a1').value = lead.a1 || 0; document.getElementById('form-a2').value = lead.a2 || 0; document.getElementById('form-a3').value = lead.a3 || 0; document.getElementById('form-a4').value = lead.a4 || 0; document.getElementById('form-a5').value = lead.a5 || 0;
-                    calcularFlujoAbonos();
-                }
-            }
-        }
-        
-        function closeModal() { document.getElementById('lead-modal').classList.add('hidden'); }
-
-        function calcularFlujoAbonos() {
-            let valTotal = parseFloat(document.getElementById('form-value').value) || 0;
-            let a1 = parseFloat(document.getElementById('form-a1').value) || 0;
-            let a2 = parseFloat(document.getElementById('form-a2').value) || 0;
-            let a3 = parseFloat(document.getElementById('form-a3').value) || 0;
-            let a4 = parseFloat(document.getElementById('form-a4').value) || 0;
-            let a5 = parseFloat(document.getElementById('form-a5').value) || 0;
-            let totAbonado = a1 + a2 + a3 + a4 + a5;
-            let saldo = valTotal - totAbonado;
-            document.getElementById('modal-total-abonado').innerText = `$${totAbonado.toFixed(2)}`;
-            document.getElementById('modal-saldo-pendiente').innerText = `$${saldo.toFixed(2)}`;
-        }
-
-        async function handleFormSubmit(e) {
-            e.preventDefault();
-            const btnSubmit = document.getElementById('btn-submit-form');
-            const status = document.getElementById('sync-status');
-            
-            btnSubmit.disabled = true; btnSubmit.innerText = "Guardando...";
-            status.className = "block text-[11px] font-bold text-amber-600 uppercase tracking-wider animate-pulse";
-            status.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Sincronizando Cloud...`;
-
-            const id = document.getElementById('form-id').value;
-            let dateInput = document.getElementById('form-date').value;
-            
-            let payload = {
-                id: id ? parseInt(id) : Date.now(), name: document.getElementById('form-name').value, 
-                phone: document.getElementById('form-phone').value, phase: document.getElementById('form-phase').value, 
-                value: parseFloat(document.getElementById('form-value').value) || 0, date: dateInput, 
-                gestor: document.getElementById('form-gestor').value, loss: document.getElementById('form-loss').value, 
-                desc: document.getElementById('form-desc').value, touch: parseInt(document.getElementById('form-touch').value) || 1,
-                a1: parseFloat(document.getElementById('form-a1').value) || 0, a2: parseFloat(document.getElementById('form-a2').value) || 0, 
-                a3: parseFloat(document.getElementById('form-a3').value) || 0, a4: parseFloat(document.getElementById('form-a4').value) || 0, 
-                a5: parseFloat(document.getElementById('form-a5').value) || 0
-            };
-
-            if (id) {
-                let idx = mainLeadsRegistry.findIndex(l => l.id === parseInt(id)); 
-                if(idx !== -1) mainLeadsRegistry[idx] = payload;
-            } else { 
-                mainLeadsRegistry.push(payload); 
-            }
-            
-            commitDatabaseState(); renderApplicationCore(); 
-            await saveLeadToCloudAPI(payload);
-            closeModal();
-            setTimeout(() => { loadDataFromCloud(); }, 1600);
-        }
-
-        function exportBackupExcel() {
-            let ws = XLSX.utils.json_to_sheet(mainLeadsRegistry); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Backup"); XLSX.writeFile(wb, "Respaldo_CRM_v29.1.xlsx");
-        }
-    </script>
-</body>
-</html>
