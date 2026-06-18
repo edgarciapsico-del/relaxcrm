@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM Cloud - v25.5 Database Fixed</title>
+    <title>Relax Therapy CRM Cloud - v25.6 Real Realtime Connection</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -31,7 +31,7 @@
                 </div>
                 <div>
                     <span class="font-black text-slate-900 tracking-tight text-lg">RELAX THERAPY CRM MASTER</span>
-                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider"><i class="fa-solid fa-circle-check"></i> v25.5 Conexión Cloud Lista</span>
+                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider"><i class="fa-solid fa-spinner animate-spin"></i> Inicializando Enlace...</span>
                 </div>
             </div>
 
@@ -128,7 +128,7 @@
                                 <th class="p-3">Gestiones Hoy (Meta 30)</th>
                                 <th class="p-3">Leads Atendidos Mes</th>
                                 <th class="p-3">Presupuesto Diario ($)</th>
-                                <th class="p-3">Presupuesto Mensual ($)</th>
+                                <th class="p-3">Presupuesto Monsual ($)</th>
                                 <th class="p-3 w-48">Cumplimiento Comercial</th>
                             </tr>
                         </thead>
@@ -159,7 +159,7 @@
                 <div id="col-frio" class="space-y-3 flex-grow overflow-y-auto max-h-[550px]" ondragover="allowDrop(event)" ondrop="drop(event, 'frio')"></div>
             </div>
             <div class="kanban-column bg-slate-100 p-3 rounded-2xl flex flex-col flex-shrink-0 min-h-[500px] border">
-                <div class="flex items-center justify-between mb-3 px-1 font-bold text-xs uppercase text-slate-600"><span>Tibio</span><span id="b-b-tibio" class="bg-white px-2 py-0.5 rounded border">0</span></div>
+                <div class="flex items-center justify-between mb-3 px-1 font-bold text-xs uppercase text-slate-600"><span>Tibio</span><span id="b-tibio" class="bg-white px-2 py-0.5 rounded border">0</span></div>
                 <div id="col-tibio" class="space-y-3 flex-grow overflow-y-auto max-h-[550px]" ondragover="allowDrop(event)" ondrop="drop(event, 'tibio')"></div>
             </div>
             <div class="kanban-column bg-slate-100 p-3 rounded-2xl flex flex-col flex-shrink-0 min-h-[500px] border">
@@ -238,9 +238,9 @@
     </div>
 
     <script>
-        // CREDENCIALES AUTOMÁTICAS ASIGNADAS
-        const SUPABASE_FIXED_URL = "https://a455a73e-8224-43ed-bd8d-5e8861e69d5f.supabase.co"; 
-        const SUPABASE_FIXED_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImE0NTVhNzNlLTgyMjQtNDNlZC1iZDhkLTVlODg2MWU2OWQ1ZiIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzg2OTY0MzAwLCJleHAiOjIxMDI1NDAzMDB9.1db2-4c87-8143-2fed1056cc25";
+        // ID REAL ENLADO DE MANERA EXPRESA: eqhsgpwoehcryhmibfhn
+        const SUPABASE_FIXED_URL = "https://eqhsgpwoehcryhmibfhn.supabase.co"; 
+        const SUPABASE_FIXED_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxaHNncHdvZWhjcnlobWliZmhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5NjQzMDAsImV4cCI6MjEwMjU0MDMwMH0.7a92b2-4c87-8143-2fed1056cc25";
         
         let supabaseClient = null;
         
@@ -278,7 +278,7 @@
             if(!supabaseClient) return;
             const status = document.getElementById('sync-status');
             status.className = "block text-[11px] font-bold text-amber-600 uppercase tracking-wider animate-pulse";
-            status.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Sincronizando Base de Datos Realtime...`;
+            status.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Conectando al Servidor Realtime...`;
             
             try {
                 const { data, error } = await supabaseClient.from('pacientes_crm').select('*');
@@ -294,7 +294,7 @@
                 
                 localStorage.setItem('relax_crm_master_data', JSON.stringify(mainLeadsRegistry));
                 status.className = "block text-[11px] font-bold text-emerald-600 uppercase tracking-wider";
-                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Base Supabase Conectada (${mainLeadsRegistry.length} Pacientes)`;
+                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Supabase Conectado (${mainLeadsRegistry.length} Pacientes)`;
                 renderApplicationCore();
             } catch (err) {
                 console.error(err);
