@@ -3,582 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
-    
-    <title>Relax Therapy CRM Cloud - v25.9 Blindaje Absoluto</title>
+    <title>Relax Therapy CRM Master - Versión Unificada</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght=300;400;500;600;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap');
         body { font-family: 'Poppins', sans-serif; background-color: #f1f5f9; }
-        .kanban-column { min-width: 295px; max-width: 350px; }
+        .kanban-column { min-width: 295px; }
         .scrollbar-custom::-webkit-scrollbar { height: 8px; width: 6px; }
-        .scrollbar-custom::-webkit-scrollbar-track { background: #f1f5f9; }
         .scrollbar-custom::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col antialiased text-slate-800">
+<body class="min-h-screen flex flex-col text-slate-800">
 
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
-        <div class="max-w-[1750px] mx-auto px-4 lg:px-8 h-20 flex flex-col sm:flex-row items-center justify-between gap-4 py-2">
+    <header class="bg-white border-b sticky top-0 z-40 shadow-sm">
+        <div class="max-w-[1750px] mx-auto px-4 h-20 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-md">
-                    <i class="fa-solid fa-database text-lg"></i>
-                </div>
+                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white"><i class="fa-solid fa-database"></i></div>
                 <div>
-                    <span class="font-black text-slate-900 tracking-tight text-lg">RELAX THERAPY CRM MASTER</span>
-                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider"><i class="fa-solid fa-spinner animate-spin"></i> Inicializando Enlace...</span>
+                    <h1 class="font-black text-lg">RELAX THERAPY CRM MASTER</h1>
+                    <span id="sync-status" class="text-[10px] text-emerald-600 font-bold uppercase">Sistema Listo</span>
                 </div>
             </div>
-
-            <div class="flex flex-wrap items-center gap-2 text-xs">
-                <button onclick="botonResetDeEmergencia()" class="bg-rose-600 hover:bg-rose-700 text-white px-4 h-10 rounded-xl font-bold flex items-center gap-1.5 shadow-md transition-all">
-                    <i class="fa-solid fa-trash-can"></i> ⚠️ BORRAR DUPLICADOS Y RESETEAR
-                </button>
-                <button onclick="toggleConfigPanel()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 h-10 rounded-xl font-bold flex items-center gap-1.5 border transition-all">
-                    <i class="fa-solid fa-user-gear text-indigo-600"></i> Configurar Metas
-                </button>
-                <div class="flex items-center gap-2 bg-slate-50 border px-3 py-1.5 rounded-xl border-slate-200 shadow-2xs">
-                    <i class="fa-solid fa-file-excel text-emerald-600 font-bold"></i>
-                    <input type="file" id="file-uploader" accept=".xlsx,.xls,.csv" onchange="importDataEngine(event)" class="w-40 text-slate-600 text-[11px] cursor-pointer">
-                </div>
-                <button onclick="loadDataFromCloud()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 h-10 rounded-xl font-bold flex items-center gap-1 shadow-sm">
-                    <i class="fa-solid fa-arrows-rotate"></i> Sincronizar Cloud
-                </button>
-                <button onclick="exportBackupExcel()" class="bg-slate-700 hover:bg-slate-800 text-white px-3 h-10 rounded-xl font-bold flex items-center gap-1 shadow-sm">
-                    <i class="fa-solid fa-file-arrow-down"></i> Exportar Excel
-                </button>
-                <button onclick="openModal('create')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 h-10 rounded-xl font-bold shadow-xs">
-                    <i class="fa-solid fa-plus"></i> Registrar Lead
-                </button>
+            <div class="flex gap-2">
+                <input type="file" id="file-uploader" onchange="importDataEngine(event)" class="text-xs border p-2 rounded-xl">
+                <button onclick="location.reload()" class="bg-indigo-600 text-white px-4 py-2 rounded-xl font-bold text-xs">REFRESCAR</button>
+                <button onclick="resetDB()" class="bg-red-600 text-white px-4 py-2 rounded-xl font-bold text-xs">⚠️ RESET</button>
             </div>
         </div>
     </header>
 
-    <section id="config-panel" class="max-w-[1750px] w-full mx-auto px-4 lg:px-8 mt-4 hidden">
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-            <h4 class="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1"><i class="fa-solid fa-sliders text-indigo-600"></i> Presupuesto Comercial Dinámico por Vendedor</h4>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
-                <div class="p-4 bg-slate-50 border rounded-xl space-y-3">
-                    <div class="flex items-center gap-2 border-b pb-1"><i class="fa-solid fa-user text-indigo-600 text-xs"></i><input type="text" id="cfg-g1" value="Brenda" onchange="updateEquipoConfig()" class="font-black text-slate-800 bg-transparent focus:outline-hidden text-xs uppercase"></div>
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <div><label class="block text-slate-400 font-bold mb-0.5">Meta Diaria ($)</label><input type="number" id="meta-d-g1" value="50" onchange="updateEquipoConfig()" class="w-full px-2 h-8 bg-white border rounded-lg font-black text-indigo-600"></div>
-                        <div><label class="block text-slate-400 font-bold mb-0.5">Meta Mensual ($)</label><input type="number" id="meta-m-g1" value="1100" onchange="updateEquipoConfig()" class="w-full px-2 h-8 bg-white border rounded-lg font-black text-indigo-600"></div>
-                    </div>
-                </div>
-                <div class="p-4 bg-slate-50 border rounded-xl space-y-3">
-                    <div class="flex items-center gap-2 border-b pb-1"><i class="fa-solid fa-user text-indigo-600 text-xs"></i><input type="text" id="cfg-g2" value="Joselyne" onchange="updateEquipoConfig()" class="font-black text-slate-800 bg-transparent focus:outline-hidden text-xs uppercase"></div>
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <div><label class="block text-slate-400 font-bold mb-0.5">Meta Diaria ($)</label><input type="number" id="meta-d-g2" value="50" onchange="updateEquipoConfig()" class="w-full px-2 h-8 bg-white border rounded-lg font-black text-indigo-600"></div>
-                        <div><label class="block text-slate-400 font-bold mb-0.5">Meta Mensual ($)</label><input type="number" id="meta-m-g2" value="1100" onchange="updateEquipoConfig()" class="w-full px-2 h-8 bg-white border rounded-lg font-black text-indigo-600"></div>
-                    </div>
-                </div>
-                <div class="p-4 bg-slate-50 border rounded-xl space-y-3">
-                    <div class="flex items-center gap-2 border-b pb-1"><i class="fa-solid fa-user text-indigo-600 text-xs"></i><input type="text" id="cfg-g3" value="Naty" onchange="updateEquipoConfig()" class="font-black text-slate-800 bg-transparent focus:outline-hidden text-xs uppercase"></div>
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <div><label class="block text-slate-400 font-bold mb-0.5">Meta Diaria ($)</label><input type="number" id="meta-d-g3" value="50" onchange="updateEquipoConfig()" class="w-full px-2 h-8 bg-white border rounded-lg font-black text-indigo-600"></div>
-                        <div><label class="block text-slate-400 font-bold mb-0.5">Meta Mensual ($)</label><input type="number" id="meta-m-g3" value="1100" onchange="updateEquipoConfig()" class="w-full px-2 h-8 bg-white border rounded-lg font-black text-indigo-600"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="pt-2 border-t text-xs">
-                <label class="font-bold text-slate-400">Usuario Administrador Principal:</label>
-                <input type="text" id="cfg-g4" value="Fernando" onchange="updateEquipoConfig()" class="ml-2 px-3 py-1 bg-slate-100 border rounded-lg font-bold text-slate-700 uppercase focus:outline-hidden">
-            </div>
-        </div>
-    </section>
-
-    <section class="max-w-[1750px] w-full mx-auto px-4 lg:px-8 mt-4">
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 space-y-6 shadow-xs">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div class="bg-slate-50 p-4 rounded-xl border"><span class="text-[10px] font-bold text-slate-400 uppercase">Pipeline Activo Filtro</span><h3 id="kpi-pipeline" class="text-lg font-black text-slate-800 mt-0.5">$0.00</h3></div>
-                
-                <div onclick="togglePendingDebtFilter()" id="btn-kpi-sales" class="bg-emerald-50 p-4 rounded-xl border border-emerald-100 cursor-pointer hover:bg-emerald-100/70 transition-all group shadow-2xs select-none">
-                    <span class="text-[10px] font-bold text-emerald-600 uppercase flex items-center justify-between">Ingresos Reales Filtro <i class="fa-solid fa-filter text-[9px]"></i></span>
-                    <h3 id="kpi-sales" class="text-lg font-black text-emerald-700 mt-0.5">$0.00</h3>
-                    <span id="sub-kpi-debt" class="block text-[10px] font-medium text-emerald-600 mt-0.5">Click: Ver por Cobrar</span>
-                </div>
-
-                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100"><span class="text-[10px] font-bold text-blue-600 uppercase">Tasa Agendamiento</span><h3 id="kpi-scheduling-rate" class="text-lg font-black text-blue-700 mt-0.5">0%</h3><span id="sub-kpi-agendas" class="block text-[10px] font-medium text-blue-500 mt-0.5">0 Agendas</span></div>
-                <div class="bg-violet-50 p-4 rounded-xl border border-violet-100"><span class="text-[10px] font-bold text-violet-600 uppercase">Tasa Cierre Global</span><h3 id="kpi-conversion" class="text-lg font-black text-violet-700 mt-0.5">0%</h3><span id="sub-kpi-cierres" class="block text-[10px] font-medium text-violet-500 mt-0.5">0 Ventas</span></div>
-                <div onclick="toggleTodayAlertsFilter()" id="btn-kpi-alerts" class="bg-fuchsia-50 p-4 rounded-xl border border-fuchsia-100 cursor-pointer text-fuchsia-700 hover:bg-fuchsia-100/70 transition-all group shadow-2xs select-none"><span class="text-[10px] font-bold text-fuchsia-600 uppercase flex items-center justify-between">Filtrar Llamadas Hoy <i class="fa-solid fa-filter text-[9px]"></i></span><h3 id="kpi-alerts" class="text-lg font-black text-fuchsia-700 mt-0.5">0</h3></div>
-            </div>
-
-            <div class="bg-slate-50 p-4 rounded-xl border space-y-2">
-                <h4 class="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-chart-line text-indigo-500"></i> Historial Comercial Independiente</h4>
-                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3" id="months-grid-container"></div>
-            </div>
-
-            <div class="bg-slate-50 p-4 rounded-xl border">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 gap-2">
-                    <h4 class="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-trophy text-amber-500"></i> Verificación e Indicadores de Gestión Comercial</h4>
-                    <div class="flex items-center gap-1.5 text-xs">
-                        <span class="text-[11px] text-slate-400 font-bold uppercase">Mes Evaluado:</span>
-                        <select id="audit-month-selector" onchange="renderApplicationCore()" class="bg-white border rounded-lg px-2 py-1 font-bold text-indigo-600 focus:outline-hidden"></select>
-                    </div>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse bg-white border rounded-xl overflow-hidden text-xs">
-                        <thead>
-                            <tr class="bg-slate-800 text-white font-bold uppercase text-center">
-                                <th class="p-3 text-left">Asesora Comercial</th>
-                                <th class="p-3">Contratado ($)</th>
-                                <th class="p-3">Cobrado Real ($)</th>
-                                <th class="p-3">Gestiones Hoy (Meta 30)</th>
-                                <th class="p-3">Leads Atendidos Mes</th>
-                                <th class="p-3">Presupuesto Diario ($)</th>
-                                <th class="p-3">Presupuesto Monsual ($)</th>
-                                <th class="p-3 w-48">Cumplimiento Comercial</th>
-                            </tr>
-                        </thead>
-                        <tbody id="goals-table-body" class="text-center font-medium divide-y"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="max-w-[1750px] w-full mx-auto px-4 lg:px-8 mt-4">
-        <div class="bg-white px-5 py-3 rounded-xl border flex flex-col md:flex-row items-center justify-between gap-4 shadow-2xs">
-            <div class="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
-                <div class="flex items-center gap-2"><i class="fa-solid fa-filter text-indigo-600"></i><span class="text-xs font-black text-slate-700 uppercase">Visualizar Gestora:</span></div>
-                <div class="flex flex-wrap gap-1.5" id="managers-buttons-box"></div>
-            </div>
-            <div class="relative w-full md:w-80">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400"><i class="fa-solid fa-magnifying-glass"></i></span>
-                <input type="text" id="crm-search-bar" oninput="executeLiveSearch()" placeholder="Buscar paciente por nombre..." class="w-full pl-9 pr-4 h-10 text-xs bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-hidden focus:bg-white focus:border-indigo-500 transition-all">
-            </div>
-        </div>
-    </section>
-
-    <main class="flex-1 max-w-[1750px] w-full mx-auto px-4 lg:px-8 py-4 overflow-x-auto">
-        <div class="flex gap-4 pb-6 items-start scrollbar-custom">
-            <div class="kanban-column bg-slate-100 p-3 rounded-2xl flex flex-col flex-shrink-0 min-h-[500px] border">
-                <div class="flex items-center justify-between mb-3 px-1 font-bold text-xs uppercase text-slate-600"><span>Frío</span><span id="b-frio" class="bg-white px-2 py-0.5 rounded border">0</span></div>
-                <div id="col-frio" class="space-y-3 flex-grow overflow-y-auto max-h-[550px]" ondragover="allowDrop(event)" ondrop="drop(event, 'frio')"></div>
-            </div>
-            <div class="kanban-column bg-slate-100 p-3 rounded-2xl flex flex-col flex-shrink-0 min-h-[500px] border">
-                <div class="flex items-center justify-between mb-3 px-1 font-bold text-xs uppercase text-slate-600"><span>Tibio</span><span id="b-tibio" class="bg-white px-2 py-0.5 rounded border">0</span></div>
-                <div id="col-tibio" class="space-y-3 flex-grow overflow-y-auto max-h-[550px]" ondragover="allowDrop(event)" ondrop="drop(event, 'tibio')"></div>
-            </div>
-            <div class="kanban-column bg-slate-100 p-3 rounded-2xl flex flex-col flex-shrink-0 min-h-[500px] border">
-                <div class="flex items-center justify-between mb-3 px-1 font-bold text-xs uppercase text-slate-600"><span>Caliente</span><span id="b-caliente" class="bg-white px-2 py-0.5 rounded border">0</span></div>
-                <div id="col-caliente" class="space-y-3 flex-grow overflow-y-auto max-h-[550px]" ondragover="allowDrop(event)" ondrop="drop(event, 'caliente')"></div>
-            </div>
-            <div class="kanban-column bg-indigo-50/60 p-3 rounded-2xl flex flex-col flex-shrink-0 min-h-[500px] border border-indigo-100">
-                <div class="flex items-center justify-between mb-3 px-1 font-bold text-xs uppercase text-indigo-700"><span>Agenda</span><span id="b-agenda" class="bg-white px-2 py-0.5 rounded border">0</span></div>
-                <div id="col-agenda" class="space-y-3 flex-grow overflow-y-auto max-h-[550px]" ondragover="allowDrop(event)" ondrop="drop(event, 'agenda')"></div>
-            </div>
-            <div class="kanban-column bg-emerald-50/60 p-3 rounded-2xl flex flex-col flex-shrink-0 min-h-[500px] border border-emerald-100">
-                <div class="flex items-center justify-between mb-3 px-1 font-bold text-xs uppercase text-emerald-700"><span>Venta</span><span id="b-venta" class="bg-white px-2 py-0.5 rounded border">0</span></div>
-                <div id="col-venta" class="space-y-3 flex-grow overflow-y-auto max-h-[550px]" ondragover="allowDrop(event)" ondrop="drop(event, 'venta')"></div>
-            </div>
-            <div class="kanban-column bg-purple-50/60 p-3 rounded-2xl flex flex-col flex-shrink-0 min-h-[500px] border border-purple-100">
-                <div class="flex items-center justify-between mb-3 px-1 font-bold text-xs uppercase text-purple-700"><span>Post Venta</span><span id="b-postventa" class="bg-white px-2 py-0.5 rounded border">0</span></div>
-                <div id="col-postventa" class="space-y-3 flex-grow overflow-y-auto max-h-[550px]" ondragover="allowDrop(event)" ondrop="drop(event, 'postventa')"></div>
-            </div>
+    <main class="flex-1 max-w-[1750px] w-full mx-auto p-4 overflow-x-auto">
+        <div class="flex gap-4 pb-6 scrollbar-custom">
+            <div class="kanban-column bg-slate-200 p-3 rounded-2xl min-h-[500px]"><h2 class="font-bold text-xs uppercase mb-3">Frío</h2><div id="col-frio" class="space-y-3"></div></div>
+            <div class="kanban-column bg-slate-200 p-3 rounded-2xl min-h-[500px]"><h2 class="font-bold text-xs uppercase mb-3">Tibio</h2><div id="col-tibio" class="space-y-3"></div></div>
+            <div class="kanban-column bg-slate-200 p-3 rounded-2xl min-h-[500px]"><h2 class="font-bold text-xs uppercase mb-3">Caliente</h2><div id="col-caliente" class="space-y-3"></div></div>
+            <div class="kanban-column bg-blue-200 p-3 rounded-2xl min-h-[500px]"><h2 class="font-bold text-xs uppercase mb-3 text-blue-800">Agenda</h2><div id="col-agenda" class="space-y-3"></div></div>
+            <div class="kanban-column bg-green-200 p-3 rounded-2xl min-h-[500px]"><h2 class="font-bold text-xs uppercase mb-3 text-green-800">Venta</h2><div id="col-venta" class="space-y-3"></div></div>
+            <div class="kanban-column bg-purple-200 p-3 rounded-2xl min-h-[500px]"><h2 class="font-bold text-xs uppercase mb-3 text-purple-800">Post Venta</h2><div id="col-postventa" class="space-y-3"></div></div>
         </div>
     </main>
 
-    <div id="lead-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center hidden">
-        <div class="bg-white rounded-2xl w-full max-w-2xl p-6 shadow-xl border mx-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between mb-4 border-b pb-2">
-                <h3 id="modal-title" class="text-xs font-black uppercase text-slate-700">Ficha Técnica e Historial Comercial</h3>
-                <div class="flex items-center gap-3">
-                    <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-                </div>
-            </div>
-            <form id="crm-form" onsubmit="handleFormSubmit(event)" class="space-y-4 text-xs">
-                <input type="hidden" id="form-id">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div><label class="block font-bold text-slate-500 mb-1">Nombre del Paciente</label><input type="text" id="form-name" required class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-medium focus:outline-hidden"></div>
-                    <div><label class="block font-bold text-slate-500 mb-1">WhatsApp de Contacto</label><input type="text" id="form-phone" required class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-medium focus:outline-hidden"></div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block font-bold text-slate-500 mb-1">Estado en Embudo</label>
-                        <select id="form-phase" class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-medium focus:outline-hidden">
-                            <option value="frio">Tráfico Frío</option><option value="tibio">Tráfico Tibio</option><option value="caliente">Tráfico Caliente</option><option value="agenda">Agenda</option><option value="venta">Venta</option><option value="postventa">Post Venta</option>
-                        </select>
-                    </div>
-                    <div><label class="block font-bold text-slate-500 mb-1">Valor Venta / Paquete ($)</label><input type="number" id="form-value" step="0.01" oninput="calcularFlujoAbonos()" class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-bold focus:outline-hidden"></div>
-                    <div><label class="block font-bold text-slate-500 mb-1">Fecha de Seguimiento</label><input type="date" id="form-date" required class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-medium focus:outline-hidden"></div>
-                </div>
-
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-                    <span class="block text-[10px] font-black text-slate-600 uppercase tracking-wider"><i class="fa-solid fa-coins text-emerald-600"></i> Historial de Abonos Recibidos</span>
-                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                        <div><label class="block text-[9px] text-center mb-0.5">Abono 1</label><input type="number" id="form-a1" step="0.01" oninput="calcularFlujoAbonos()" class="w-full px-2 h-8 border rounded-lg text-center font-bold bg-white"></div>
-                        <div><label class="block text-[9px] text-center mb-0.5">Abono 2</label><input type="number" id="form-a2" step="0.01" oninput="calcularFlujoAbonos()" class="w-full px-2 h-8 border rounded-lg text-center font-bold bg-white"></div>
-                        <div><label class="block text-[9px] text-center mb-0.5">Abono 3</label><input type="number" id="form-a3" step="0.01" oninput="calcularFlujoAbonos()" class="w-full px-2 h-8 border rounded-lg text-center font-bold bg-white"></div>
-                        <div><label class="block text-[9px] text-center mb-0.5">Abono 4</label><input type="number" id="form-a4" step="0.01" oninput="calcularFlujoAbonos()" class="w-full px-2 h-8 border rounded-lg text-center font-bold bg-white"></div>
-                        <div><label class="block text-[9px] text-center mb-0.5">Abono 5</label><input type="number" id="form-a5" step="0.01" oninput="calcularFlujoAbonos()" class="w-full px-2 h-8 border rounded-lg text-center font-bold bg-white"></div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4 pt-2 border-t text-center">
-                        <div class="bg-emerald-100/60 p-2 rounded-lg"><span class="block text-[9px] font-bold text-emerald-700 uppercase">Efectivo Cobrado</span><strong id="modal-total-abonado" class="text-sm font-black text-emerald-800">$0.00</strong></div>
-                        <div class="bg-rose-100/60 p-2 rounded-lg"><span class="block text-[9px] font-bold text-rose-700 uppercase">Saldo Pendiente</span><strong id="modal-saldo-pendiente" class="text-sm font-black text-rose-800">$0.00</strong></div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div><label class="block font-bold text-slate-500 mb-1">Asesora</label><select id="form-gestor" class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-medium focus:outline-hidden"></select></div>
-                    <div><label class="block font-bold text-slate-500 mb-1">Intentos</label><input type="number" id="form-touch" value="1" class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-medium focus:outline-hidden"></div>
-                    <div><label class="block font-bold text-rose-600 mb-1">Motivo Descarte</label><select id="form-loss" class="w-full px-3 h-10 bg-rose-50 border border-rose-200 text-rose-700 font-bold rounded-xl focus:outline-hidden"><option value="Ninguno">Ninguno</option><option value="Fuera de la ciudad">Fuera de la ciudad</option><option value="No le interesa">No le interesa</option><option value="Precios">Precios</option></select></div>
-                </div>
-
-                <div><label class="block font-bold text-slate-500 mb-1">Observaciones / Historial Clínico</label><textarea id="form-desc" rows="2" class="w-full p-3 bg-slate-50 border rounded-xl focus:outline-hidden"></textarea></div>
-                <div class="pt-2 flex justify-end gap-2 border-t">
-                    <button type="button" onclick="closeModal()" class="px-4 h-10 font-bold text-slate-500">Cancelar</button>
-                    <button type="submit" id="btn-submit-form" class="px-5 h-10 bg-indigo-600 text-white font-bold rounded-xl shadow-sm">Guardar Cambios</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <script>
-        const SUPABASE_FIXED_URL = "https://eqhsgpwoehcryhmibfhn.supabase.co"; 
-        const SUPABASE_FIXED_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxaHNncHdvZWhjcnlobWliZmhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5NjQzMDAsImV4cCI6MjEwMjU0MDMwMH0.7a92b2-4c87-8143-2fed1056cc25";
-        
-        let supabaseClient = null;
-        const liveClock = new Date();
-        const CURRENT_DAY_NUM = liveClock.getDate();
-        const CURRENT_MONTH_NUM = liveClock.getMonth() + 1;
-        const CURRENT_YEAR_NUM = liveClock.getFullYear();
-        
-        let mainLeadsRegistry = [];
-        let currentManagerFilter = 'all';
-        let filterOnlyTodayAlerts = false;
-        let filterOnlyPendingDebt = false; 
-        let activeSearchQuery = "";
-        let selectedMonthInteractiveFilter = null; 
-        
-        let listadoGestores = ["Brenda", "Joselyne", "Naty", "Fernando"];
-        let metasMensualesDinamicas = { "Brenda": 1100, "Joselyne": 1100, "Naty": 1100, "Fernando": 0 };
-        let metasDiariasDinamicas = { "Brenda": 50, "Joselyne": 50, "Naty": 50, "Fernando": 0 };
-        const monthsNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        const sb = supabase.createClient("https://eqhsgpwoehcryhmibfhn.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxaHNncHdvZWhjcnlobWliZmhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5NjQzMDAsImV4cCI6MjEwMjU0MDMwMH0.7a92b2-4c87-8143-2fed1056cc25");
 
-        window.onload = function() {
-            initPersonalizationConfig();
-            initSupabaseEngine();
-        };
-
-        function initSupabaseEngine() {
-            if(SUPABASE_FIXED_URL && SUPABASE_FIXED_KEY) {
-                supabaseClient = supabase.createClient(SUPABASE_FIXED_URL, SUPABASE_FIXED_KEY);
-                loadDataFromCloud();
-            }
-        }
-
-        async function botonResetDeEmergencia() {
-            let seguro = confirm("¿Deseas limpiar todo el CRM y purgar datos duplicados? Se borrará el historial viejo de pantalla y la nube para recibir tu Excel limpio.");
-            if(!seguro) return;
+        async function importDataEngine(e) {
+            const file = e.target.files[0];
+            const wb = XLSX.read(await file.arrayBuffer(), {type: 'array'});
+            const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
             
-            try {
-                if(supabaseClient) {
-                    document.getElementById('sync-status').innerHTML = "🗑️ Limpiando Servidor...";
-                    await supabaseClient.from('pacientes_crm').delete().neq('name', 'VACIO_RELAX_FORCE');
-                }
-            } catch(e) { console.error(e); }
+            let cargados = 0;
+            let errores = 0;
 
-            localStorage.clear();
-            mainLeadsRegistry = [];
-            renderApplicationCore();
-            alert("¡CRM Totalmente purgado y en blanco!");
+            for(let row of rows) {
+                let idVal = parseInt(row.id);
+                if (isNaN(idVal)) {
+                    console.warn("Fila corrupta ignorada:", row);
+                    errores++;
+                    continue;
+                }
+
+                let data = {
+                    crm_id: String(idVal),
+                    name: String(row.name || "Sin nombre"),
+                    phone: String(row.phone || ""),
+                    phase: String(row.phase || "frio").toLowerCase().trim(),
+                    value: String(row.value || "0"),
+                    date: String(row.date || ""),
+                    loss: String(row.loss || "Ninguno"),
+                    gestor: String(row.gestor || "Brenda"),
+                    a1: String(row.a1 || "0"), a2: String(row.a2 || "0"),
+                    a3: String(row.a3 || "0"), a4: String(row.a4 || "0"),
+                    a5: String(row.a5 || "0"),
+                    touch: "1",
+                    observaciones: String(row.desc || row.observaciones || "")
+                };
+                
+                let { error } = await sb.from('pacientes_crm').insert([data]);
+                if(!error) cargados++;
+            }
+            alert("Carga Finalizada: " + cargados + " cargados. " + errores + " errores saltados.");
             location.reload();
         }
 
-        async function loadDataFromCloud() {
-            if(!supabaseClient) return;
-            const status = document.getElementById('sync-status');
-            status.className = "block text-[11px] font-bold text-amber-600 uppercase tracking-wider animate-pulse";
-            status.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Sincronizando Base de Datos Realtime...`;
-            
-            try {
-                const { data, error } = await supabaseClient.from('pacientes_crm').select('*');
-                if (error) throw error;
-                
-                mainLeadsRegistry = data.map(item => ({
-                    id: parseInt(item.crm_id || item.id), name: item.name, phone: item.phone, phase: item.phase,
-                    value: parseFloat(item.value) || 0, date: item.date, loss: item.loss,
-                    gestor: item.gestor, a1: parseFloat(item.a1) || 0, a2: parseFloat(item.a2) || 0,
-                    a3: parseFloat(item.a3) || 0, a4: parseFloat(item.a4) || 0, a5: parseFloat(item.a5) || 0,
-                    touch: item.touch, desc: item.observaciones || ''
-                }));
-                
-                localStorage.setItem('relax_crm_master_data', JSON.stringify(mainLeadsRegistry));
-                status.className = "block text-[11px] font-bold text-emerald-600 uppercase tracking-wider";
-                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Supabase Conectado (${mainLeadsRegistry.length} Pacientes)`;
-                renderApplicationCore();
-            } catch (err) {
-                console.error(err);
-                status.className = "block text-[11px] font-bold text-rose-600 uppercase tracking-wider";
-                status.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Error de enlace estructural`;
-            }
-        }
-
-        async function saveLeadToSupabase(leadData) {
-            if(!supabaseClient) return;
-            try {
-                const rowPayload = {
-                    crm_id: parseInt(leadData.id), name: leadData.name, phone: leadData.phone, phase: leadData.phase,
-                    value: leadData.value, date: leadData.date, loss: leadData.loss,
-                    gestor: leadData.gestor, a1: leadData.a1, a2: leadData.a2, a3: leadData.a3,
-                    a4: leadData.a4, a5: leadData.a5, touch: leadData.touch, observaciones: leadData.desc
-                };
-
-                // RESPALDO DE SEGURIDAD POR SI LA COLUMNA ID DIO CONFLICTO: Enviar tanto a id como a crm_id
-                rowPayload.id = parseInt(leadData.id);
-
-                const { data: existing } = await supabaseClient.from('pacientes_crm').select('id').eq('id', leadData.id);
-                
-                if(existing && existing.length > 0) {
-                    await supabaseClient.from('pacientes_crm').update(rowPayload).eq('id', leadData.id);
-                } else {
-                    await supabaseClient.from('pacientes_crm').insert([rowPayload]);
-                }
-            } catch(e) { console.error(e); }
-        }
-
-        function renderApplicationCore() {
-            const phases = ['frio', 'tibio', 'caliente', 'agenda', 'venta', 'postventa'];
-            let pipelineSum = 0, salesSum = 0, todayAlerts = 0;
-            let phaseCounts = { frio: 0, tibio: 0, caliente: 0, agenda: 0, venta: 0, postventa: 0 };
-            let totalLeadsBajoFiltro = 0; let agendasContadasBajoFiltro = 0; let ventasContadasBajoFiltro = 0;
-
-            let gestoresSales = {}; let gestoresContracted = {}; let gestoresTodayCount = {}; let gestoresMonthTotalCount = {};
-            listadoGestores.forEach(g => { gestoresSales[g] = 0; gestoresContracted[g] = 0; gestoresTodayCount[g] = 0; gestoresMonthTotalCount[g] = 0; });
-            
-            let yearMonthsData = Array.from({ length: 12 }, () => ({ totalLeads: 0, totalContracted: 0, totalCollected: 0 }));
-            let selectedAuditMonth = parseInt(document.getElementById('audit-month-selector').value) || CURRENT_MONTH_NUM;
-
-            phases.forEach(p => { if(document.getElementById(`col-${p}`)) document.getElementById(`col-${p}`).innerHTML = ''; });
-
-            mainLeadsRegistry.forEach(lead => {
-                let currentPhase = lead.phase || 'frio';
-                let valContrato = parseFloat(lead.value) || 0;
-                let totalAbonado = (parseFloat(lead.a1)||0)+(parseFloat(lead.a2)||0)+(parseFloat(lead.a3)||0)+(parseFloat(lead.a4)||0)+(parseFloat(lead.a5)||0);
-                let saldoPendiente = valContrato - totalAbonado;
-                
-                let leadDay = CURRENT_DAY_NUM; let leadMonth = CURRENT_MONTH_NUM; let leadYear = CURRENT_YEAR_NUM;
-                if (lead.date) {
-                    let parts = String(lead.date).replace(/\//g, '-').split('-');
-                    if(parts.length === 3) {
-                        if(parts[0].length === 4) {
-                            leadYear = parseInt(parts[0]); leadMonth = parseInt(parts[1]); leadDay = parseInt(parts[2]);
-                        } else {
-                            leadDay = parseInt(parts[0]); leadMonth = parseInt(parts[1]); leadYear = parseInt(parts[2]);
-                        }
-                    }
-                }
-
-                if(leadMonth >= 1 && leadMonth <= 12) {
-                    yearMonthsData[leadMonth - 1].totalLeads++;
-                    yearMonthsData[leadMonth - 1].totalContracted += valContrato;
-                    yearMonthsData[leadMonth - 1].totalCollected += totalAbonado;
-                }
-
-                let gName = lead.gestor || listadoGestores[0];
-                let isToday = (leadDay === CURRENT_DAY_NUM && leadMonth === CURRENT_MONTH_NUM && leadYear === CURRENT_YEAR_NUM);
-
-                if(leadMonth === selectedAuditMonth && gestoresSales[gName] !== undefined) {
-                    gestoresSales[gName] += totalAbonado; gestoresContracted[gName] += valContrato; gestoresMonthTotalCount[gName]++;
-                }
-                if(isToday && gestoresTodayCount[gName] !== undefined) gestoresTodayCount[gName]++;
-                if (isToday) todayAlerts++;
-
-                if ((selectedMonthInteractiveFilter === null || leadMonth === selectedMonthInteractiveFilter) &&
-                    (!filterOnlyTodayAlerts || isToday) && (!filterOnlyPendingDebt || saldoPendiente > 0.05) &&
-                    (activeSearchQuery === "" || lead.name.toLowerCase().includes(activeSearchQuery)) &&
-                    (currentManagerFilter === 'all' || lead.gestor === currentManagerFilter)) {
-                    
-                    totalLeadsBajoFiltro++;
-                    if (currentPhase === 'agenda') agendasContadasBajoFiltro++;
-                    if (currentPhase === 'venta' || currentPhase === 'postventa') ventasContadasBajoFiltro++;
-
-                    pipelineSum += valContrato; salesSum += totalAbonado; phaseCounts[currentPhase]++;
-
-                    let cleanDigits = String(lead.phone).replace(/[^0-9]/g, '');
-                    if (cleanDigits.startsWith('09') && cleanDigits.length === 10) cleanDigits = '593' + cleanDigits.substring(1);
-
-                    const card = document.createElement('div');
-                    card.className = `p-3 rounded-xl border bg-white shadow-2xs space-y-2 hover:border-indigo-500 transition-all ${isToday ? 'border-fuchsia-500 bg-fuchsia-50/50 ring-2 ring-fuchsia-400' : 'border-slate-200'}`;
-                    card.innerHTML = `
-                        <div class="flex items-start justify-between gap-1">
-                            <div class="font-bold text-xs text-slate-800 hover:text-indigo-600 cursor-pointer underline truncate flex-1" onclick="openModal('edit', ${lead.id})">${lead.name}</div>
-                            <span class="bg-indigo-50 text-indigo-700 font-bold text-[9px] px-1.5 py-0.5 rounded-sm"><i class="fa-solid fa-phone-volume"></i> ${lead.touch || 1}</span>
-                        </div>
-                        <p class="text-[10px] text-slate-500 line-clamp-2">${lead.desc || 'Sin notas'}</p>
-                        <div class="text-[9px] bg-slate-50 p-1 rounded flex justify-between text-slate-400">
-                            <span>Seguimiento: ${lead.date || 'Sin fecha'}</span>
-                            <span class="font-bold text-indigo-600">${lead.gestor}</span>
-                        </div>
-                        <div class="grid grid-cols-2 gap-1.5 text-[10px] pt-1 border-t border-slate-100 font-medium">
-                            <div class="text-emerald-600 font-bold">Cobrado: $${totalAbonado.toFixed(2)}</div>
-                            <div class="${saldoPendiente > 0.05 ? 'text-rose-600 font-black' : 'text-slate-400'} text-right">Pend: $${saldoPendiente.toFixed(2)}</div>
-                        </div>
-                        <div class="pt-2"><a href="https://wa.me/${cleanDigits}" target="_blank" class="w-full flex items-center justify-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold py-1.5 rounded-lg"><i class="fa-brands fa-whatsapp"></i> WhatsApp Activo</a></div>`;
-                    
-                    if(document.getElementById(`col-${currentPhase}`)) document.getElementById(`col-${currentPhase}`).appendChild(card);
-                }
+        async function cargarTablero() {
+            let { data } = await sb.from('pacientes_crm').select('*');
+            if(!data) return;
+            data.forEach(item => {
+                let col = document.getElementById('col-' + (item.phase || 'frio'));
+                if(col) col.innerHTML += `<div class="bg-white p-2 mb-1 rounded shadow text-[10px] font-bold">${item.name}</div>`;
             });
-
-            const mContainer = document.getElementById('months-grid-container'); mContainer.innerHTML = '';
-            yearMonthsData.forEach((mData, idx) => {
-                let isCurrentFilter = (selectedMonthInteractiveFilter === (idx + 1));
-                mContainer.innerHTML += `
-                    <div onclick="triggerMonthInteractiveFilter(${idx})" class="p-2.5 rounded-xl border text-center shadow-2xs cursor-pointer transition-all ${isCurrentFilter ? 'border-indigo-600 bg-indigo-50/40 ring-2' : 'border-slate-200 bg-white'}">
-                        <span class="block font-black text-slate-700 border-b pb-1 mb-1.5 text-[11px] uppercase">${monthsNames[idx]}</span>
-                        <div class="text-left text-[10px] text-slate-500 space-y-0.5">
-                            <div class="flex justify-between"><span>Leads:</span> <strong>${mData.totalLeads}</strong></div>
-                            <div class="flex justify-between font-bold text-indigo-600"><span>Ventas:</span> <strong>$${mData.totalContracted.toFixed(2)}</strong></div>
-                            <div class="flex justify-between font-bold text-emerald-600"><span>Cobrado:</span> <strong>$${mData.totalCollected.toFixed(2)}</strong></div>
-                        </div>
-                    </div>`;
-            });
-
-            const gBody = document.getElementById('goals-table-body'); gBody.innerHTML = '';
-            Object.keys(gestoresSales).forEach(g => {
-                let isF = (g === 'Fernando'); let totCobradoMes = gestoresSales[g] || 0;
-                let pctAvance = (metasMensualesDinamicas[g] || 0) > 0 ? Math.min(Math.round((totCobradoMes / metasMensualesDinamicas[g]) * 100), 100) : 0;
-                gBody.innerHTML += `
-                    <tr class="border-b h-11 hover:bg-slate-50 text-center">
-                        <td class="p-2 font-bold text-slate-700 text-left pl-4">${g}</td>
-                        <td class="p-2 font-semibold text-slate-500">$${(gestoresContracted[g]||0).toFixed(2)}</td>
-                        <td class="p-2 font-black text-emerald-600">$${totCobradoMes.toFixed(2)}</td>
-                        <td class="p-2 font-bold text-fuchsia-700">${isF ? '-' : `${gestoresTodayCount[g]||0} / 30`}</td>
-                        <td class="p-2 font-semibold text-slate-700">${isF ? '-' : `${gestoresMonthTotalCount[g]||0} Leads`}</td>
-                        <td class="p-2 font-bold text-blue-600">${isF ? '-' : `$${(metasDiariasDinamicas[g]||0).toFixed(2)}`}</td>
-                        <td class="p-2 font-bold text-indigo-600">$${(metasMensualesDinamicas[g]||0).toFixed(2)}</td>
-                        <td class="p-2">${isF ? '-' : `<div class="w-full bg-slate-200 rounded-full h-2.5"><div class="bg-indigo-600 h-2.5 rounded-full" style="width: ${pctAvance}%"></div></div><span>${pctAvance}%</span>`}</td>
-                    </tr>`;
-            });
-
-            document.getElementById('kpi-pipeline').innerText = `$${pipelineSum.toFixed(2)}`;
-            document.getElementById('kpi-sales').innerText = `$${salesSum.toFixed(2)}`;
-            document.getElementById('kpi-alerts').innerText = todayAlerts;
-            phases.forEach(p => { if(document.getElementById(`b-${p}`)) document.getElementById(`b-${p}`).innerText = phaseCounts[p]; });
-            document.getElementById('kpi-scheduling-rate').innerText = `${totalLeadsBajoFiltro > 0 ? Math.round((agendasContadasBajoFiltro / totalLeadsBajoFiltro) * 100) : 0}%`;
-            document.getElementById('sub-kpi-agendas').innerText = `${agendasContadasBajoFiltro} Agendas`;
-            document.getElementById('kpi-conversion').innerText = `${totalLeadsBajoFiltro > 0 ? Math.round((ventasContadasBajoFiltro / totalLeadsBajoFiltro) * 100) : 0}%`;
-            document.getElementById('sub-kpi-cierres').innerText = `${ventasContadasBajoFiltro} Ventas`;
         }
 
-        function importDataEngine(event) {
-            const file = event.target.files[0]; if (!file) return;
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result); const wb = XLSX.read(data, { type: 'array' });
-                    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-                    if(rows.length === 0) return;
-                    
-                    let successCount = 0;
-                    for(let i = 0; i < rows.length; i++) {
-                        let row = rows[i];
-                        let getRowVal = (tokens, fallback = "") => {
-                            let key = Object.keys(row).find(k => tokens.some(t => k.toLowerCase().trim().includes(t)));
-                            return key ? row[key] : fallback;
-                        };
-                        let name = getRowVal(['name', 'nombre', 'paciente']); if(!name) continue;
-
-                        let payload = {
-                            id: parseInt(getRowVal(['id', 'crm_id'])) || (Date.now() + i),
-                            name: String(name).trim(), phone: String(getRowVal(['phone', 'telefono', 'whatsapp'], '')).trim(),
-                            phase: String(getRowVal(['phase', 'estado', 'fase'], 'frio')).toLowerCase().trim(),
-                            value: parseFloat(getRowVal(['value', 'valor', 'precio'])) || 0, date: String(getRowVal(['date', 'fecha'], '')).trim(),
-                            loss: String(getRowVal(['loss', 'descarte'], 'Ninguno')).trim(), gestor: String(getRowVal(['gestor', 'asesora'], listadoGestores[0])).trim(),
-                            a1: parseFloat(getRowVal(['a1'])) || 0, a2: parseFloat(getRowVal(['a2'])) || 0, a3: parseFloat(getRowVal(['a3'])) || 0, a4: parseFloat(getRowVal(['a4'])) || 0, a5: parseFloat(getRowVal(['a5'])) || 0,
-                            touch: parseInt(getRowVal(['touch', 'intentos'])) || 1, desc: String(getRowVal(['desc', 'observaciones', 'notas'], '')).trim()
-                        };
-
-                        let existingIdx = mainLeadsRegistry.findIndex(l => l.id === payload.id);
-                        if(existingIdx !== -1) { mainLeadsRegistry[existingIdx] = payload; } 
-                        else { mainLeadsRegistry.push(payload); }
-
-                        await saveLeadToSupabase(payload);
-                        successCount++;
-                    }
-                    commitDatabaseState(); renderApplicationCore();
-                    alert("¡Mapeo Exitoso! Sincronizados " + successCount + " registros comerciales en el servidor cloud.");
-                } catch(err) { console.error(err); alert("Error de lectura del archivo Excel."); }
-            };
-            reader.readAsArrayBuffer(file);
+        async function resetDB() {
+            if(!confirm("¿Borrar todos los datos de la nube?")) return;
+            await sb.from('pacientes_crm').delete().neq('id', -1);
+            location.reload();
         }
 
-        function commitDatabaseState() { localStorage.setItem('relax_crm_master_data', JSON.stringify(mainLeadsRegistry)); }
-        function allowDrop(e) { e.preventDefault(); }
-        async function drop(e, phaseTarget) {
-            e.preventDefault(); const id = parseInt(e.dataTransfer.getData('text/plain'));
-            const lead = mainLeadsRegistry.find(l => l.id === id);
-            if(lead) { lead.phase = phaseTarget; renderApplicationCore(); commitDatabaseState(); await saveLeadToSupabase(lead); }
-        }
-        function openModal(mode, id = null) {
-            document.getElementById('lead-modal').classList.remove('hidden');
-            if (mode === 'create') { document.getElementById('crm-form').reset(); document.getElementById('form-id').value = ""; calcularFlujoAbonos(); }
-            else if (mode === 'edit' && id) {
-                const lead = mainLeadsRegistry.find(l => l.id === id);
-                if (lead) {
-                    document.getElementById('form-id').value = lead.id; document.getElementById('form-name').value = lead.name; document.getElementById('form-phone').value = lead.phone; document.getElementById('form-phase').value = lead.phase; document.getElementById('form-value').value = lead.value; document.getElementById('form-date').value = lead.date;
-                    document.getElementById('form-gestor').value = lead.gestor; document.getElementById('form-loss').value = lead.loss || "Ninguno"; document.getElementById('form-desc').value = lead.desc; document.getElementById('form-touch').value = lead.touch || 1;
-                    document.getElementById('form-a1').value = lead.a1 || 0; document.getElementById('form-a2').value = lead.a2 || 0; document.getElementById('form-a3').value = lead.a3 || 0; document.getElementById('form-a4').value = lead.a4 || 0; document.getElementById('form-a5').value = lead.a5 || 0;
-                    calcularFlujoAbonos();
-                }
-            }
-        }
-        function closeModal() { document.getElementById('lead-modal').classList.add('hidden'); }
-        function calcularFlujoAbonos() {
-            let valTotal = parseFloat(document.getElementById('form-value').value) || 0;
-            let totAbonado = (parseFloat(document.getElementById('form-a1').value)||0)+(parseFloat(document.getElementById('form-a2').value)||0)+(parseFloat(document.getElementById('form-a3').value)||0)+(parseFloat(document.getElementById('form-a4').value)||0)+(parseFloat(document.getElementById('form-a5').value)||0);
-            document.getElementById('modal-total-abonado').innerText = `$${totAbonado.toFixed(2)}`; document.getElementById('modal-saldo-pendiente').innerText = `$${(valTotal - totAbonado).toFixed(2)}`;
-        }
-        async function handleFormSubmit(e) {
-            e.preventDefault(); const id = document.getElementById('form-id').value;
-            let payload = {
-                id: id ? parseInt(id) : Date.now(), name: document.getElementById('form-name').value, phone: document.getElementById('form-phone').value, phase: document.getElementById('form-phase').value, value: parseFloat(document.getElementById('form-value').value) || 0, date: document.getElementById('form-date').value, gestor: document.getElementById('form-gestor').value, loss: document.getElementById('form-loss').value, desc: document.getElementById('form-desc').value, touch: parseInt(document.getElementById('form-touch').value) || 1,
-                a1: parseFloat(document.getElementById('form-a1').value) || 0, a2: parseFloat(document.getElementById('form-a2').value) || 0, a3: parseFloat(document.getElementById('form-a3').value) || 0, a4: parseFloat(document.getElementById('form-a4').value) || 0, a5: parseFloat(document.getElementById('form-a5').value) || 0
-            };
-            if (id) { let idx = mainLeadsRegistry.findIndex(l => l.id === parseInt(id)); if(idx !== -1) mainLeadsRegistry[idx] = payload; }
-            else { mainLeadsRegistry.push(payload); }
-            commitDatabaseState(); renderApplicationCore(); closeModal(); await saveLeadToSupabase(payload);
-        }
-        function initPersonalizationConfig() {
-            let savedNames = localStorage.getItem('relax_gestores_names'); if(savedNames) { listadoGestores = JSON.parse(savedNames); }
-            let savedMM = localStorage.getItem('relax_mm_dinamicas'); if(savedMM) { metasMensualesDinamicas = JSON.parse(savedMM); }
-            let savedMD = localStorage.getItem('relax_md_dinamicas'); if(savedMD) { metasDiariasDinamicas = JSON.parse(savedMD); }
-            document.getElementById('cfg-g1').value = listadoGestores[0]; document.getElementById('cfg-g2').value = listadoGestores[1]; document.getElementById('cfg-g3').value = listadoGestores[2]; document.getElementById('cfg-g4').value = listadoGestores[3];
-            document.getElementById('meta-d-g1').value = metasDiariasDinamicas[listadoGestores[0]] ?? 50; document.getElementById('meta-m-g1').value = metasMensualesDinamicas[listadoGestores[0]] ?? 1100;
-            document.getElementById('meta-d-g2').value = metasDiariasDinamicas[listadoGestores[1]] ?? 50; document.getElementById('meta-m-g2').value = metasMensualesDinamicas[listadoGestores[1]] ?? 1100;
-            document.getElementById('meta-d-g3').value = metasDiariasDinamicas[listadoGestores[2]] ?? 50; document.getElementById('meta-m-g3').value = metasMensualesDinamicas[listadoGestores[2]] ?? 1100;
-            const selectAudit = document.getElementById('audit-month-selector');
-            monthsNames.forEach((m, idx) => { let opt = document.createElement('option'); opt.value = idx + 1; opt.innerText = m; if(idx + 1 === CURRENT_MONTH_NUM) opt.selected = true; selectAudit.appendChild(opt); });
-            buildDynamicButtonsFilters();
-        }
-        function toggleConfigPanel() { document.getElementById('config-panel').classList.toggle('hidden'); }
-        function triggerMonthInteractiveFilter(idx) { selectedMonthInteractiveFilter = (selectedMonthInteractiveFilter === (idx + 1)) ? null : (idx + 1); renderApplicationCore(); }
-        function updateEquipoConfig() {
-            listadoGestores = [document.getElementById('cfg-g1').value.trim(), document.getElementById('cfg-g2').value.trim(), document.getElementById('cfg-g3').value.trim(), document.getElementById('cfg-g4').value.trim()];
-            metasDiariasDinamicas[listadoGestores[0]] = parseFloat(document.getElementById('meta-d-g1').value) || 0; metasMensualesDinamicas[listadoGestores[0]] = parseFloat(document.getElementById('meta-m-g1').value) || 0;
-            metasDiariasDinamicas[listadoGestores[1]] = parseFloat(document.getElementById('meta-d-g2').value) || 0; metasMensualesDinamicas[listadoGestores[1]] = parseFloat(document.getElementById('meta-m-g2').value) || 0;
-            metasDiariasDinamicas[listadoGestores[2]] = parseFloat(document.getElementById('meta-d-g3').value) || 0; metasMensualesDinamicas[listadoGestores[2]] = parseFloat(document.getElementById('meta-m-g3').value) || 0;
-            localStorage.setItem('relax_gestores_names', JSON.stringify(listadoGestores)); localStorage.setItem('relax_mm_dinamicas', JSON.stringify(metasMensualesDinamicas)); localStorage.setItem('relax_md_dinamicas', JSON.stringify(metasDiariasDinamicas));
-            buildDynamicButtonsFilters(); renderApplicationCore();
-        }
-        function buildDynamicButtonsFilters() {
-            const box = document.getElementById('managers-buttons-box'); box.innerHTML = `<button onclick="setManagerFilter('all')" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${currentManagerFilter === 'all' ? 'bg-indigo-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600'}">Todas</button>`;
-            listadoGestores.forEach(g => { box.innerHTML += `<button onclick="setManagerFilter('${g}')" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${currentManagerFilter === g ? 'bg-indigo-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600'}">${g}</button>`; });
-            const selectForm = document.getElementById('form-gestor'); selectForm.innerHTML = "";
-            listadoGestores.forEach(g => { let opt = document.createElement('option'); opt.value = g; opt.innerText = g; selectForm.appendChild(opt); });
-        }
-        function setManagerFilter(m) { currentManagerFilter = m; buildDynamicButtonsFilters(); renderApplicationCore(); }
-        function executeLiveSearch() { activeSearchQuery = document.getElementById('crm-search-bar').value.toLowerCase().trim(); renderApplicationCore(); }
-        function toggleTodayAlertsFilter() { filterOnlyTodayAlerts = !filterOnlyTodayAlerts; document.getElementById('btn-kpi-alerts').className = filterOnlyTodayAlerts ? "bg-fuchsia-600 p-4 rounded-xl border text-white transition-all cursor-pointer select-none" : "bg-fuchsia-50 p-4 rounded-xl border text-fuchsia-700 hover:bg-fuchsia-100/70 transition-all cursor-pointer select-none"; renderApplicationCore(); }
-        function togglePendingDebtFilter() { filterOnlyPendingDebt = !filterOnlyPendingDebt; const btn = document.getElementById('btn-kpi-sales'); const subText = document.getElementById('sub-kpi-debt'); if(filterOnlyPendingDebt) { btn.className = "bg-rose-600 p-4 rounded-xl border text-white transition-all cursor-pointer select-none"; subText.innerText = "Filtro: Viendo por Cobrar ⚠️"; } else { btn.className = "bg-emerald-50 p-4 rounded-xl border text-emerald-700 hover:bg-emerald-100/70 transition-all cursor-pointer select-none"; subText.innerText = "Click: Ver por Cobrar"; } renderApplicationCore(); }
-        function exportBackupExcel() { let ws = XLSX.utils.json_to_sheet(mainLeadsRegistry); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Backup"); XLSX.writeFile(wb, "Respaldo_CRM_Supabase.xlsx"); }
+        cargarTablero();
     </script>
 </body>
 </html>
