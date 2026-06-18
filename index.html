@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM Cloud - v25.3 Supabase Auto-Connect</title>
+    <title>Relax Therapy CRM Cloud - v25.4 Supabase Smart Import</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -31,7 +31,7 @@
                 </div>
                 <div>
                     <span class="font-black text-slate-900 tracking-tight text-lg">RELAX THERAPY CRM MASTER</span>
-                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider"><i class="fa-solid fa-circle-check"></i> v25.3 Supabase Autoconectado</span>
+                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider"><i class="fa-solid fa-circle-check"></i> v25.4 Motor de Importación Reparado</span>
                 </div>
             </div>
 
@@ -238,7 +238,7 @@
     </div>
 
     <script>
-        // CREDENCIALES FIJAS EMBEBIDAS PARA CONEXIÓN REALTIME AUTOMÁTICA
+        // CREDENCIALES FIJAS EMBEBIDAS
         const SUPABASE_FIXED_URL = "https://a455a73e-8224-43ed-bd8d-5e8861e69d5f.supabase.co"; 
         const SUPABASE_FIXED_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImE0NTVhNzNlLTgyMjQtNDNlZC1iZDhkLTVlODg2MWU2OWQ1ZiIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzg2OTY0MzAwLCJleHAiOjIxMDI1NDAzMDB9.1db2-4c87-8143-2fed1056cc25";
         
@@ -275,9 +275,6 @@
                 supabaseClient = supabase.createClient(url, key);
                 loadDataFromCloud();
             } else {
-                document.getElementById('sync-status').className = "block text-[11px] font-bold text-rose-600 uppercase tracking-wider";
-                document.getElementById('sync-status').innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Error al cargar credenciales embebidas`;
-                
                 let localData = localStorage.getItem('relax_crm_master_data');
                 if(localData) { mainLeadsRegistry = JSON.parse(localData); renderApplicationCore(); }
             }
@@ -390,33 +387,23 @@
             if(!supabaseClient) return;
             const status = document.getElementById('sync-status');
             status.className = "block text-[11px] font-bold text-amber-600 uppercase tracking-wider animate-pulse";
-            status.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Sincronizando con Servidor Realtime...`;
+            status.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Cargando base de datos cloud...`;
             
             try {
                 const { data, error } = await supabaseClient.from('pacientes_crm').select('*');
                 if (error) throw error;
                 
                 mainLeadsRegistry = data.map(item => ({
-                    id: item.crm_id,
-                    name: item.name,
-                    phone: item.phone,
-                    phase: item.phase,
-                    value: parseFloat(item.value) || 0,
-                    date: item.date,
-                    loss: item.loss,
-                    gestor: item.gestor,
-                    a1: parseFloat(item.a1) || 0,
-                    a2: parseFloat(item.a2) || 0,
-                    a3: parseFloat(item.a3) || 0,
-                    a4: parseFloat(item.a4) || 0,
-                    a5: parseFloat(item.a5) || 0,
-                    touch: item.touch,
-                    desc: item.desc
+                    id: item.crm_id, name: item.name, phone: item.phone, phase: item.phase,
+                    value: parseFloat(item.value) || 0, date: item.date, loss: item.loss,
+                    gestor: item.gestor, a1: parseFloat(item.a1) || 0, a2: parseFloat(item.a2) || 0,
+                    a3: parseFloat(item.a3) || 0, a4: parseFloat(item.a4) || 0, a5: parseFloat(item.a5) || 0,
+                    touch: item.touch, desc: item.desc
                 }));
                 
                 localStorage.setItem('relax_crm_master_data', JSON.stringify(mainLeadsRegistry));
                 status.className = "block text-[11px] font-bold text-emerald-600 uppercase tracking-wider";
-                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Base Supabase Sincronizada`;
+                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Base Supabase Sincronizada (${mainLeadsRegistry.length} registros)`;
                 renderApplicationCore();
             } catch (err) {
                 console.error(err);
@@ -637,6 +624,7 @@
             document.getElementById('sub-kpi-cierres').innerText = `${ventasContadasBajoFiltro} Ventas`;
         }
 
+        // MOTOR DE IMPORTACIÓN DE EXCEL TOTALMENTE DINÁMICO E INTELIGENTE
         function importDataEngine(event) {
             const file = event.target.files[0]; if (!file) return;
             const reader = new FileReader();
@@ -644,43 +632,57 @@
                 try {
                     const data = new Uint8Array(e.target.result); 
                     const wb = XLSX.read(data, { type: 'array' });
-                    const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
+                    // Mapeamos el archivo en formato JSON estructurado con nombres de cabeceras
+                    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
                     
-                    if(json.length <= 1) return;
+                    if(rows.length === 0) { alert("El archivo está vacío."); return; }
                     
                     let importedLeads = [];
-                    for(let i = 1; i < json.length; i++) {
-                        let row = json[i];
-                        if(!row[1]) continue; 
+                    let successCount = 0;
+
+                    for(let i = 0; i < rows.length; i++) {
+                        let row = rows[i];
                         
-                        let payload = {
-                            id: Date.now() + i,
-                            name: String(row[1] || '').trim(),
-                            phone: String(row[2] || '').trim(),
-                            phase: String(row[3] || 'frio').toLowerCase().trim(),
-                            value: parseFloat(row[4]) || 0,
-                            date: String(row[5] || '').trim(),
-                            loss: String(row[6] || 'Ninguno').trim(),
-                            gestor: String(row[7] || listadoGestores[0]).trim(),
-                            a1: parseFloat(row[8]) || 0,
-                            a2: parseFloat(row[9]) || 0,
-                            a3: parseFloat(row[10]) || 0,
-                            a4: parseFloat(row[12]) || 0,
-                            a5: parseFloat(row[13]) || 0,
-                            touch: parseInt(row[14]) || 1,
-                            desc: String(row[11] || '').trim()
+                        // Mapeo dinámico: Busca la columna sin importar si está en mayúsculas, minúsculas o espacios
+                        let getRowVal = (tokens, fallback = "") => {
+                            let key = Object.keys(row).find(k => tokens.some(t => k.toLowerCase().trim().includes(t)));
+                            return key ? row[key] : fallback;
                         };
+
+                        let name = getRowVal(['name', 'nombre', 'paciente']);
+                        if(!name) continue; // Si no tiene nombre la fila, nos la saltamos por seguridad
+
+                        let payload = {
+                            id: parseInt(getRowVal(['id', 'crm_id'])) || (Date.now() + i),
+                            name: String(name).trim(),
+                            phone: String(getRowVal(['phone', 'telefono', 'whatsapp', 'contacto', 'celular'], '')).trim(),
+                            phase: String(getRowVal(['phase', 'estado', 'fase', 'embudo'], 'frio')).toLowerCase().trim(),
+                            value: parseFloat(getRowVal(['value', 'valor', 'precio', 'paquete'])) || 0,
+                            date: String(getRowVal(['date', 'fecha', 'seguimiento'], '')).trim(),
+                            loss: String(getRowVal(['loss', 'descarte', 'motivo'], 'Ninguno')).trim(),
+                            gestor: String(getRowVal(['gestor', 'asesora', 'vendedor'], listadoGestores[0])).trim(),
+                            a1: parseFloat(getRowVal(['a1', 'abono1'])) || 0,
+                            a2: parseFloat(getRowVal(['a2', 'abono2'])) || 0,
+                            a3: parseFloat(getRowVal(['a3', 'abono3'])) || 0,
+                            a4: parseFloat(getRowVal(['a4', 'abono4'])) || 0,
+                            a5: parseFloat(getRowVal(['a5', 'abono5'])) || 0,
+                            touch: parseInt(getRowVal(['touch', 'intentos', 'gestiones'])) || 1,
+                            desc: String(getRowVal(['desc', 'observaciones', 'notas', 'historial'], '')).trim()
+                        };
+
                         importedLeads.push(payload);
                         await saveLeadToSupabase(payload);
+                        successCount++;
                     }
                     
+                    // Unir y refrescar el tablero comercial al instante
                     mainLeadsRegistry = [...mainLeadsRegistry, ...importedLeads];
                     commitDatabaseState();
                     renderApplicationCore();
-                    alert("¡Importación Masiva completada con éxito en Supabase!");
+                    alert("¡Éxito! Se cargaron correctamente " + successCount + " pacientes comerciales directos a Supabase.");
                 } catch(err) {
-                    console.error("Error importando archivo", err);
-                    alert("Inconveniente al mapear el archivo.");
+                    console.error(err);
+                    alert("Error crítico de lectura del archivo Excel. Asegúrate de que las columnas tengan nombres claros.");
                 }
             };
             reader.readAsArrayBuffer(file);
