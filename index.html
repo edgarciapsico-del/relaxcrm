@@ -7,10 +7,11 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM Cloud - v24.7.1 Local First</title>
+    <title>Relax Therapy CRM Cloud - v25.1 Supabase Native</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght=300;400;500;600;700;900&display=swap');
         body { font-family: 'Poppins', sans-serif; background-color: #f1f5f9; }
@@ -26,11 +27,11 @@
         <div class="max-w-[1750px] mx-auto px-4 lg:px-8 h-20 flex flex-col sm:flex-row items-center justify-between gap-4 py-2">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-md">
-                    <i class="fa-solid fa-cloud text-lg"></i>
+                    <i class="fa-solid fa-database text-lg"></i>
                 </div>
                 <div>
                     <span class="font-black text-slate-900 tracking-tight text-lg">RELAX THERAPY CRM MASTER</span>
-                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider"><i class="fa-solid fa-circle-check"></i> v24.7.1 Buffer Local Activado</span>
+                    <span id="sync-status" class="block text-[11px] font-bold text-indigo-600 uppercase tracking-wider"><i class="fa-solid fa-bolt"></i> v25.1 Conectado a Supabase Realtime</span>
                 </div>
             </div>
 
@@ -42,11 +43,8 @@
                     <i class="fa-solid fa-file-excel text-emerald-600 font-bold"></i>
                     <input type="file" id="file-uploader" accept=".xlsx,.xls,.csv" onchange="importDataEngine(event)" class="w-40 text-slate-600 text-[11px] cursor-pointer">
                 </div>
-                <button onclick="forceResetLocalStorage()" class="bg-rose-600 hover:bg-rose-700 text-white px-3 h-10 rounded-xl font-bold flex items-center gap-1 shadow-sm">
-                    <i class="fa-solid fa-arrows-rotate"></i> Forzar Descarga Cloud
-                </button>
                 <button onclick="loadDataFromCloud()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 h-10 rounded-xl font-bold flex items-center gap-1 shadow-sm">
-                    <i class="fa-solid fa-arrows-rotate"></i> Actualizar Tablero
+                    <i class="fa-solid fa-arrows-rotate"></i> Sincronizar Base Datos
                 </button>
                 <button onclick="exportBackupExcel()" class="bg-slate-700 hover:bg-slate-800 text-white px-3 h-10 rounded-xl font-bold flex items-center gap-1 shadow-sm">
                     <i class="fa-solid fa-file-arrow-down"></i> Exportar Excel
@@ -58,10 +56,26 @@
         </div>
     </header>
 
+    <section class="max-w-[1750px] w-full mx-auto px-4 lg:px-8 mt-4">
+        <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-key text-amber-600 text-sm"></i>
+                <div>
+                    <strong class="text-amber-900 block">Llaves de Conexión de tu Servidor</strong>
+                    <span class="text-amber-700 font-medium">Inserta las llaves que te da Supabase en los campos de la derecha para enlazar tu CRM.</span>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                <input type="text" id="db-url" placeholder="Tu Supabase URL (Project URL)" class="px-3 h-9 bg-white border border-amber-300 rounded-lg w-64 font-mono focus:outline-hidden">
+                <input type="password" id="db-key" placeholder="Tu Supabase Anon Key" class="px-3 h-9 bg-white border border-amber-300 rounded-lg w-64 font-mono focus:outline-hidden">
+                <button onclick="saveConnectionCredentials()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold h-9 px-4 rounded-lg transition-all">Enlazar Servidor</button>
+            </div>
+        </div>
+    </section>
+
     <section id="config-panel" class="max-w-[1750px] w-full mx-auto px-4 lg:px-8 mt-4 hidden">
         <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
             <h4 class="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1"><i class="fa-solid fa-sliders text-indigo-600"></i> Presupuesto Comercial Dinámico por Vendedor</h4>
-            
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
                 <div class="p-4 bg-slate-50 border rounded-xl space-y-3">
                     <div class="flex items-center gap-2 border-b pb-1"><i class="fa-solid fa-user text-indigo-600 text-xs"></i><input type="text" id="cfg-g1" value="Brenda" onchange="updateEquipoConfig()" class="font-black text-slate-800 bg-transparent focus:outline-hidden text-xs uppercase"></div>
@@ -70,7 +84,6 @@
                         <div><label class="block text-slate-400 font-bold mb-0.5">Meta Mensual ($)</label><input type="number" id="meta-m-g1" value="1100" onchange="updateEquipoConfig()" class="w-full px-2 h-8 bg-white border rounded-lg font-black text-indigo-600"></div>
                     </div>
                 </div>
-
                 <div class="p-4 bg-slate-50 border rounded-xl space-y-3">
                     <div class="flex items-center gap-2 border-b pb-1"><i class="fa-solid fa-user text-indigo-600 text-xs"></i><input type="text" id="cfg-g2" value="Joselyne" onchange="updateEquipoConfig()" class="font-black text-slate-800 bg-transparent focus:outline-hidden text-xs uppercase"></div>
                     <div class="grid grid-cols-2 gap-2 text-xs">
@@ -78,7 +91,6 @@
                         <div><label class="block text-slate-400 font-bold mb-0.5">Meta Mensual ($)</label><input type="number" id="meta-m-g2" value="1100" onchange="updateEquipoConfig()" class="w-full px-2 h-8 bg-white border rounded-lg font-black text-indigo-600"></div>
                     </div>
                 </div>
-
                 <div class="p-4 bg-slate-50 border rounded-xl space-y-3">
                     <div class="flex items-center gap-2 border-b pb-1"><i class="fa-solid fa-user text-indigo-600 text-xs"></i><input type="text" id="cfg-g3" value="Naty" onchange="updateEquipoConfig()" class="font-black text-slate-800 bg-transparent focus:outline-hidden text-xs uppercase"></div>
                     <div class="grid grid-cols-2 gap-2 text-xs">
@@ -236,14 +248,14 @@
                 <div><label class="block font-bold text-slate-500 mb-1">Observaciones / Historial Clínico</label><textarea id="form-desc" rows="2" class="w-full p-3 bg-slate-50 border rounded-xl focus:outline-hidden"></textarea></div>
                 <div class="pt-2 flex justify-end gap-2 border-t">
                     <button type="button" onclick="closeModal()" class="px-4 h-10 font-bold text-slate-500">Cancelar</button>
-                    <button type="submit" id="btn-submit-form" class="px-5 h-10 bg-emerald-600 text-white font-bold rounded-xl shadow-sm">Guardar Cambios</button>
+                    <button type="submit" id="btn-submit-form" class="px-5 h-10 bg-indigo-600 text-white font-bold rounded-xl shadow-sm">Guardar Cambios</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-        const GOOGLE_CSV_READ_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQHCnaAP2Sm7I9jrP03YkHlkmn7DoUVwUVIpdQ_s6RExN9KD2iduuYzTsbRRWp64QCWtQex8MrYyTs4/pub?gid=0&single=true&output=csv";
+        let supabaseClient = null;
         
         const liveClock = new Date();
         const CURRENT_DAY_NUM = liveClock.getDate();
@@ -265,20 +277,42 @@
 
         window.onload = function() {
             initPersonalizationConfig();
-            
-            // Cargar primero de memoria interna si ya hay datos guardados para no depender de internet
-            let localCached = localStorage.getItem('relax_crm_master_data');
-            if (localCached) {
-                mainLeadsRegistry = JSON.parse(localCached);
-                renderApplicationCore();
-            }
-            loadDataFromCloud();
+            initSupabaseEngine();
         };
+
+        function initSupabaseEngine() {
+            let savedUrl = localStorage.getItem('relax_supabase_url');
+            let savedKey = localStorage.getItem('relax_supabase_key');
+            
+            if(savedUrl && savedKey) {
+                document.getElementById('db-url').value = savedUrl;
+                document.getElementById('db-key').value = savedKey;
+                supabaseClient = supabase.createClient(savedUrl, savedKey);
+                loadDataFromCloud();
+            } else {
+                document.getElementById('sync-status').className = "block text-[11px] font-bold text-amber-600 uppercase tracking-wider";
+                document.getElementById('sync-status').innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Falta enlazar las llaves de Supabase`;
+                
+                let localData = localStorage.getItem('relax_crm_master_data');
+                if(localData) { mainLeadsRegistry = JSON.parse(localData); renderApplicationCore(); }
+            }
+        }
+
+        function saveConnectionCredentials() {
+            let url = document.getElementById('db-url').value.trim();
+            let key = document.getElementById('db-key').value.trim();
+            if(!url || !key) { alert("Por favor inserta ambas llaves comerciales."); return; }
+            
+            localStorage.setItem('relax_supabase_url', url);
+            localStorage.setItem('relax_supabase_key', key);
+            supabaseClient = supabase.createClient(url, key);
+            loadDataFromCloud();
+        }
 
         function forceResetLocalStorage() {
             localStorage.clear();
             mainLeadsRegistry = [];
-            loadDataFromCloud();
+            renderApplicationCore();
         }
 
         function initPersonalizationConfig() {
@@ -378,124 +412,81 @@
             renderApplicationCore();
         }
 
+        // LEER REALTIME DESDE SUPABASE
         async function loadDataFromCloud() {
+            if(!supabaseClient) return;
             const status = document.getElementById('sync-status');
+            status.className = "block text-[11px] font-bold text-amber-600 uppercase tracking-wider animate-pulse";
+            status.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Conectando al Servidor Supabase...`;
             
-            // Si ya hay datos locales, mantenemos el aviso de éxito local activo
-            if(mainLeadsRegistry.length > 0) {
-                status.className = "block text-[11px] font-bold text-emerald-600 uppercase tracking-wider";
-                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Trabajando en Modo Local Seguro`;
-            } else {
-                status.className = "block text-[11px] font-bold text-amber-600 uppercase tracking-wider animate-pulse";
-                status.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Leyendo Base de Datos Externa...`;
-            }
-            
-            const secureUrl = "https://corsproxy.io/?" + encodeURIComponent(GOOGLE_CSV_READ_URL + "&cache_bust=" + Date.now());
             try {
-                const res = await fetch(secureUrl);
-                const text = await res.text();
-                if(text && text.toLowerCase().includes("id") && text.toLowerCase().includes("name")) {
-                    parseSafeCSV(text);
-                    status.className = "block text-[11px] font-bold text-emerald-600 uppercase tracking-wider";
-                    status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Datos de Google Sheets Importados`;
-                    return;
-                }
-            } catch (err) {
-                try {
-                    const fallbackRes = await fetch(GOOGLE_CSV_READ_URL + "&ts=" + Date.now());
-                    const fallbackText = await fallbackRes.text();
-                    if(fallbackText && fallbackText.toLowerCase().includes("id")) {
-                        parseSafeCSV(fallbackText);
-                        status.className = "block text-[11px] font-bold text-emerald-600 uppercase tracking-wider";
-                        status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Importación Directa Completada`;
-                        return;
-                    }
-                } catch(e) { console.error(e); }
-            }
-        }
-
-        function parseSafeCSV(text) {
-            let lines = text.split(/\r\n|\n/);
-            if (lines.length === 0) return;
-            
-            let firstLine = lines[0];
-            let delimiter = ",";
-            if (firstLine.includes(";") && (firstLine.split(";").length > firstLine.split(",").length)) {
-                delimiter = ";";
-            }
-            
-            let headers = firstLine.split(delimiter).map(h => h.replace(/"/g, '').trim().toLowerCase());
-            let findHeaderIdx = (token) => headers.findIndex(h => h === token || h.includes(token));
-
-            let idxMap = {
-                id: findHeaderIdx('id'), name: findHeaderIdx('name'), phone: findHeaderIdx('phone'),
-                phase: findHeaderIdx('phase'), value: findHeaderIdx('value'), date: findHeaderIdx('date'),
-                loss: findHeaderIdx('loss'), gestor: findHeaderIdx('gestor'),
-                a1: headers.indexOf('a1'), a2: headers.indexOf('a2'), a3: headers.indexOf('a3'),
-                a4: headers.indexOf('a4'), a5: headers.indexOf('a5'),
-                touch: findHeaderIdx('touch'), desc: findHeaderIdx('desc')
-            };
-
-            let cleanRegistry = [];
-            const validPhases = ['frio', 'tibio', 'caliente', 'agenda', 'venta', 'postventa'];
-            
-            for (let i = 1; i < lines.length; i++) {
-                let line = lines[i].trim(); if (!line) continue;
+                const { data, error } = await supabaseClient.from('pacientes_crm').select('*');
+                if (error) throw error;
                 
-                let cols = (delimiter === ",") ? line.split(/,(?=(?:?:[^"]*"){2})*[^"]*$)/) : line.split(/;(?=(?:?:[^"]*"){2})*[^"]*$)/);
-                if (cols.length < 2) continue;
-
-                let getVal = (field, fallback = "") => {
-                    let idx = idxMap[field];
-                    return (idx !== -1 && cols[idx] !== undefined) ? cols[idx].replace(/"/g, '').trim() : fallback;
-                };
-
-                let safePhase = getVal('phase', 'frio').toLowerCase().trim();
-                if (!validPhases.includes(safePhase) || safePhase === "") safePhase = "frio";
-
-                let rawGestor = getVal('gestor', listadoGestores[0]);
-                if (rawGestor) {
-                    rawGestor = rawGestor.charAt(0).toUpperCase() + rawGestor.slice(1).toLowerCase();
-                }
-
-                cleanRegistry.push({
-                    id: parseInt(getVal('id', Date.now() + i)) || (Date.now() + i),
-                    name: getVal('name', 'Paciente Sin Nombre'),
-                    phone: getVal('phone', ''),
-                    phase: safePhase,
-                    value: parseFloat(getVal('value', '0')) || 0,
-                    date: getVal('date', ''),
-                    loss: getVal('loss', 'Ninguno'),
-                    gestor: listadoGestores.includes(rawGestor) ? rawGestor : listadoGestores[0],
-                    a1: parseFloat(getVal('a1', '0')) || 0, 
-                    a2: parseFloat(getVal('a2', '0')) || 0, 
-                    a3: parseFloat(getVal('a3', '0')) || 0, 
-                    a4: parseFloat(getVal('a4', '0')) || 0,
-                    a5: parseFloat(getVal('a5', '0')) || 0,
-                    touch: parseInt(getVal('touch', '1')) || 1,
-                    desc: getVal('desc', '')
-                });
-            }
-            
-            // Si la base externa tiene registros, la sincronizamos con la memoria local
-            if(cleanRegistry.length > 0) {
-                mainLeadsRegistry = cleanRegistry;
+                mainLeadsRegistry = data.map(item => ({
+                    id: item.crm_id,
+                    name: item.name,
+                    phone: item.phone,
+                    phase: item.phase,
+                    value: parseFloat(item.value) || 0,
+                    date: item.date,
+                    loss: item.loss,
+                    gestor: item.gestor,
+                    a1: parseFloat(item.a1) || 0,
+                    a2: parseFloat(item.a2) || 0,
+                    a3: parseFloat(item.a3) || 0,
+                    a4: parseFloat(item.a4) || 0,
+                    a5: parseFloat(item.a5) || 0,
+                    touch: item.touch,
+                    desc: item.desc
+                }));
+                
                 localStorage.setItem('relax_crm_master_data', JSON.stringify(mainLeadsRegistry));
+                status.className = "block text-[11px] font-bold text-emerald-600 uppercase tracking-wider";
+                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Base Supabase Sincronizada`;
                 renderApplicationCore();
+            } catch (err) {
+                console.error(err);
+                status.className = "block text-[11px] font-bold text-rose-600 uppercase tracking-wider";
+                status.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Error de conexión externa`;
             }
         }
 
         function commitDatabaseState() { localStorage.setItem('relax_crm_master_data', JSON.stringify(mainLeadsRegistry)); }
         function allowDrop(e) { e.preventDefault(); }
         
-        function drop(e, phaseTarget) {
+        async function drop(e, phaseTarget) {
             e.preventDefault(); const id = parseInt(e.dataTransfer.getData('text/plain'));
             const lead = mainLeadsRegistry.find(l => l.id === id);
             if(lead) { 
                 lead.phase = phaseTarget; 
-                commitDatabaseState();
                 renderApplicationCore(); 
+                commitDatabaseState(); 
+                await saveLeadToSupabase(lead); 
             }
+        }
+
+        // GUARDADO INMEDIATO Y LIQUIDACIÓN EN SUPABASE
+        async function saveLeadToSupabase(leadData) {
+            if(!supabaseClient) return;
+            try {
+                const rowPayload = {
+                    name: leadData.name, phone: leadData.phone, phase: leadData.phase,
+                    value: leadData.value, date: leadData.date, loss: leadData.loss,
+                    gestor: leadData.gestor, a1: leadData.a1, a2: leadData.a2, a3: leadData.a3,
+                    a4: leadData.a4, a5: leadData.a5, touch: leadData.touch, desc: leadData.desc
+                };
+
+                // Verificar si ya existe el registro en la nube para actualizar o insertar
+                const { data: existing } = await supabaseClient.from('pacientes_crm').select('crm_id').eq('crm_id', leadData.id);
+                
+                if(existing && existing.length > 0) {
+                    await supabaseClient.from('pacientes_crm').update(rowPayload).eq('crm_id', leadData.id);
+                } else {
+                    rowPayload.crm_id = leadData.id;
+                    await supabaseClient.from('pacientes_crm').insert([rowPayload]);
+                }
+            } catch(e) { console.error("Error al persistir en la nube", e); }
         }
 
         function renderApplicationCore() {
@@ -688,6 +679,23 @@
             reader.readAsArrayBuffer(file);
         }
 
+        function parseSafeCSV(text) {
+            let lines = text.split(/\r\n|\n/); if (lines.length === 0) return;
+            let headers = lines[0].split(",").map(h => h.trim().toLowerCase());
+            let cleanRegistry = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                let cols = lines[i].split(","); if (cols.length < 2) continue;
+                cleanRegistry.push({
+                    id: Date.now() + i, name: cols[1] || 'Paciente', phone: cols[2] || '', phase: 'frio',
+                    value: parseFloat(cols[4]) || 0, date: cols[5] || '', loss: 'Ninguno', gestor: listadoGestores[0],
+                    a1: 0, a2: 0, a3: 0, a4: 0, a5: 0, touch: 1, desc: cols[11] || ''
+                });
+            }
+            mainLeadsRegistry = cleanRegistry;
+            commitDatabaseState(); renderApplicationCore();
+        }
+
         function openModal(mode, id = null) {
             document.getElementById('lead-modal').classList.remove('hidden');
             if (mode === 'create') {
@@ -696,12 +704,7 @@
                 const lead = mainLeadsRegistry.find(l => l.id === id);
                 if (lead) {
                     document.getElementById('form-id').value = lead.id; document.getElementById('form-name').value = lead.name; document.getElementById('form-phone').value = lead.phone; document.getElementById('form-phase').value = lead.phase; document.getElementById('form-value').value = lead.value; 
-                    let targetDate = lead.date;
-                    if(String(lead.date).includes('/')) {
-                        let segments = String(lead.date).split('/');
-                        if(segments[2] && segments[1] && segments[0]) targetDate = `${segments[2]}-${segments[1].padStart(2,'0')}-${segments[0].padStart(2,'0')}`;
-                    }
-                    document.getElementById('form-date').value = targetDate;
+                    document.getElementById('form-date').value = lead.date;
                     document.getElementById('form-gestor').value = lead.gestor; document.getElementById('form-loss').value = lead.loss || "Ninguno"; document.getElementById('form-desc').value = lead.desc;
                     document.getElementById('form-touch').value = lead.touch || 1;
                     document.getElementById('form-a1').value = lead.a1 || 0; document.getElementById('form-a2').value = lead.a2 || 0; document.getElementById('form-a3').value = lead.a3 || 0; document.getElementById('form-a4').value = lead.a4 || 0; document.getElementById('form-a5').value = lead.a5 || 0;
@@ -719,7 +722,7 @@
             document.getElementById('modal-saldo-pendiente').innerText = `$${(valTotal - totAbonado).toFixed(2)}`;
         }
 
-        function handleFormSubmit(e) {
+        async function handleFormSubmit(e) {
             e.preventDefault();
             const id = document.getElementById('form-id').value;
             let payload = {
@@ -739,15 +742,12 @@
             } else { 
                 mainLeadsRegistry.push(payload); 
             }
-            
-            // PROTECCIÓN TOTAL: El CRM guarda internamente de inmediato y no se bloquea por errores de Google.
-            commitDatabaseState(); 
-            renderApplicationCore(); 
-            closeModal();
+            commitDatabaseState(); renderApplicationCore(); closeModal();
+            await saveLeadToSupabase(payload);
         }
 
         function exportBackupExcel() {
-            let ws = XLSX.utils.json_to_sheet(mainLeadsRegistry); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Backup"); XLSX.writeFile(wb, "Respaldo_CRM_v24.7.1.xlsx");
+            let ws = XLSX.utils.json_to_sheet(mainLeadsRegistry); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Backup"); XLSX.writeFile(wb, "Respaldo_CRM_Supabase.xlsx");
         }
     </script>
 </body>
