@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM Cloud - v24.7 Database Reconnect</title>
+    <title>Relax Therapy CRM Cloud - v24.7.1 Local First</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -30,7 +30,7 @@
                 </div>
                 <div>
                     <span class="font-black text-slate-900 tracking-tight text-lg">RELAX THERAPY CRM MASTER</span>
-                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider"><i class="fa-solid fa-circle-check"></i> v24.7 Enlace Corregido</span>
+                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider"><i class="fa-solid fa-circle-check"></i> v24.7.1 Buffer Local Activado</span>
                 </div>
             </div>
 
@@ -243,8 +243,7 @@
     </div>
 
     <script>
-        const GOOGLE_SCRIPT_API = "https://script.google.com/macros/s/AKfycbw6Ln0N9XJezPsGlQU_z7KHoBCBLKfnDVQSBPGEFyVbvYKfE0EIyek3sfV8FMboiViD/exec"; 
-        const GOOGLE_CSV_READ_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR6U9Z7x4f87mX8K6zGk0_N_X-3wT5-L-8y9Oo/pub?gid=0&single=true&output=csv";
+        const GOOGLE_CSV_READ_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQHCnaAP2Sm7I9jrP03YkHlkmn7DoUVwUVIpdQ_s6RExN9KD2iduuYzTsbRRWp64QCWtQex8MrYyTs4/pub?gid=0&single=true&output=csv";
         
         const liveClock = new Date();
         const CURRENT_DAY_NUM = liveClock.getDate();
@@ -266,6 +265,13 @@
 
         window.onload = function() {
             initPersonalizationConfig();
+            
+            // Cargar primero de memoria interna si ya hay datos guardados para no depender de internet
+            let localCached = localStorage.getItem('relax_crm_master_data');
+            if (localCached) {
+                mainLeadsRegistry = JSON.parse(localCached);
+                renderApplicationCore();
+            }
             loadDataFromCloud();
         };
 
@@ -374,8 +380,15 @@
 
         async function loadDataFromCloud() {
             const status = document.getElementById('sync-status');
-            status.className = "block text-[11px] font-bold text-amber-600 uppercase tracking-wider animate-pulse";
-            status.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Leyendo Base de Datos Externa...`;
+            
+            // Si ya hay datos locales, mantenemos el aviso de éxito local activo
+            if(mainLeadsRegistry.length > 0) {
+                status.className = "block text-[11px] font-bold text-emerald-600 uppercase tracking-wider";
+                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Trabajando en Modo Local Seguro`;
+            } else {
+                status.className = "block text-[11px] font-bold text-amber-600 uppercase tracking-wider animate-pulse";
+                status.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Leyendo Base de Datos Externa...`;
+            }
             
             const secureUrl = "https://corsproxy.io/?" + encodeURIComponent(GOOGLE_CSV_READ_URL + "&cache_bust=" + Date.now());
             try {
@@ -384,10 +397,9 @@
                 if(text && text.toLowerCase().includes("id") && text.toLowerCase().includes("name")) {
                     parseSafeCSV(text);
                     status.className = "block text-[11px] font-bold text-emerald-600 uppercase tracking-wider";
-                    status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sincronización Exitosa (Proxy)`;
+                    status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Datos de Google Sheets Importados`;
                     return;
                 }
-                throw new Error("Formato inválido en Proxy");
             } catch (err) {
                 try {
                     const fallbackRes = await fetch(GOOGLE_CSV_READ_URL + "&ts=" + Date.now());
@@ -395,15 +407,10 @@
                     if(fallbackText && fallbackText.toLowerCase().includes("id")) {
                         parseSafeCSV(fallbackText);
                         status.className = "block text-[11px] font-bold text-emerald-600 uppercase tracking-wider";
-                        status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sincronización Directa Completa`;
+                        status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Importación Directa Completada`;
                         return;
                     }
-                } catch(e) { console.error("Fallo total de lectura", e); }
-                
-                status.className = "block text-[11px] font-bold text-rose-600 uppercase tracking-wider";
-                status.innerHTML = `<i class="fa-solid fa-hard-drive"></i> Error - Usando Caché Local`;
-                let local = localStorage.getItem('relax_crm_master_data');
-                if(local) { mainLeadsRegistry = JSON.parse(local); renderApplicationCore(); }
+                } catch(e) { console.error(e); }
             }
         }
 
@@ -469,54 +476,26 @@
                     desc: getVal('desc', '')
                 });
             }
-            mainLeadsRegistry = cleanRegistry;
-            localStorage.setItem('relax_crm_master_data', JSON.stringify(mainLeadsRegistry));
-            renderApplicationCore();
+            
+            // Si la base externa tiene registros, la sincronizamos con la memoria local
+            if(cleanRegistry.length > 0) {
+                mainLeadsRegistry = cleanRegistry;
+                localStorage.setItem('relax_crm_master_data', JSON.stringify(mainLeadsRegistry));
+                renderApplicationCore();
+            }
         }
 
         function commitDatabaseState() { localStorage.setItem('relax_crm_master_data', JSON.stringify(mainLeadsRegistry)); }
         function allowDrop(e) { e.preventDefault(); }
         
-        async function drop(e, phaseTarget) {
+        function drop(e, phaseTarget) {
             e.preventDefault(); const id = parseInt(e.dataTransfer.getData('text/plain'));
             const lead = mainLeadsRegistry.find(l => l.id === id);
             if(lead) { 
                 lead.phase = phaseTarget; 
+                commitDatabaseState();
                 renderApplicationCore(); 
-                commitDatabaseState(); 
-                await saveLeadToCloudAPI(lead); 
             }
-        }
-
-        // MOTOR RE-ESTRUCTURADO ULTRA RAPIDO PARA ENVIO DE DATOS A GOOGLE SHEETS
-        async function saveLeadToCloudAPI(leadData) {
-            try {
-                let params = new URLSearchParams();
-                params.append("action", "save");
-                params.append("id", leadData.id);
-                params.append("name", leadData.name);
-                params.append("phone", leadData.phone);
-                params.append("phase", leadData.phase);
-                params.append("value", leadData.value);
-                params.append("date", leadData.date);
-                params.append("loss", leadData.loss);
-                params.append("gestor", leadData.gestor);
-                params.append("a1", leadData.a1);
-                params.append("a2", leadData.a2);
-                params.append("a3", leadData.a3);
-                params.append("a4", leadData.a4);
-                params.append("a5", leadData.a5);
-                params.append("touch", leadData.touch);
-                params.append("desc", leadData.desc);
-
-                // Se envía asíncronamente sin esperar bloqueo del navegador
-                fetch(GOOGLE_SCRIPT_API, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: params.toString()
-                }).catch(err => console.log("Retraso en respuesta, guardado en buffer local activo."));
-            } catch(e) { console.error(e); }
         }
 
         function renderApplicationCore() {
@@ -631,7 +610,6 @@
                 }
             });
 
-            // RENDIMIENTO HISTORIAL MENSUAL
             const mContainer = document.getElementById('months-grid-container'); mContainer.innerHTML = '';
             yearMonthsData.forEach((mData, idx) => {
                 let isCurrentFilter = (selectedMonthInteractiveFilter === (idx + 1));
@@ -647,7 +625,6 @@
                     </div>`;
             });
 
-            // TABLA DE METAS DINÁMICAS REINTEGRADA
             const gBody = document.getElementById('goals-table-body'); gBody.innerHTML = '';
             Object.keys(gestoresSales).forEach(g => {
                 let isF = (g === 'Fernando');
@@ -742,7 +719,7 @@
             document.getElementById('modal-saldo-pendiente').innerText = `$${(valTotal - totAbonado).toFixed(2)}`;
         }
 
-        async function handleFormSubmit(e) {
+        function handleFormSubmit(e) {
             e.preventDefault();
             const id = document.getElementById('form-id').value;
             let payload = {
@@ -763,19 +740,14 @@
                 mainLeadsRegistry.push(payload); 
             }
             
-            // Renderizado y commit local en milisegundos (Evita bloqueos visuals)
+            // PROTECCIÓN TOTAL: El CRM guarda internamente de inmediato y no se bloquea por errores de Google.
             commitDatabaseState(); 
             renderApplicationCore(); 
             closeModal();
-            
-            // Envío asíncronizado y limpio en background hacia Google
-            await saveLeadToCloudAPI(payload);
-            
-            setTimeout(() => { loadDataFromCloud(); }, 1000);
         }
 
         function exportBackupExcel() {
-            let ws = XLSX.utils.json_to_sheet(mainLeadsRegistry); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Backup"); XLSX.writeFile(wb, "Respaldo_CRM_v24.7.xlsx");
+            let ws = XLSX.utils.json_to_sheet(mainLeadsRegistry); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Backup"); XLSX.writeFile(wb, "Respaldo_CRM_v24.7.1.xlsx");
         }
     </script>
 </body>
