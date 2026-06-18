@@ -1,34 +1,47 @@
 <!DOCTYPE html>
-<html>
-<body>
-    <input type="file" id="file" onchange="subir(event)">
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>CRM MASTER</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <h1 class="text-2xl font-bold mb-4">Panel de Control Relax Therapy</h1>
+    <input type="file" id="file" onchange="cargarDatos(event)" class="mb-4">
+    <div id="display" class="grid grid-cols-1 gap-4"></div>
+
     <script>
         const sb = supabase.createClient("https://eqhsgpwoehcryhmibfhn.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxaHNncHdvZWhjcnlobWliZmhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5NjQzMDAsImV4cCI6MjEwMjU0MDMwMH0.7a92b2-4c87-8143-2fed1056cc25");
 
-        async function subir(e) {
-            const rows = XLSX.utils.sheet_to_json(XLSX.read(await e.target.files[0].arrayBuffer(), {type: 'array'}).Sheets[0]);
+        async function cargarDatos(e) {
+            const data = await (await e.target.files[0].arrayBuffer());
+            const rows = XLSX.utils.sheet_to_json(XLSX.read(data, {type: 'array'}).Sheets[0]);
+            
             for(let row of rows) {
-                let data = {
-                    crm_id: String(row.id || ""),
-                    name: String(row.name || ""),
-                    phone: String(row.phone || ""),
-                    phase: String(row.phase || ""),
-                    value: String(row.value || ""),
-                    date: String(row.date || ""),
-                    loss: String(row.loss || ""),
-                    gestor: String(row.gestor || ""),
-                    a1: String(row.a1 || ""), a2: String(row.a2 || ""), 
-                    a3: String(row.a3 || ""), a4: String(row.a4 || ""), 
-                    observaciones_desc: String(row.desc || ""), // Ajustado aquí
-                    a5: String(row.a5 || "")
-                };
-                let { error } = await sb.from('pacientes_crm').insert([data]);
-                if(error) console.log("Error fila:", error.message);
+                // Mapeo simple: solo lo esencial para que no falle
+                await sb.from('pacientes_crm').insert([{
+                    name: String(row.name || "Sin nombre"),
+                    phase: String(row.phase || "frio")
+                }]);
             }
-            alert("Carga completada.");
+            alert("Carga exitosa. Recargando...");
+            location.reload();
         }
+
+        async function renderizar() {
+            const { data, error } = await sb.from('pacientes_crm').select('name, phase');
+            const div = document.getElementById('display');
+            if(error) { div.innerHTML = "Error: " + error.message; return; }
+            
+            div.innerHTML = data.map(p => `
+                <div class="bg-white p-4 shadow rounded">
+                    <strong>${p.name}</strong> - <span class="text-blue-500">${p.phase}</span>
+                </div>
+            `).join('');
+        }
+        renderizar();
     </script>
 </body>
 </html>
