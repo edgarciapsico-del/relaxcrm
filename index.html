@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM Cloud - v26.2 Máster Final</title>
+    <title>Relax Therapy CRM Cloud - v26.5 Máster Estable</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -31,7 +31,7 @@
                 </div>
                 <div>
                     <span class="font-black text-slate-900 tracking-tight text-lg">RELAX THERAPY CRM MASTER</span>
-                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider"><i class="fa-solid fa-circle-check"></i> Acceso Móvil Cloud Autenticado</span>
+                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider"><i class="fa-solid fa-circle-check"></i> Acceso Directo Conectado</span>
                 </div>
             </div>
 
@@ -53,7 +53,7 @@
                     <i class="fa-solid fa-trash-can"></i> Purgar Nube
                 </button>
                 <button onclick="openModal('create')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 h-10 rounded-xl font-bold shadow-xs">
-                    <i class="fa-solid fa-plus"></i> Lead manual
+                    <i class="fa-solid fa-plus"></i> Registrar Lead
                 </button>
             </div>
         </div>
@@ -159,27 +159,27 @@
         <div class="flex gap-4 pb-6 items-start scrollbar-custom">
             <div class="kanban-column bg-slate-100 p-3 rounded-2xl flex flex-col flex-shrink-0 min-h-[500px] border">
                 <div class="flex items-center justify-between mb-3 px-1 font-bold text-xs uppercase text-slate-600"><span>Frío</span><span id="b-frio" class="bg-white px-2 py-0.5 rounded border">0</span></div>
-                <div id="col-frio" class="space-y-3 flex-grow overflow-y-auto max-h-[550px]" ondragover="allowDrop(event)" ondrop="drop(event, 'frio')"></div>
+                <div id="col-frio" class="space-y-3 flex-grow overflow-y-auto max-h-[550px]"></div>
             </div>
             <div class="kanban-column bg-slate-100 p-3 rounded-2xl flex flex-col flex-shrink-0 min-h-[500px] border">
                 <div class="flex items-center justify-between mb-3 px-1 font-bold text-xs uppercase text-slate-600"><span>Tibio</span><span id="b-tibio" class="bg-white px-2 py-0.5 rounded border">0</span></div>
-                <div id="col-tibio" class="space-y-3 flex-grow overflow-y-auto max-h-[550px]" ondragover="allowDrop(event)" ondrop="drop(event, 'tibio')"></div>
+                <div id="col-tibio" class="space-y-3 flex-grow overflow-y-auto max-h-[550px]"></div>
             </div>
             <div class="kanban-column bg-slate-100 p-3 rounded-2xl flex flex-col flex-shrink-0 min-h-[500px] border">
                 <div class="flex items-center justify-between mb-3 px-1 font-bold text-xs uppercase text-slate-600"><span>Caliente</span><span id="b-caliente" class="bg-white px-2 py-0.5 rounded border">0</span></div>
-                <div id="col-caliente" class="space-y-3 flex-grow overflow-y-auto max-h-[550px]" ondragover="allowDrop(event)" ondrop="drop(event, 'caliente')"></div>
+                <div id="col-caliente" class="space-y-3 flex-grow overflow-y-auto max-h-[550px]"></div>
             </div>
             <div class="kanban-column bg-indigo-50/60 p-3 rounded-2xl flex flex-col flex-shrink-0 min-h-[500px] border border-indigo-100">
                 <div class="flex items-center justify-between mb-3 px-1 font-bold text-xs uppercase text-indigo-700"><span>Agenda</span><span id="b-agenda" class="bg-white px-2 py-0.5 rounded border">0</span></div>
-                <div id="col-agenda" class="space-y-3 flex-grow overflow-y-auto max-h-[550px]" ondragover="allowDrop(event)" ondrop="drop(event, 'agenda')"></div>
+                <div id="col-agenda" class="space-y-3 flex-grow overflow-y-auto max-h-[550px]"></div>
             </div>
             <div class="kanban-column bg-emerald-50/60 p-3 rounded-2xl flex flex-col flex-shrink-0 min-h-[500px] border border-emerald-100">
                 <div class="flex items-center justify-between mb-3 px-1 font-bold text-xs uppercase text-emerald-700"><span>Venta</span><span id="b-venta" class="bg-white px-2 py-0.5 rounded border">0</span></div>
-                <div id="col-venta" class="space-y-3 flex-grow overflow-y-auto max-h-[550px]" ondragover="allowDrop(event)" ondrop="drop(event, 'venta')"></div>
+                <div id="col-venta" class="space-y-3 flex-grow overflow-y-auto max-h-[550px]"></div>
             </div>
             <div class="kanban-column bg-purple-50/60 p-3 rounded-2xl flex flex-col flex-shrink-0 min-h-[500px] border border-purple-100">
                 <div class="flex items-center justify-between mb-3 px-1 font-bold text-xs uppercase text-purple-700"><span>Post Venta</span><span id="b-postventa" class="bg-white px-2 py-0.5 rounded border">0</span></div>
-                <div id="col-postventa" class="space-y-3 flex-grow overflow-y-auto max-h-[550px]" ondragover="allowDrop(event)" ondrop="drop(event, 'postventa')"></div>
+                <div id="col-postventa" class="space-y-3 flex-grow overflow-y-auto max-h-[550px]"></div>
             </div>
         </div>
     </main>
@@ -188,7 +188,7 @@
         <div class="bg-white rounded-2xl w-full max-w-2xl p-6 shadow-xl border mx-4 max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between mb-4 border-b pb-2">
                 <h3 id="modal-title" class="text-xs font-black uppercase text-slate-700">Ficha Técnica Comercial</h3>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <button type="button" onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <form id="crm-form" onsubmit="handleFormSubmit(event)" class="space-y-4 text-xs">
                 <input type="hidden" id="form-id">
@@ -235,7 +235,7 @@
     </div>
 
     <script>
-        // CREDENCIALES CLOUD INTERNAS (Para que entre directo en móviles)
+        // CREDENCIALES FIJAS DE INFRAESTRUCTURA RELAX THERAPY
         const DB_CLOUD_URL = "https://eqhsgpwoehcryhmibfhn.supabase.co";
         const DB_CLOUD_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxaHNncHdvZWhjcnlobWliZmhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5NjQzMDAsImV4cCI6MjEwMjU0MDMwMH0.7a92b2-4c87-8143-2fed1056cc25";
 
@@ -263,30 +263,28 @@
         };
 
         function initSupabaseEngine() {
+            // Inicialización controlada síncrona
             supabaseClient = supabase.createClient(DB_CLOUD_URL, DB_CLOUD_KEY);
             loadDataFromCloud();
-        }
-
-        function saveConnectionCredentials() {
-            alert("Acceso unificado activo.");
         }
 
         async function loadDataFromCloud() {
             if(!supabaseClient) return;
             const status = document.getElementById('sync-status');
-            status.innerHTML = `⏳ Cargando Base Cloud...`;
+            status.innerHTML = `⏳ Sincronizando datos cloud...`;
             try {
                 let { data, error } = await supabaseClient.from('pacientes_crm').select('*');
                 if(error) throw error;
+                
                 mainLeadsRegistry = data.map(item => ({
                     id: parseInt(item.crm_id || item.id), 
-                    name: item.name, 
-                    phone: item.phone, 
-                    phase: String(item.phase || 'frio').trim(),
+                    name: String(item.name || ''), 
+                    phone: String(item.phone || ''), 
+                    phase: String(item.phase || 'frio').toLowerCase().trim(),
                     value: parseFloat(item.value) || 0, 
-                    date: item.date, 
-                    loss: item.loss, 
-                    gestor: item.gestor,
+                    date: item.date ? String(item.date).trim() : '', 
+                    loss: item.loss || 'Ninguno', 
+                    gestor: item.gestor || 'Brenda',
                     a1: parseFloat(item.a1) || 0, 
                     a2: parseFloat(item.a2) || 0, 
                     a3: parseFloat(item.a3) || 0,
@@ -295,11 +293,12 @@
                     touch: parseInt(item.touch) || 1, 
                     desc: item.observaciones || item.desc || ''
                 }));
-                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Cloud Conectado (${mainLeadsRegistry.length} Leads)`;
+                
+                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sincronizado (${mainLeadsRegistry.length} Leads)`;
                 renderApplicationCore();
             } catch(e) { 
                 console.error(e); 
-                status.innerHTML = `⚠️ Error cloud`;
+                status.innerHTML = `⚠️ Error de Red Supabase`;
             }
         }
 
@@ -318,17 +317,16 @@
             phases.forEach(p => document.getElementById(`col-${p}`).innerHTML = '');
 
             mainLeadsRegistry.forEach(lead => {
-                let currentPhase = String(lead.phase || 'frio').toLowerCase().replace(/\s/g, '').trim();
+                let currentPhase = lead.phase;
                 if (!phases.includes(currentPhase)) currentPhase = 'frio';
 
-                let valContrato = lead.value || 0;
+                let valContrato = lead.value;
                 let totalAbonado = lead.a1 + lead.a2 + lead.a3 + lead.a4 + lead.a5;
                 let saldoPendiente = valContrato - totalAbonado;
                 
-                // EXTRACTOR INTELIGENTE MULTIFORMATO DE FECHA (Corrige el error de acumulación en Junio)
                 let leadDay = CURRENT_DAY_NUM; let leadMonth = CURRENT_MONTH_NUM; let leadYear = CURRENT_YEAR_NUM;
                 if (lead.date) {
-                    let parts = String(lead.date).replace(/\//g, '-').split('-');
+                    let parts = lead.date.split('-');
                     if(parts.length === 3) {
                         if(parts[0].length === 4) {
                             leadYear = parseInt(parts[0]); leadMonth = parseInt(parts[1]); leadDay = parseInt(parts[2]);
@@ -347,15 +345,18 @@
                     yearMonthsData[leadMonth - 1].totalCollected += totalAbonado;
                 }
 
-                let gName = lead.gestor || listadoGestores[0];
-                
-                // Métrica reseteable de gestiones diarias Hoy
+                let gName = lead.gestor;
                 let isToday = (leadDay === CURRENT_DAY_NUM && leadMonth === CURRENT_MONTH_NUM && leadYear === CURRENT_YEAR_NUM);
 
                 if(leadMonth === selectedAuditMonth && gestoresSales[gName] !== undefined) {
-                    gestoresSales[gName] += totalAbonado; gestoresContracted[gName] += valContrato; gestoresMonthTotalCount[gName]++;
+                    gestoresSales[gName] += totalAbonado; 
+                    gestoresContracted[gName] += valContrato; 
+                    gestoresMonthTotalCount[gName]++;
                 }
-                if(isToday && gestoresTodayCount[gName] !== undefined) gestoresTodayCount[gName]++;
+                
+                if(isToday && gestoresTodayCount[gName] !== undefined) {
+                    gestoresTodayCount[gName]++;
+                }
                 if (isToday) todayAlerts++;
 
                 if ((selectedMonthInteractiveFilter === null || leadMonth === selectedMonthInteractiveFilter) &&
@@ -369,14 +370,14 @@
 
                     pipelineSum += valContrato; salesSum += totalAbonado; phaseCounts[currentPhase]++;
 
-                    let cleanDigits = String(lead.phone).replace(/[^0-9]/g, '');
+                    let cleanDigits = lead.phone.replace(/[^0-9]/g, '');
                     if (cleanDigits.startsWith('09') && cleanDigits.length === 10) cleanDigits = '593' + cleanDigits.substring(1);
 
                     const card = document.createElement('div');
                     card.className = "p-3 rounded-xl border bg-white shadow-xs space-y-1 border-slate-200";
                     card.innerHTML = `
                         <div class="flex justify-between font-bold text-xs">
-                            <span onclick="openModal('edit', ${lead.id})" class="underline cursor-pointer text-slate-800">${lead.name}</span>
+                            <span onclick="openModal('edit', ${lead.id})" class="underline cursor-pointer text-indigo-600">${lead.name}</span>
                             <span class="text-[9px] bg-indigo-50 text-indigo-700 px-1 rounded">Int: ${lead.touch}</span>
                         </div>
                         <p class="text-[10px] text-slate-500">${lead.desc || 'Sin observaciones'}</p>
@@ -390,7 +391,7 @@
                 }
             });
 
-            // Renderizado de Historial Mensual con Tasa de Cierre Real
+            // Historial independiente por mes con Tasa de cierre correcta
             const mContainer = document.getElementById('months-grid-container'); mContainer.innerHTML = '';
             yearMonthsData.forEach((mData, idx) => {
                 let isCurrentFilter = (selectedMonthInteractiveFilter === (idx + 1));
@@ -408,7 +409,7 @@
                     </div>`;
             });
 
-            // Renderizado de metas de asesoras
+            // Metas de asesoras diario/mensual
             const gBody = document.getElementById('goals-table-body'); gBody.innerHTML = '';
             Object.keys(gestoresSales).forEach(g => {
                 let isF = (g === 'Fernando');
@@ -443,6 +444,83 @@
             document.getElementById('kpi-conversion').innerText = `${totalLeadsBajoFiltro > 0 ? Math.round((ventasContadasBajoFiltro / totalLeadsBajoFiltro) * 100) : 0}%`;
         }
 
+        function initPersonalizationConfig() {
+            let savedNames = localStorage.getItem('relax_gestores_names');
+            if(savedNames) { listadoGestores = JSON.parse(savedNames); }
+            let savedMM = localStorage.getItem('relax_mm_dinamicas');
+            if(savedMM) { metasMensualesDinamicas = JSON.parse(savedMM); }
+            let savedMD = localStorage.getItem('relax_md_dinamicas');
+            if(savedMD) { metasDiariasDinamicas = JSON.parse(savedMD); }
+
+            const selectAudit = document.getElementById('audit-month-selector');
+            selectAudit.innerHTML = "";
+            monthsNames.forEach((m, idx) => { 
+                let opt = document.createElement('option'); opt.value = idx + 1; opt.innerText = m; 
+                if(idx + 1 === CURRENT_MONTH_NUM) opt.selected = true; 
+                selectAudit.appendChild(opt); 
+            });
+            buildDynamicButtonsFilters();
+        }
+
+        function buildDynamicButtonsFilters() {
+            const box = document.getElementById('managers-buttons-box'); 
+            box.innerHTML = `<button onclick="setManagerFilter('all')" class="px-3 py-1 bg-slate-100 rounded-lg">Todas</button>`;
+            listadoGestores.forEach(g => { box.innerHTML += `<button onclick="setManagerFilter('${g}')" class="px-3 py-1 bg-slate-100 rounded-lg ml-1">${g}</button>`; });
+            const selectForm = document.getElementById('form-gestor'); selectForm.innerHTML = "";
+            listadoGestores.forEach(g => { let opt = document.createElement('option'); opt.value = g; opt.innerText = g; selectForm.appendChild(opt); });
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('form-id').value;
+            let payload = {
+                id: id ? parseInt(id) : Date.now(), 
+                name: document.getElementById('form-name').value, 
+                phone: document.getElementById('form-phone').value, 
+                phase: document.getElementById('form-phase').value, 
+                value: parseFloat(document.getElementById('form-value').value) || 0, 
+                date: document.getElementById('form-date').value, 
+                gestor: document.getElementById('form-gestor').value, 
+                loss: document.getElementById('form-loss').value, 
+                desc: document.getElementById('form-desc').value, 
+                touch: parseInt(document.getElementById('form-touch').value) || 1,
+                a1: parseFloat(document.getElementById('form-a1').value) || 0, 
+                a2: parseFloat(document.getElementById('form-a2').value) || 0, 
+                a3: parseFloat(document.getElementById('form-a3').value) || 0, 
+                a4: parseFloat(document.getElementById('form-a4').value) || 0, 
+                a5: parseFloat(document.getElementById('form-a5').value) || 0
+            };
+
+            if (id) {
+                let idx = mainLeadsRegistry.findIndex(l => l.id === parseInt(id)); 
+                if(idx !== -1) mainLeadsRegistry[idx] = payload;
+            } else { 
+                mainLeadsRegistry.push(payload); 
+            }
+            closeModal();
+            renderApplicationCore();
+            await saveLeadToSupabase(payload);
+        }
+
+        async function saveLeadToSupabase(leadData) {
+            if(!supabaseClient) return;
+            try {
+                const rowPayload = {
+                    crm_id: String(leadData.id),
+                    name: leadData.name, phone: leadData.phone, phase: leadData.phase,
+                    value: String(leadData.value), date: leadData.date, loss: leadData.loss,
+                    gestor: leadData.gestor, a1: String(leadData.a1), a2: String(leadData.a2), a3: String(leadData.a3),
+                    a4: String(leadData.a4), a5: String(leadData.a5), touch: String(leadData.touch), observaciones: leadData.desc
+                };
+                const { data: existing } = await supabaseClient.from('pacientes_crm').select('crm_id').eq('crm_id', String(leadData.id));
+                if(existing && existing.length > 0) {
+                    await supabaseClient.from('pacientes_crm').update(rowPayload).eq('crm_id', String(leadData.id));
+                } else {
+                    await supabaseClient.from('pacientes_crm').insert([rowPayload]);
+                }
+            } catch(e) { console.error(e); }
+        }
+
         async function importDataEngine(event) {
             if(!supabaseClient) return;
             const file = event.target.files[0]; if (!file) return;
@@ -463,27 +541,55 @@
                         };
                         await saveLeadToSupabase(payload);
                     }
-                    alert("Importación exitosa."); loadDataFromCloud();
+                    alert("Importación Completada."); 
+                    loadDataFromCloud();
                 } catch(err) { console.error(err); }
             };
             reader.readAsArrayBuffer(file);
         }
 
-        function initPersonalizationConfig() {
-            const selectAudit = document.getElementById('audit-month-selector');
-            monthsNames.forEach((m, idx) => { let opt = document.createElement('option'); opt.value = idx + 1; opt.innerText = m; if(idx + 1 === CURRENT_MONTH_NUM) opt.selected = true; selectAudit.appendChild(opt); });
-            buildDynamicButtonsFilters();
+        function openModal(mode, id = null) {
+            document.getElementById('lead-modal').classList.remove('hidden');
+            if (mode === 'create') {
+                document.getElementById('crm-form').reset(); document.getElementById('form-id').value = ""; calcularFlujoAbonos();
+            } else if (mode === 'edit' && id) {
+                const lead = mainLeadsRegistry.find(l => l.id === id);
+                if (lead) {
+                    document.getElementById('form-id').value = lead.id; document.getElementById('form-name').value = lead.name; document.getElementById('form-phone').value = lead.phone; document.getElementById('form-phase').value = lead.phase; document.getElementById('form-value').value = lead.value; 
+                    document.getElementById('form-date').value = lead.date;
+                    document.getElementById('form-gestor').value = lead.gestor; document.getElementById('form-loss').value = lead.loss || "Ninguno"; document.getElementById('form-desc').value = lead.desc;
+                    document.getElementById('form-touch').value = lead.touch || 1;
+                    document.getElementById('form-a1').value = lead.a1 || 0; document.getElementById('form-a2').value = lead.a2 || 0; document.getElementById('form-a3').value = lead.a3 || 0; document.getElementById('form-a4').value = lead.a4 || 0; document.getElementById('form-a5').value = lead.a5 || 0;
+                    calcularFlujoAbonos();
+                }
+            }
         }
-        function buildDynamicButtonsFilters() {
-            const box = document.getElementById('managers-buttons-box'); box.innerHTML = `<button onclick="setManagerFilter('all')" class="px-3 py-1 bg-slate-100 rounded-lg">Todas</button>`;
-            listadoGestores.forEach(g => { box.innerHTML += `<button onclick="setManagerFilter('${g}')" class="px-3 py-1 bg-slate-100 rounded-lg ml-1">${g}</button>`; });
-            const selectForm = document.getElementById('form-gestor'); selectForm.innerHTML = "";
-            listadoGestores.forEach(g => { let opt = document.createElement('option'); opt.value = g; opt.innerText = g; selectForm.appendChild(opt); });
+        function closeModal() { document.getElementById('lead-modal').classList.add('hidden'); }
+        function calcularFlujoAbonos() {
+            let valTotal = parseFloat(document.getElementById('form-value').value) || 0;
+            let totAbonado = (parseFloat(document.getElementById('form-a1').value)||0)+(parseFloat(document.getElementById('form-a2').value)||0)+(parseFloat(document.getElementById('form-a3').value)||0)+(parseFloat(document.getElementById('form-a4').value)||0)+(parseFloat(document.getElementById('form-a5').value)||0);
+            document.getElementById('modal-total-abonado').innerText = `$${totAbonado.toFixed(2)}`;
+            document.getElementById('modal-saldo-pendiente').innerText = `$${(valTotal - totAbonado).toFixed(2)}`;
+        }
+        function toggleConfigPanel() { document.getElementById('config-panel').classList.toggle('hidden'); }
+        function updateEquipoConfig() {
+            listadoGestores = [document.getElementById('cfg-g1').value.trim(), document.getElementById('cfg-g2').value.trim(), document.getElementById('cfg-g3').value.trim(), document.getElementById('cfg-g4').value.trim()];
+            metasDiariasDinamicas[listadoGestores[0]] = parseFloat(document.getElementById('meta-d-g1').value) || 0;
+            metasMensualesDinamicas[listadoGestores[0]] = parseFloat(document.getElementById('meta-m-g1').value) || 0;
+            metasDiariasDinamicas[listadoGestores[1]] = parseFloat(document.getElementById('meta-d-g2').value) || 0;
+            metasMensualesDinamicas[listadoGestores[1]] = parseFloat(document.getElementById('meta-m-g2').value) || 0;
+            metasDiariasDinamicas[listadoGestores[2]] = parseFloat(document.getElementById('meta-d-g3').value) || 0;
+            metasMensualesDinamicas[listadoGestores[2]] = parseFloat(document.getElementById('meta-m-g3').value) || 0;
+            localStorage.setItem('relax_gestores_names', JSON.stringify(listadoGestores));
+            localStorage.setItem('relax_mm_dinamicas', JSON.stringify(metasMensualesDinamicas));
+            localStorage.setItem('relax_md_dinamicas', JSON.stringify(metasDiariasDinamicas));
+            buildDynamicButtonsFilters(); renderApplicationCore();
         }
         function setManagerFilter(m) { currentManagerFilter = m; renderApplicationCore(); }
         function executeLiveSearch() { activeSearchQuery = document.getElementById('crm-search-bar').value.toLowerCase().trim(); renderApplicationCore(); }
-        function openModal(mode, id = null) { document.getElementById('lead-modal').classList.remove('hidden'); }
-        function closeModal() { document.getElementById('lead-modal').classList.add('hidden'); }
+        function toggleTodayAlertsFilter() { filterOnlyTodayAlerts = !filterOnlyTodayAlerts; renderApplicationCore(); }
+        function togglePendingDebtFilter() { filterOnlyPendingDebt = !filterOnlyPendingDebt; renderApplicationCore(); }
+        function triggerMonthInteractiveFilter(monthIndex) { let targetMonth = monthIndex + 1; selectedMonthInteractiveFilter = (selectedMonthInteractiveFilter === targetMonth) ? null : targetMonth; renderApplicationCore(); }
         async function resetDBCloud() { if(confirm("¿Vaciar base cloud?")) { await supabaseClient.from('pacientes_crm').delete().neq('id', -1); location.reload(); } }
         function exportBackupExcel() { let ws = XLSX.utils.json_to_sheet(mainLeadsRegistry); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Backup"); XLSX.writeFile(wb, "Respaldo_CRM_Supabase.xlsx"); }
     </script>
