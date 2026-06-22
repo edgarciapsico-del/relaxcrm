@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM Cloud - v26.5 Máster Estable</title>
+    <title>Relax Therapy CRM Cloud - v26.6 Final Stable</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -31,7 +31,7 @@
                 </div>
                 <div>
                     <span class="font-black text-slate-900 tracking-tight text-lg">RELAX THERAPY CRM MASTER</span>
-                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider"><i class="fa-solid fa-circle-check"></i> Acceso Directo Conectado</span>
+                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider"><i class="fa-solid fa-circle-check"></i> Conexión Directa Estable</span>
                 </div>
             </div>
 
@@ -235,7 +235,6 @@
     </div>
 
     <script>
-        // CREDENCIALES FIJAS DE INFRAESTRUCTURA RELAX THERAPY
         const DB_CLOUD_URL = "https://eqhsgpwoehcryhmibfhn.supabase.co";
         const DB_CLOUD_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxaHNncHdvZWhjcnlobWliZmhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5NjQzMDAsImV4cCI6MjEwMjU0MDMwMH0.7a92b2-4c87-8143-2fed1056cc25";
 
@@ -263,7 +262,6 @@
         };
 
         function initSupabaseEngine() {
-            // Inicialización controlada síncrona
             supabaseClient = supabase.createClient(DB_CLOUD_URL, DB_CLOUD_KEY);
             loadDataFromCloud();
         }
@@ -391,7 +389,6 @@
                 }
             });
 
-            // Historial independiente por mes con Tasa de cierre correcta
             const mContainer = document.getElementById('months-grid-container'); mContainer.innerHTML = '';
             yearMonthsData.forEach((mData, idx) => {
                 let isCurrentFilter = (selectedMonthInteractiveFilter === (idx + 1));
@@ -409,7 +406,6 @@
                     </div>`;
             });
 
-            // Metas de asesoras diario/mensual
             const gBody = document.getElementById('goals-table-body'); gBody.innerHTML = '';
             Object.keys(gestoresSales).forEach(g => {
                 let isF = (g === 'Fernando');
