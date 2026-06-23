@@ -7,15 +7,11 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM Cloud - Premium v27.0</title>
-    <!-- Tailwind CSS -->
+    <title>Relax Therapy CRM Cloud - Premium v27.0 QA Final</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Excel Library -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <!-- Supabase SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.js"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
@@ -34,7 +30,6 @@
             background-color: var(--bg-main); 
         }
 
-        /* Glassmorphism utility */
         .glass-panel {
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(12px);
@@ -48,7 +43,6 @@
             transition: all 0.2s ease;
         }
         
-        /* Drag & Drop Visual Classes */
         .kanban-column.drag-over {
             background-color: rgba(79, 70, 229, 0.08) !important;
             border: 2px dashed var(--brand-primary) !important;
@@ -86,7 +80,6 @@
             background: #94a3b8;
         }
 
-        /* Animations */
         @keyframes slideInUp {
             from {
                 transform: translateY(20px);
@@ -102,7 +95,6 @@
             animation: slideInUp 0.3s ease forwards;
         }
 
-        /* Notyf Toast Styling */
         .toast-notification {
             animation: slideInUp 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
@@ -110,15 +102,13 @@
 </head>
 <body class="min-h-screen flex flex-col antialiased text-slate-800">
 
-    <!-- Toast Notifications Container -->
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2.5 max-w-sm w-full"></div>
 
-    <!-- MAIN HEADER -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
         <div class="max-w-[1780px] mx-auto px-4 lg:px-8 h-20 flex flex-col md:flex-row items-center justify-between gap-4 py-2">
             <div class="flex items-center gap-3">
                 <div class="w-11 h-11 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-600/25">
-                    <i class="fa-solid fa-fire-flame-simple text-xl animate-pulse"></i>
+                    <i class="fa-solid fa-cloud text-xl animate-pulse"></i>
                 </div>
                 <div>
                     <span class="font-extrabold text-slate-900 tracking-tight text-xl flex items-center gap-1.5">
@@ -131,9 +121,7 @@
                 </div>
             </div>
 
-            <!-- Header Quick Actions -->
             <div class="flex flex-wrap items-center gap-2.5 text-xs">
-                <!-- Mode Indicator Badge -->
                 <div id="storage-mode-badge" class="px-3 h-10 rounded-xl font-bold flex items-center gap-2 border bg-slate-50 text-slate-600 shadow-2xs">
                     <i id="storage-icon" class="fa-solid fa-database"></i>
                     <span id="storage-text">Detectando almacenamiento...</span>
@@ -167,7 +155,6 @@
         </div>
     </header>
 
-    <!-- CONFIGURATION & DATABASE PANEL -->
     <section id="config-panel" class="max-w-[1780px] w-full mx-auto px-4 lg:px-8 mt-4 hidden animate-fade-in">
         <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
             
@@ -178,7 +165,6 @@
                     </h3>
                     <p class="text-xs text-slate-500 mt-1">Gestione credenciales de base de datos, metas dinámicas y su equipo de asesoras.</p>
                 </div>
-                <!-- Database Mode Switch -->
                 <div class="flex items-center gap-3 bg-slate-100 p-1.5 rounded-xl border">
                     <button onclick="changeDatabaseMode('local')" id="btn-mode-local" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all">
                         <i class="fa-solid fa-laptop"></i> Modo Local (LocalStorage)
@@ -190,7 +176,6 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- COL 1: Supabase Configuration -->
                 <div class="p-5 bg-slate-50 rounded-2xl border space-y-4">
                     <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
                         <i class="fa-solid fa-database text-blue-600"></i> Credenciales de Nube (Supabase)
@@ -215,7 +200,6 @@
                     </div>
                 </div>
 
-                <!-- COL 2 & 3: Advisers Targets Management -->
                 <div class="lg:col-span-2 p-5 bg-slate-50 rounded-2xl border space-y-4">
                     <div class="flex justify-between items-center border-b pb-2">
                         <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
@@ -227,21 +211,16 @@
                     </div>
                     
                     <div class="overflow-y-auto max-h-[170px] scrollbar-custom">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="advisers-config-list">
-                            <!-- Dynamic settings inputs go here -->
-                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="advisers-config-list"></div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- METRICS & KPIS -->
     <section class="max-w-[1780px] w-full mx-auto px-4 lg:px-8 mt-4">
         <div class="bg-white p-6 rounded-2xl border border-slate-200 space-y-6 shadow-xs">
-            <!-- KPI GRID -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                
                 <div class="bg-slate-50 p-4.5 rounded-xl border border-slate-200 hover:shadow-2xs transition-all relative group">
                     <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Pipeline Activo</span>
                     <h3 id="kpi-pipeline" class="text-2xl font-black text-slate-800 mt-1">$0.00</h3>
@@ -261,14 +240,14 @@
                 <div class="bg-blue-50/70 p-4.5 rounded-xl border border-blue-100 hover:shadow-2xs transition-all relative group">
                     <span class="text-[10px] font-black text-blue-600 uppercase tracking-wider">Tasa Agendamiento</span>
                     <h3 id="kpi-scheduling-rate" class="text-2xl font-black text-blue-700 mt-1">0%</h3>
-                    <p id="sub-kpi-agendas" class="text-[10px] text-blue-500 font-medium mt-1">0 Pacientes en Agenda</p>
+                    <p id="sub-kpi-agendas" class="text-[10px] text-blue-500 font-medium mt-1">0 Citas en Filtro</p>
                     <i class="fa-solid fa-calendar-check absolute top-4 right-4 text-blue-300 group-hover:text-blue-600 transition-colors text-lg"></i>
                 </div>
 
                 <div class="bg-violet-50/70 p-4.5 rounded-xl border border-violet-100 hover:shadow-2xs transition-all relative group">
                     <span class="text-[10px] font-black text-violet-600 uppercase tracking-wider">Tasa Cierre Real</span>
                     <h3 id="kpi-conversion" class="text-2xl font-black text-violet-700 mt-1">0%</h3>
-                    <p id="sub-kpi-cierres" class="text-[10px] text-violet-500 font-medium mt-1">0 Pacientes Convertidos</p>
+                    <p id="sub-kpi-cierres" class="text-[10px] text-violet-500 font-medium mt-1">0 Convertidos en Filtro</p>
                     <i class="fa-solid fa-award absolute top-4 right-4 text-violet-300 group-hover:text-violet-600 transition-colors text-lg"></i>
                 </div>
 
@@ -282,7 +261,6 @@
                 </div>
             </div>
 
-            <!-- MONTHLY BAR HISTORY -->
             <div class="bg-slate-50 p-4.5 rounded-xl border border-slate-200 space-y-3">
                 <div class="flex items-center justify-between border-b pb-1.5">
                     <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
@@ -290,12 +268,9 @@
                     </h4>
                     <span class="text-[10px] text-slate-400 font-bold uppercase">Haz clic en un mes para filtrar el Kanban</span>
                 </div>
-                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-12 gap-3.5" id="months-grid-container">
-                    <!-- Dynamic Month metrics go here -->
-                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-12 gap-3.5" id="months-grid-container"></div>
             </div>
 
-            <!-- LEADS PERFORMANCE TABLE -->
             <div class="bg-slate-50 p-4.5 rounded-xl border border-slate-200 space-y-3">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b pb-2">
                     <h4 class="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
@@ -321,16 +296,13 @@
                                 <th class="p-3.5 w-60 font-bold text-left">Progreso de Ventas</th>
                             </tr>
                         </thead>
-                        <tbody id="goals-table-body" class="text-center font-medium divide-y divide-slate-100">
-                            <!-- Dynamic adviser rows go here -->
-                        </tbody>
+                        <tbody id="goals-table-body" class="text-center font-medium divide-y divide-slate-100"></tbody>
                     </table>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- SEARCH & ADVISER FILTER BOARD BAR -->
     <section class="max-w-[1780px] w-full mx-auto px-4 lg:px-8 mt-4">
         <div class="bg-white px-5 py-3 rounded-2xl border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4 shadow-2xs">
             <div class="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
@@ -338,9 +310,7 @@
                     <i class="fa-solid fa-filter text-indigo-600"></i>
                     <span class="text-xs font-black text-slate-700 uppercase">Filtrar Asesora:</span>
                 </div>
-                <div class="flex flex-wrap gap-1.5" id="managers-buttons-box">
-                    <!-- Dynamic adviser filter buttons -->
-                </div>
+                <div class="flex flex-wrap gap-1.5" id="managers-buttons-box"></div>
             </div>
             <div class="relative w-full md:w-96">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
@@ -351,7 +321,6 @@
         </div>
     </section>
 
-    <!-- MOBILE KANBAN TAB SELECTOR (Hidden on Desktop) -->
     <section class="max-w-[1780px] w-full mx-auto px-4 mt-4 lg:hidden">
         <div class="bg-white p-2 rounded-xl border flex overflow-x-auto gap-1 scrollbar-custom">
             <button onclick="switchMobileColumn('frio')" id="tab-frio" class="px-3 py-2 rounded-lg font-bold text-xs flex-shrink-0 bg-slate-100 text-slate-700 flex items-center gap-1.5">
@@ -375,11 +344,9 @@
         </div>
     </section>
 
-    <!-- KANBAN BOARD CONTAINER -->
     <main class="flex-1 max-w-[1780px] w-full mx-auto px-4 lg:px-8 py-4 overflow-x-auto">
         <div class="flex gap-4.5 pb-6 items-start scrollbar-custom">
             
-            <!-- COLUMN: FRÍO -->
             <div id="column-container-frio" class="kanban-column bg-slate-100 p-3.5 rounded-2xl flex flex-col flex-shrink-0 min-h-[550px] border border-slate-200/80 shadow-2xs"
                  ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event, 'frio')" ondragleave="handleDragLeave(event, 'frio')" ondrop="handleDrop(event, 'frio')">
                 <div class="flex items-center justify-between mb-3.5 px-1 font-extrabold text-xs uppercase text-slate-600">
@@ -389,7 +356,6 @@
                 <div id="col-frio" class="space-y-3.5 flex-grow overflow-y-auto max-h-[580px] scrollbar-custom pb-4"></div>
             </div>
             
-            <!-- COLUMN: TIBIO -->
             <div id="column-container-tibio" class="kanban-column bg-slate-100 p-3.5 rounded-2xl flex flex-col flex-shrink-0 min-h-[550px] border border-slate-200/80 shadow-2xs"
                  ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event, 'tibio')" ondragleave="handleDragLeave(event, 'tibio')" ondrop="handleDrop(event, 'tibio')">
                 <div class="flex items-center justify-between mb-3.5 px-1 font-extrabold text-xs uppercase text-slate-600">
@@ -399,7 +365,6 @@
                 <div id="col-tibio" class="space-y-3.5 flex-grow overflow-y-auto max-h-[580px] scrollbar-custom pb-4"></div>
             </div>
             
-            <!-- COLUMN: CALIENTE -->
             <div id="column-container-caliente" class="kanban-column bg-slate-100 p-3.5 rounded-2xl flex flex-col flex-shrink-0 min-h-[550px] border border-slate-200/80 shadow-2xs"
                  ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event, 'caliente')" ondragleave="handleDragLeave(event, 'caliente')" ondrop="handleDrop(event, 'caliente')">
                 <div class="flex items-center justify-between mb-3.5 px-1 font-extrabold text-xs uppercase text-slate-600">
@@ -409,7 +374,6 @@
                 <div id="col-caliente" class="space-y-3.5 flex-grow overflow-y-auto max-h-[580px] scrollbar-custom pb-4"></div>
             </div>
             
-            <!-- COLUMN: AGENDA -->
             <div id="column-container-agenda" class="kanban-column bg-indigo-50/60 p-3.5 rounded-2xl flex flex-col flex-shrink-0 min-h-[550px] border border-indigo-100 shadow-2xs"
                  ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event, 'agenda')" ondragleave="handleDragLeave(event, 'agenda')" ondrop="handleDrop(event, 'agenda')">
                 <div class="flex items-center justify-between mb-3.5 px-1 font-extrabold text-xs uppercase text-indigo-700">
@@ -419,7 +383,6 @@
                 <div id="col-agenda" class="space-y-3.5 flex-grow overflow-y-auto max-h-[580px] scrollbar-custom pb-4"></div>
             </div>
             
-            <!-- COLUMN: VENTA -->
             <div id="column-container-venta" class="kanban-column bg-emerald-50/60 p-3.5 rounded-2xl flex flex-col flex-shrink-0 min-h-[550px] border border-emerald-100 shadow-2xs"
                  ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event, 'venta')" ondragleave="handleDragLeave(event, 'venta')" ondrop="handleDrop(event, 'venta')">
                 <div class="flex items-center justify-between mb-3.5 px-1 font-extrabold text-xs uppercase text-emerald-700">
@@ -429,7 +392,6 @@
                 <div id="col-venta" class="space-y-3.5 flex-grow overflow-y-auto max-h-[580px] scrollbar-custom pb-4"></div>
             </div>
             
-            <!-- COLUMN: POST VENTA -->
             <div id="column-container-postventa" class="kanban-column bg-purple-50/60 p-3.5 rounded-2xl flex flex-col flex-shrink-0 min-h-[550px] border border-purple-100 shadow-2xs"
                  ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event, 'postventa')" ondragleave="handleDragLeave(event, 'postventa')" ondrop="handleDrop(event, 'postventa')">
                 <div class="flex items-center justify-between mb-3.5 px-1 font-extrabold text-xs uppercase text-purple-700">
@@ -442,11 +404,9 @@
         </div>
     </main>
 
-    <!-- TECHNICAL FILE / DETAILS MODAL -->
     <div id="lead-modal" class="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl w-full max-w-4xl p-6 shadow-2xl border border-slate-200 mx-4 max-h-[92vh] overflow-y-auto scrollbar-custom animate-fade-in">
             
-            <!-- Modal Header -->
             <div class="flex items-center justify-between mb-5 border-b border-slate-100 pb-3">
                 <div>
                     <h3 id="modal-title" class="text-sm font-black uppercase text-slate-800 tracking-wider flex items-center gap-2">
@@ -462,7 +422,6 @@
             <form id="crm-form" onsubmit="handleFormSubmit(event)" class="space-y-6 text-xs">
                 <input type="hidden" id="form-id">
                 
-                <!-- SECTION 1: Personal & Primary Information -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="block font-bold text-slate-500 mb-1">Nombre Completo del Paciente</label>
@@ -487,7 +446,6 @@
                     </div>
                 </div>
 
-                <!-- SECTION 2: Pipeline State & Financial value -->
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-indigo-50/30 p-4 rounded-xl border border-indigo-100/50">
                     <div>
                         <label class="block font-bold text-indigo-950 mb-1">Estado de Pipeline</label>
@@ -509,9 +467,7 @@
                     </div>
                     <div>
                         <label class="block font-bold text-indigo-950 mb-1">Asesora Gestora</label>
-                        <select id="form-gestor" class="w-full px-3 h-10 bg-white border border-slate-200 rounded-xl font-semibold focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
-                            <!-- Dynamic options -->
-                        </select>
+                        <select id="form-gestor" class="w-full px-3 h-10 bg-white border border-slate-200 rounded-xl font-semibold focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"></select>
                     </div>
                     <div>
                         <label class="block font-bold text-indigo-950 mb-1">Causa de Descarte</label>
@@ -525,13 +481,11 @@
                     </div>
                 </div>
 
-                <!-- SECTION 3: Dynamic Payments History -->
                 <div class="bg-slate-50 p-4.5 rounded-xl border border-slate-200/80 space-y-4">
                     <span class="block text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
                         <i class="fa-solid fa-wallet text-emerald-600"></i> Control y Registro de Abonos Realizados
                     </span>
                     
-                    <!-- Form to add new abono -->
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-2xs items-end">
                         <div>
                             <label class="block text-[10px] font-bold text-slate-500 mb-1">Monto del Abono ($)</label>
@@ -558,7 +512,6 @@
                         </div>
                     </div>
 
-                    <!-- Payment list -->
                     <div class="overflow-x-auto max-h-[140px] scrollbar-custom border rounded-lg bg-white">
                         <table class="w-full text-[11px] text-left border-collapse">
                             <thead>
@@ -569,9 +522,7 @@
                                     <th class="p-2 w-16">Acción</th>
                                 </tr>
                             </thead>
-                            <tbody id="modal-abonos-list-rows" class="divide-y text-center font-semibold">
-                                <!-- Dynamic abonos table -->
-                            </tbody>
+                            <tbody id="modal-abonos-list-rows" class="divide-y text-center font-semibold"></tbody>
                         </table>
                     </div>
 
@@ -587,9 +538,7 @@
                     </div>
                 </div>
 
-                <!-- SECTION 4: Bitacora / Timeline / Contact Notes -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <!-- Write log -->
                     <div class="bg-slate-50 p-4.5 rounded-xl border border-slate-200/80 space-y-3">
                         <span class="block text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
                             <i class="fa-solid fa-clock-rotate-left text-indigo-600"></i> Registrar Nueva Gestión Comercial
@@ -628,19 +577,14 @@
                         </div>
                     </div>
 
-                    <!-- Log timeline list -->
                     <div class="bg-slate-50 p-4.5 rounded-xl border border-slate-200/80 flex flex-col h-[270px]">
                         <span class="block text-xs font-black text-slate-800 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                             <i class="fa-solid fa-list-ul text-slate-500"></i> Bitácora e Historial de Contacto
                         </span>
-                        
-                        <div class="flex-1 overflow-y-auto space-y-3.5 pr-1.5 scrollbar-custom" id="modal-bitacora-timeline">
-                            <!-- Timeline dynamic logs go here -->
-                        </div>
+                        <div class="flex-1 overflow-y-auto space-y-3.5 pr-1.5 scrollbar-custom" id="modal-bitacora-timeline"></div>
                     </div>
                 </div>
 
-                <!-- Footer buttons -->
                 <div class="pt-3.5 flex justify-end gap-2.5 border-t border-slate-100">
                     <button type="button" onclick="closeModal()" class="px-4.5 h-11 font-bold text-slate-500 hover:text-slate-700 transition-colors">
                         Cancelar
@@ -653,9 +597,7 @@
         </div>
     </div>
 
-    <!-- MAIN CRM SCRIPT -->
     <script>
-        // CREDENCIALES DE INFRAESTRUCTURA RELAX THERAPY (POR DEFECTO)
         const DB_CLOUD_URL = "https://eqhsgpwoehcryhmibfhn.supabase.co";
         const DB_CLOUD_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxaHNncHdvZWhjcnlobWliZmhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5NjQzMDAsImV4cCI6MjEwMjU0MDMwMH0.7a92b2-4c87-8143-2fed1056cc25";
 
@@ -666,49 +608,39 @@
         const CURRENT_YEAR_NUM = liveClock.getFullYear();
         
         let mainLeadsRegistry = [];
-        let currentStorageMode = 'local'; // 'local' o 'supabase'
+        let currentStorageMode = 'local'; 
         let currentManagerFilter = 'all';
         let filterOnlyTodayAlerts = false;
         let filterOnlyPendingDebt = false; 
         let activeSearchQuery = "";
         let selectedMonthInteractiveFilter = null; 
-        let currentMobileColumn = 'frio'; // Kanban mobile column
+        let currentMobileColumn = 'frio'; 
         
-        // Dynamic payments & dynamic logs trackers in modal
         let currentModalAbonosList = [];
         let currentModalBitacoraList = [];
         
-        // Adviser Settings
         let listadoGestores = ["Brenda", "Joselyne", "Naty", "Fernando"];
         let metasMensualesDinamicas = { "Brenda": 1100, "Joselyne": 1100, "Naty": 1100, "Fernando": 0 };
         let metasDiariasDinamicas = { "Brenda": 50, "Joselyne": 50, "Naty": 50, "Fernando": 0 };
         const monthsNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
+        // Espera de seguridad Máster para registro UMD en objeto window
         window.onload = function() {
             initPersonalizationConfig();
             initStorageEngine();
         };
 
-        // NOTIFICATIONS SYSTEM
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             toast.className = `toast-notification flex items-center gap-3 p-4 rounded-xl border text-xs font-bold shadow-lg bg-white border-slate-200 transition-all duration-300`;
             
             let icon = '';
-            if (type === 'success') {
-                icon = '<i class="fa-solid fa-circle-check text-emerald-500 text-base"></i>';
-            } else if (type === 'warning') {
-                icon = '<i class="fa-solid fa-triangle-exclamation text-amber-500 text-base"></i>';
-            } else {
-                icon = '<i class="fa-solid fa-circle-xmark text-rose-500 text-base"></i>';
-            }
+            if (type === 'success') icon = '<i class="fa-solid fa-circle-check text-emerald-500 text-base"></i>';
+            else if (type === 'warning') icon = '<i class="fa-solid fa-triangle-exclamation text-amber-500 text-base"></i>';
+            else icon = '<i class="fa-solid fa-circle-xmark text-rose-500 text-base"></i>';
             
-            toast.innerHTML = `
-                ${icon}
-                <div class="flex-1 text-slate-800">${message}</div>
-                <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
-            `;
+            toast.innerHTML = `${icon}<div class="flex-1 text-slate-800">${message}</div><button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>`;
             container.appendChild(toast);
             
             setTimeout(() => {
@@ -717,17 +649,10 @@
             }, 4500);
         }
 
-        // STORAGE AND SYNC ENGINE
         function initStorageEngine() {
-            // Cargar modo preferido o auto-detectar
-            const savedMode = localStorage.getItem('relax_storage_mode');
-            if (savedMode) {
-                currentStorageMode = savedMode;
-            } else {
-                currentStorageMode = 'supabase'; // Predeterminado
-            }
+            const savedMode = localStorage.getItem('relax_storage_mode') || 'supabase';
+            currentStorageMode = savedMode;
 
-            // Cargar credenciales cargadas
             const urlSetup = localStorage.getItem('supabase_url') || DB_CLOUD_URL;
             const keySetup = localStorage.getItem('supabase_key') || DB_CLOUD_KEY;
             
@@ -738,11 +663,15 @@
 
             if (currentStorageMode === 'supabase') {
                 try {
-                    supabaseClient = supabase.createClient(urlSetup, keySetup);
+                    // Corrección definitiva de espacio de nombres UMD
+                    if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
+                        setTimeout(initStorageEngine, 250);
+                        return;
+                    }
+                    supabaseClient = window.supabase.createClient(urlSetup, keySetup);
                     loadDataFromCloud();
-                } catch(e) {
-                    console.error("Error al conectar con Supabase:", e);
-                    switchToLocalFallback("Error de inicialización Supabase");
+                } {
+                    switchToLocalFallback("Error de objeto Supabase");
                 }
             } else {
                 loadDataFromLocalStorage();
@@ -754,7 +683,6 @@
             const badge = document.getElementById('storage-mode-badge');
             const icon = document.getElementById('storage-icon');
             const text = document.getElementById('storage-text');
-            
             const btnLocal = document.getElementById('btn-mode-local');
             const btnSupa = document.getElementById('btn-mode-supabase');
 
@@ -762,17 +690,14 @@
                 badge.className = "px-3 h-10 rounded-xl font-bold flex items-center gap-2 border bg-indigo-50 border-indigo-100 text-indigo-700 shadow-2xs";
                 icon.className = "fa-solid fa-cloud text-indigo-600";
                 text.innerText = "Base Nube (Supabase)";
-                
                 btnSupa.className = "px-4 py-1.5 rounded-lg text-xs font-bold bg-white text-indigo-700 shadow-2xs border border-indigo-100";
                 btnLocal.className = "px-4 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:bg-slate-200/50";
             } else {
                 badge.className = "px-3 h-10 rounded-xl font-bold flex items-center gap-2 border bg-amber-50 border-amber-100 text-amber-700 shadow-2xs";
                 icon.className = "fa-solid fa-laptop text-amber-600";
                 text.innerText = "Modo Local (Offline)";
-                
                 btnLocal.className = "px-4 py-1.5 rounded-lg text-xs font-bold bg-white text-amber-700 shadow-2xs border border-amber-100";
                 btnSupa.className = "px-4 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:bg-slate-200/50";
-                
                 status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Modo Offline Activo`;
                 status.className = "block text-[11px] font-extrabold text-amber-600 uppercase tracking-wider";
             }
@@ -782,36 +707,31 @@
             if (currentStorageMode === mode) return;
             currentStorageMode = mode;
             localStorage.setItem('relax_storage_mode', mode);
-            
-            showToast(`Cambiando a Modo ${mode === 'supabase' ? 'Nube (Supabase)' : 'Local (LocalStorage)'}...`, 'warning');
+            showToast(`Cambiando a Modo ${mode === 'supabase' ? 'Nube' : 'Local'}...`, 'warning');
             initStorageEngine();
         }
 
         function saveSupabaseSettings() {
             const url = document.getElementById('db-setup-url').value.trim();
             const key = document.getElementById('db-setup-key').value.trim();
-            
             if(!url || !key) {
-                showToast("Por favor complete todos los campos de credenciales.", "error");
+                showToast("Por favor complete todos los campos.", "error");
                 return;
             }
-            
             localStorage.setItem('supabase_url', url);
             localStorage.setItem('supabase_key', key);
             localStorage.setItem('relax_storage_mode', 'supabase');
             currentStorageMode = 'supabase';
-            
-            showToast("Ajustes de Supabase guardados. Conectando...", "warning");
+            showToast("Credenciales de nube guardadas.", "warning");
             initStorageEngine();
         }
 
         function resetDefaultSupabaseSettings() {
-            if (confirm("¿Seguro que desea restaurar las credenciales predeterminadas de fábrica?")) {
+            if (confirm("¿Seguro que desea restaurar las credenciales predeterminadas?")) {
                 localStorage.removeItem('supabase_url');
                 localStorage.removeItem('supabase_key');
                 document.getElementById('db-setup-url').value = DB_CLOUD_URL;
                 document.getElementById('db-setup-key').value = DB_CLOUD_KEY;
-                showToast("Credenciales de fábrica restauradas.", "warning");
                 saveSupabaseSettings();
             }
         }
@@ -819,52 +739,36 @@
         function switchToLocalFallback(reason = "") {
             currentStorageMode = 'local';
             updateStorageBadges();
-            showToast(`⚠️ Error Nube (${reason}). Operando en Modo Local.`, 'error');
+            showToast(`⚠️ Modo Local Activado de Respaldo.`, 'error');
             loadDataFromLocalStorage();
         }
 
         function loadDataFromLocalStorage() {
             const localData = localStorage.getItem('relax_leads_registry_local');
-            if (localData) {
-                mainLeadsRegistry = JSON.parse(localData);
-            } else {
-                mainLeadsRegistry = [];
-            }
+            mainLeadsRegistry = localData ? JSON.parse(localData) : [];
             renderApplicationCore();
-            showToast(`Datos cargados localmente (${mainLeadsRegistry.length} leads).`);
+            showToast(`Datos locales cargados (${mainLeadsRegistry.length} leads).`);
         }
 
         async function loadDataFromCloud() {
-            if(!supabaseClient) {
-                switchToLocalFallback("Cliente no inicializado");
-                return;
-            }
-            
+            if(!supabaseClient) return;
             const status = document.getElementById('sync-status');
             status.innerHTML = `⏳ Sincronizando datos cloud...`;
             status.className = "block text-[11px] font-extrabold text-indigo-600 uppercase tracking-wider";
-            
             try {
                 let { data, error } = await supabaseClient.from('pacientes_crm').select('*');
                 if(error) throw error;
-                
                 mainLeadsRegistry = data.map(item => parseRowToLead(item));
-                
-                // Save a copy in local backup
                 localStorage.setItem('relax_leads_registry_local', JSON.stringify(mainLeadsRegistry));
-                
                 status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sincronizado (${mainLeadsRegistry.length} Leads)`;
                 status.className = "block text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider";
-                
-                showToast(`Base de datos sincronizada. ${mainLeadsRegistry.length} leads leídos.`);
                 renderApplicationCore();
             } catch(e) { 
                 console.error(e); 
-                switchToLocalFallback(e.message || "Error de red");
+                switchToLocalFallback("Error de conexión");
             }
         }
 
-        // PARSING & COMPATIBILITY HELPERS
         function parseRowToLead(item) {
             let lead = {
                 id: parseInt(item.crm_id || item.id), 
@@ -876,18 +780,8 @@
                 loss: item.loss || 'Ninguno', 
                 gestor: item.gestor || 'Brenda',
                 touch: parseInt(item.touch) || 1,
-                desc: '', 
-                abonos: [],
-                bitacora: []
+                desc: '', abonos: [], bitacora: []
             };
-
-            let a1 = parseFloat(item.a1) || 0;
-            let a2 = parseFloat(item.a2) || 0;
-            let a3 = parseFloat(item.a3) || 0;
-            let a4 = parseFloat(item.a4) || 0;
-            let a5 = parseFloat(item.a5) || 0;
-
-            // Leer observaciones enriquecidas
             let obsVal = item.observaciones || item.desc || '';
             if (obsVal.trim().startsWith('{') && obsVal.trim().endsWith('}')) {
                 try {
@@ -895,177 +789,104 @@
                     lead.desc = parsed.desc || '';
                     lead.abonos = parsed.abonos || [];
                     lead.bitacora = parsed.bitacora || [];
-                } catch (e) {
-                    lead.desc = obsVal;
-                }
-            } else {
-                lead.desc = obsVal;
-            }
+                } catch (e) { lead.desc = obsVal; }
+            } else { lead.desc = obsVal; }
 
-            // Retrocompatibilidad de abonos si están vacíos
             if (lead.abonos.length === 0) {
-                if (a1 > 0) lead.abonos.push({ monto: a1, fecha: lead.date, metodo: 'Abono 1' });
-                if (a2 > 0) lead.abonos.push({ monto: a2, fecha: lead.date, metodo: 'Abono 2' });
-                if (a3 > 0) lead.abonos.push({ monto: a3, fecha: lead.date, metodo: 'Abono 3' });
-                if (a4 > 0) lead.abonos.push({ monto: a4, fecha: lead.date, metodo: 'Abono 4' });
-                if (a5 > 0) lead.abonos.push({ monto: a5, fecha: lead.date, metodo: 'Abono 5' });
+                if ((parseFloat(item.a1)||0) > 0) lead.abonos.push({ monto: parseFloat(item.a1), fecha: lead.date, metodo: 'Abono 1' });
+                if ((parseFloat(item.a2)||0) > 0) lead.abonos.push({ monto: parseFloat(item.a2), fecha: lead.date, metodo: 'Abono 2' });
+                if ((parseFloat(item.a3)||0) > 0) lead.abonos.push({ monto: parseFloat(item.a3), fecha: lead.date, metodo: 'Abono 3' });
+                if ((parseFloat(item.a4)||0) > 0) lead.abonos.push({ monto: parseFloat(item.a4), fecha: lead.date, metodo: 'Abono 4' });
+                if ((parseFloat(item.a5)||0) > 0) lead.abonos.push({ monto: parseFloat(item.a5), fecha: lead.date, metodo: 'Abono 5' });
             }
-
             return lead;
         }
 
         function prepareLeadToRow(leadData) {
-            // Retrocompatibilidad para las 5 columnas fijas de Supabase
             let a1 = leadData.abonos[0] ? parseFloat(leadData.abonos[0].monto) || 0 : 0;
             let a2 = leadData.abonos[1] ? parseFloat(leadData.abonos[1].monto) || 0 : 0;
             let a3 = leadData.abonos[2] ? parseFloat(leadData.abonos[2].monto) || 0 : 0;
             let a4 = leadData.abonos[3] ? parseFloat(leadData.abonos[3].monto) || 0 : 0;
             let a5 = leadData.abonos[4] ? parseFloat(leadData.abonos[4].monto) || 0 : 0;
-
-            // Guardamos datos enriquecidos en observaciones serializados como JSON
-            let obsJSONString = JSON.stringify({
-                desc: leadData.desc,
-                abonos: leadData.abonos,
-                bitacora: leadData.bitacora
-            });
-
+            let obsJSONString = JSON.stringify({ desc: leadData.desc, abonos: leadData.abonos, bitacora: leadData.bitacora });
             return {
-                crm_id: String(leadData.id),
-                name: leadData.name, 
-                phone: leadData.phone, 
-                phase: leadData.phase,
-                value: String(leadData.value), 
-                date: leadData.date, 
-                loss: leadData.loss,
-                gestor: leadData.gestor, 
-                a1: String(a1), 
-                a2: String(a2), 
-                a3: String(a3),
-                a4: String(a4), 
-                a5: String(a5), 
-                touch: String(leadData.touch), 
-                observaciones: obsJSONString
+                crm_id: String(leadData.id), name: leadData.name, phone: leadData.phone, phase: leadData.phase,
+                value: String(leadData.value), date: leadData.date, loss: leadData.loss, gestor: leadData.gestor, 
+                a1: String(a1), a2: String(a2), a3: String(a3), a4: String(a4), a5: String(a5), touch: String(leadData.touch), observaciones: obsJSONString
             };
         }
 
-        // SAVE LOGIC
         async function saveLeadData(leadData) {
-            // Actualizar localmente primero
             let idx = mainLeadsRegistry.findIndex(l => l.id === leadData.id);
-            if(idx !== -1) {
-                mainLeadsRegistry[idx] = leadData;
-            } else {
-                mainLeadsRegistry.push(leadData);
-            }
-            
-            // Guardar en LocalStorage
+            if(idx !== -1) mainLeadsRegistry[idx] = leadData; else mainLeadsRegistry.push(leadData);
             localStorage.setItem('relax_leads_registry_local', JSON.stringify(mainLeadsRegistry));
 
             if (currentStorageMode === 'supabase' && supabaseClient) {
                 try {
                     const rowPayload = prepareLeadToRow(leadData);
                     const { data: existing } = await supabaseClient.from('pacientes_crm').select('crm_id').eq('crm_id', String(leadData.id));
-                    
                     if(existing && existing.length > 0) {
                         await supabaseClient.from('pacientes_crm').update(rowPayload).eq('crm_id', String(leadData.id));
                     } else {
                         await supabaseClient.from('pacientes_crm').insert([rowPayload]);
                     }
-                    showToast("Sincronizado con Supabase.");
                 } catch(e) {
-                    console.error("Error al escribir en Supabase:", e);
-                    showToast("No se pudo escribir en la nube. Cambiando a local.", "warning");
-                    switchToLocalFallback(e.message || "Error al guardar");
+                    console.error(e);
+                    showToast("Guardado localmente. Error de sincronización cloud.", "warning");
                 }
             }
             renderApplicationCore();
         }
 
-        // HTML5 DRAG & DROP FOR KANBAN
         function handleDragStart(e, id) {
             e.dataTransfer.setData("text/plain", id);
-            
-            // Add visual effects delayed so the drag image copies correctly
             setTimeout(() => {
                 const card = document.getElementById(`lead-card-${id}`);
                 if (card) card.classList.add('dragging');
             }, 0);
         }
-
         function handleDragEnd(e) {
-            const draggingCards = document.querySelectorAll('.lead-card.dragging');
-            draggingCards.forEach(c => c.classList.remove('dragging'));
+            document.querySelectorAll('.lead-card.dragging').forEach(c => c.classList.remove('dragging'));
         }
-
-        function handleDragOver(e) {
-            e.preventDefault();
-        }
-
+        function handleDragOver(e) { e.preventDefault(); }
         function handleDragEnter(e, columnId) {
             e.preventDefault();
             const colContainer = document.getElementById(`column-container-${columnId}`);
             if (colContainer) colContainer.classList.add('drag-over');
         }
-
         function handleDragLeave(e, columnId) {
             const colContainer = document.getElementById(`column-container-${columnId}`);
             if (colContainer) colContainer.classList.remove('drag-over');
         }
-
         async function handleDrop(e, targetPhase) {
             e.preventDefault();
             const colContainer = document.getElementById(`column-container-${targetPhase}`);
             if (colContainer) colContainer.classList.remove('drag-over');
-
-            const id = e.dataTransfer.getData("text/plain");
-            if (!id) return;
-
+            const id = e.dataTransfer.getData("text/plain"); if (!id) return;
             const lead = mainLeadsRegistry.find(l => l.id === parseInt(id));
-            if (lead) {
-                if (lead.phase === targetPhase) return; // No change
-                
-                const oldPhase = lead.phase;
-                lead.phase = targetPhase;
-                
-                // Add an automatic log entry to the history
-                const timestamp = new Date().toLocaleString();
+            if (lead && lead.phase !== targetPhase) {
+                const oldPhase = lead.phase; lead.phase = targetPhase;
                 lead.bitacora.unshift({
-                    fecha: timestamp,
-                    asesora: "Sistema",
-                    nota: `Lead movido de [${oldPhase.toUpperCase()}] a [${targetPhase.toUpperCase()}] vía arrastrar y soltar.`
+                    fecha: new Date().toLocaleString(), asesora: "Sistema",
+                    nota: `Lead movido de [${oldPhase.toUpperCase()}] a [${targetPhase.toUpperCase()}] vía arrastrar.`
                 });
-                
-                showToast(`Paciente "${lead.name}" movido a ${targetPhase.toUpperCase()}`);
+                showToast(`Moviendo a ${targetPhase.toUpperCase()}`);
                 await saveLeadData(lead);
             }
         }
 
-        // RENDER CORE
         function renderApplicationCore() {
             const phases = ['frio', 'tibio', 'caliente', 'agenda', 'venta', 'postventa'];
             let pipelineSum = 0, salesSum = 0, todayAlerts = 0;
             let phaseCounts = { frio: 0, tibio: 0, caliente: 0, agenda: 0, venta: 0, postventa: 0 };
-            let totalLeadsBajoFiltro = 0; 
-            let agendasContadasBajoFiltro = 0; 
-            let ventasContadasBajoFiltro = 0;
+            let totalLeadsBajoFiltro = 0; let agendasContadasBajoFiltro = 0; let ventasContadasBajoFiltro = 0;
 
-            let gestoresSales = {}; 
-            let gestoresContracted = {}; 
-            let gestoresTodayCount = {}; 
-            let gestoresMonthTotalCount = {};
-            
-            // Inicializar contadores por gestora
-            listadoGestores.forEach(g => { 
-                gestoresSales[g] = 0; 
-                gestoresContracted[g] = 0; 
-                gestoresTodayCount[g] = 0; 
-                gestoresMonthTotalCount[g] = 0; 
-            });
+            let gestoresSales = {}; let gestoresContracted = {}; let gestoresTodayCount = {}; let gestoresMonthTotalCount = {};
+            listadoGestores.forEach(g => { gestoresSales[g] = 0; gestoresContracted[g] = 0; gestoresTodayCount[g] = 0; gestoresMonthTotalCount[g] = 0; });
             
             let yearMonthsData = Array.from({ length: 12 }, () => ({ totalLeads: 0, totalSalesLeads: 0, totalContracted: 0, totalCollected: 0 }));
             let selectedAuditMonth = parseInt(document.getElementById('audit-month-selector').value) || CURRENT_MONTH_NUM;
 
-            // Limpiar columnas Kanban
             phases.forEach(p => document.getElementById(`col-${p}`).innerHTML = '');
 
             mainLeadsRegistry.forEach(lead => {
@@ -1076,12 +897,8 @@
                 let totalAbonado = lead.abonos ? lead.abonos.reduce((sum, a) => sum + parseFloat(a.monto), 0) : 0;
                 let saldoPendiente = valContrato - totalAbonado;
                 
-                // Parse date
-                let leadDay = CURRENT_DAY_NUM; 
-                let leadMonth = CURRENT_MONTH_NUM; 
-                let leadYear = CURRENT_YEAR_NUM;
-                
-                if (lead.date) {
+                let leadDay = CURRENT_DAY_NUM; let leadMonth = CURRENT_MONTH_NUM; let leadYear = CURRENT_YEAR_NUM;
+                if (lead.date && lead.date.includes('-')) {
                     let parts = lead.date.split('-');
                     if(parts.length === 3) {
                         if(parts[0].length === 4) {
@@ -1092,12 +909,9 @@
                     }
                 }
 
-                // Acumulador de historial mensual
                 if(leadMonth >= 1 && leadMonth <= 12) {
                     yearMonthsData[leadMonth - 1].totalLeads++;
-                    if(currentPhase === 'venta' || currentPhase === 'postventa') {
-                        yearMonthsData[leadMonth - 1].totalSalesLeads++;
-                    }
+                    if(currentPhase === 'venta' || currentPhase === 'postventa') yearMonthsData[leadMonth - 1].totalSalesLeads++;
                     yearMonthsData[leadMonth - 1].totalContracted += valContrato;
                     yearMonthsData[leadMonth - 1].totalCollected += totalAbonado;
                 }
@@ -1110,95 +924,56 @@
                     gestoresContracted[gName] += valContrato; 
                     gestoresMonthTotalCount[gName]++;
                 }
-                
-                if(isToday && gestoresTodayCount[gName] !== undefined) {
-                    gestoresTodayCount[gName]++;
-                }
+                if(isToday && gestoresTodayCount[gName] !== undefined) gestoresTodayCount[gName]++;
                 if (isToday) todayAlerts++;
 
-                // EVALUACIÓN DE FILTROS ACTIVO
-                const matchesManager = (currentManagerFilter === 'all' || lead.gestor === currentManagerFilter);
-                const matchesMonth = (selectedMonthInteractiveFilter === null || leadMonth === selectedMonthInteractiveFilter);
-                const matchesTodayAlerts = (!filterOnlyTodayAlerts || isToday);
-                const matchesPendingDebt = (!filterOnlyPendingDebt || saldoPendiente > 0.05);
-                const matchesSearch = (activeSearchQuery === "" || 
-                                       lead.name.toLowerCase().includes(activeSearchQuery) || 
-                                       lead.phone.includes(activeSearchQuery) ||
-                                       lead.desc.toLowerCase().includes(activeSearchQuery) ||
-                                       (lead.bitacora && lead.bitacora.some(log => log.nota.toLowerCase().includes(activeSearchQuery))));
-
-                if (matchesManager && matchesMonth && matchesTodayAlerts && matchesPendingDebt && matchesSearch) {
+                if ((currentManagerFilter === 'all' || lead.gestor === currentManagerFilter) &&
+                    (selectedMonthInteractiveFilter === null || leadMonth === selectedMonthInteractiveFilter) &&
+                    (!filterOnlyTodayAlerts || isToday) && (!filterOnlyPendingDebt || saldoPendiente > 0.05) &&
+                    (activeSearchQuery === "" || lead.name.toLowerCase().includes(activeSearchQuery) || lead.phone.includes(activeSearchQuery) || lead.desc.toLowerCase().includes(activeSearchQuery))) {
                     
                     totalLeadsBajoFiltro++;
                     if (currentPhase === 'agenda') agendasContadasBajoFiltro++;
                     if (currentPhase === 'venta' || currentPhase === 'postventa') ventasContadasBajoFiltro++;
 
-                    pipelineSum += valContrato; 
-                    salesSum += totalAbonado; 
-                    phaseCounts[currentPhase]++;
+                    pipelineSum += valContrato; salesSum += totalAbonado; phaseCounts[currentPhase]++;
 
                     let cleanDigits = lead.phone.replace(/[^0-9]/g, '');
-                    if (cleanDigits.startsWith('09') && cleanDigits.length === 10) {
-                        cleanDigits = '593' + cleanDigits.substring(1);
-                    }
+                    if (cleanDigits.startsWith('09') && cleanDigits.length === 10) cleanDigits = '593' + cleanDigits.substring(1);
 
-                    // Renderizar Tarjeta Lead
                     const card = document.createElement('div');
-                    card.id = `lead-card-${lead.id}`;
-                    card.draggable = true;
+                    card.id = `lead-card-${lead.id}`; card.draggable = true;
                     card.ondragstart = (e) => handleDragStart(e, lead.id);
                     card.ondragend = (e) => handleDragEnd(e);
                     
-                    // Condensar observaciones
                     let displayObs = lead.desc ? lead.desc : "Sin observaciones";
                     if (displayObs.length > 55) displayObs = displayObs.substring(0, 52) + "...";
 
-                    let cardBorderClass = 'border-slate-200';
-                    let badgeClass = 'bg-slate-100 text-slate-600';
-                    if (lead.loss && lead.loss !== 'Ninguno') {
-                        cardBorderClass = 'border-rose-300 bg-rose-50/20';
-                        badgeClass = 'bg-rose-100 text-rose-700';
-                    } else if (currentPhase === 'venta' || currentPhase === 'postventa') {
-                        cardBorderClass = 'border-emerald-300';
-                    }
-
+                    let cardBorderClass = lead.loss && lead.loss !== 'Ninguno' ? 'border-rose-300 bg-rose-50/20' : (currentPhase === 'venta' || currentPhase === 'postventa' ? 'border-emerald-300' : 'border-slate-200');
                     card.className = `lead-card p-3 rounded-xl border bg-white shadow-xs space-y-2 hover:shadow-md transition-all ${cardBorderClass} ${currentMobileColumn !== currentPhase ? 'hidden lg:block' : ''}`;
                     card.innerHTML = `
                         <div class="flex justify-between font-bold text-xs">
                             <span onclick="openModal('edit', ${lead.id})" class="underline cursor-pointer text-indigo-600 hover:text-indigo-800 font-extrabold">${lead.name}</span>
-                            <span class="text-[9px] ${badgeClass} px-1.5 py-0.5 rounded font-black uppercase">
-                                ${lead.loss && lead.loss !== 'Ninguno' ? 'Descarte' : `Int: ${lead.touch}`}
-                            </span>
+                            <span class="text-[9px] ${lead.loss && lead.loss !== 'Ninguno' ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-600'} px-1.5 py-0.5 rounded font-black uppercase">${lead.loss && lead.loss !== 'Ninguno' ? 'Descarte' : `Int: ${lead.touch}`}</span>
                         </div>
                         <p class="text-[10px] text-slate-500 font-medium"><i class="fa-solid fa-notes-medical text-slate-400"></i> ${displayObs}</p>
-                        
                         <div class="text-[10px] font-extrabold flex justify-between bg-slate-50 p-1.5 rounded-lg border border-slate-100">
                             <span class="text-emerald-600">Cobrado: $${totalAbonado.toFixed(2)}</span>
                             <span class="text-rose-600">Pend: $${saldoPendiente.toFixed(2)}</span>
                         </div>
-                        
                         <div class="flex justify-between items-center text-[10px] text-slate-400 font-bold pt-1 border-t border-slate-100">
                             <span class="uppercase text-[9px]"><i class="fa-solid fa-circle-user text-slate-300"></i> ${lead.gestor}</span>
-                            <a href="https://wa.me/${cleanDigits}" target="_blank" class="flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded-lg text-[9px] font-black transition-all">
-                                <i class="fa-brands fa-whatsapp text-xs"></i> WhatsApp
-                            </a>
+                            <a href="https://wa.me/${cleanDigits}" target="_blank" class="flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded-lg text-[9px] font-black transition-all"><i class="fa-brands fa-whatsapp text-xs"></i> WhatsApp</a>
                         </div>`;
                     
                     document.getElementById(`col-${currentPhase}`).appendChild(card);
                 }
             });
 
-            // RENDER MONTHLY WIDGETS
-            const mContainer = document.getElementById('months-grid-container'); 
-            mContainer.innerHTML = '';
+            const mContainer = document.getElementById('months-grid-container'); mContainer.innerHTML = '';
             yearMonthsData.forEach((mData, idx) => {
-                let isCurrentFilter = (selectedMonthInteractiveFilter === (idx + 1));
-                let borderStyle = isCurrentFilter 
-                    ? 'border-indigo-600 bg-indigo-50/70 ring-2 ring-indigo-500/20' 
-                    : 'border-slate-200 bg-white hover:border-slate-300';
-                
+                let borderStyle = (selectedMonthInteractiveFilter === (idx + 1)) ? 'border-indigo-600 bg-indigo-50/70 ring-2 ring-indigo-500/20' : 'border-slate-200 bg-white hover:border-slate-300';
                 let tasaCierreMes = mData.totalLeads > 0 ? Math.round((mData.totalSalesLeads / mData.totalLeads) * 100) : 0;
-
                 mContainer.innerHTML += `
                     <div onclick="triggerMonthInteractiveFilter(${idx})" class="p-2.5 rounded-xl border text-center shadow-2xs cursor-pointer transition-all ${borderStyle}">
                         <span class="block font-black text-slate-700 border-b pb-1 mb-1.5 text-[10px] uppercase tracking-wide">${monthsNames[idx]}</span>
@@ -1210,25 +985,13 @@
                     </div>`;
             });
 
-            // RENDER PERFORMANCE TABLE ROWS
-            const gBody = document.getElementById('goals-table-body'); 
-            gBody.innerHTML = '';
+            const gBody = document.getElementById('goals-table-body'); gBody.innerHTML = '';
             Object.keys(gestoresSales).forEach(g => {
-                let isSupervisor = (g === 'Fernando' || gName === 'Fernando'); 
-                let totCobradoMes = gestoresSales[g] || 0;
-                let totContratadoMes = gestoresContracted[g] || 0;
-                let hoyGestiones = gestoresTodayCount[g] || 0;
-                let acumuladoMesLeads = gestoresMonthTotalCount[g] || 0;
-                
-                let metaMensualBase = metasMensualesDinamicas[g] !== undefined ? metasMensualesDinamicas[g] : 1100;
-                let metaDiariaBase = metasDiariasDinamicas[g] !== undefined ? metasDiariasDinamicas[g] : 50;
+                let totCobradoMes = gestoresSales[g] || 0; let totContratadoMes = gestoresContracted[g] || 0;
+                let hoyGestiones = gestoresTodayCount[g] || 0; let acumuladoMesLeads = gestoresMonthTotalCount[g] || 0;
+                let metaMensualBase = metasMensualesDinamicas[g] ?? 1100; let metaDiariaBase = metasDiariasDinamicas[g] ?? 50;
                 let pctAvance = metaMensualBase > 0 ? Math.min(Math.round((totCobradoMes / metaMensualBase) * 100), 100) : 0;
-
-                // Color code progress bar
-                let barColor = 'bg-indigo-600';
-                if (pctAvance < 40) barColor = 'bg-rose-500';
-                else if (pctAvance < 75) barColor = 'bg-amber-500';
-                else barColor = 'bg-emerald-600';
+                let barColor = pctAvance < 40 ? 'bg-rose-500' : (pctAvance < 75 ? 'bg-amber-500' : 'bg-emerald-600');
 
                 gBody.innerHTML += `
                     <tr class="border-b h-12 hover:bg-slate-50/50 text-center font-medium">
@@ -1241,652 +1004,239 @@
                         <td class="p-2.5 font-bold text-indigo-600">$${metaMensualBase.toFixed(2)}</td>
                         <td class="p-2.5 text-left pl-2">
                             <div class="flex items-center gap-2">
-                                <div class="w-full bg-slate-200 rounded-full h-2 shadow-2xs">
-                                    <div class="${barColor} h-2 rounded-full transition-all duration-500" style="width: ${pctAvance}%"></div>
-                                </div>
-                                <span class="font-extrabold w-8 text-right ${pctAvance >= 100 ? 'text-emerald-600': 'text-slate-600'}">${pctAvance}%</span>
+                                <div class="w-full bg-slate-200 rounded-full h-2 shadow-2xs"><div class="${barColor} h-2 rounded-full transition-all duration-500" style="width: ${pctAvance}%"></div></div>
+                                <span class="font-extrabold w-8 text-right text-slate-600">${pctAvance}%</span>
                             </div>
                         </td>
                     </tr>`;
             });
 
-            // UPDATE WIDGET COUNTERS
             document.getElementById('kpi-pipeline').innerText = `$${pipelineSum.toFixed(2)}`;
             document.getElementById('kpi-sales').innerText = `$${salesSum.toFixed(2)}`;
             document.getElementById('kpi-alerts').innerText = todayAlerts;
             phases.forEach(p => {
                 document.getElementById(`b-${p}`).innerText = phaseCounts[p];
-                // Update badges on mobile header tabs
-                const tabBadge = document.getElementById(`badge-tab-${p}`);
-                if (tabBadge) tabBadge.innerText = phaseCounts[p];
+                if (document.getElementById(`badge-tab-${p}`)) document.getElementById(`badge-tab-${p}`).innerText = phaseCounts[p];
             });
-            
             document.getElementById('kpi-scheduling-rate').innerText = `${totalLeadsBajoFiltro > 0 ? Math.round((agendasContadasBajoFiltro / totalLeadsBajoFiltro) * 100) : 0}%`;
             document.getElementById('sub-kpi-agendas').innerText = `${agendasContadasBajoFiltro} Agenda Cita en Filtro`;
-            
             document.getElementById('kpi-conversion').innerText = `${totalLeadsBajoFiltro > 0 ? Math.round((ventasContadasBajoFiltro / totalLeadsBajoFiltro) * 100) : 0}%`;
-            document.getElementById('sub-kpi-cierres').innerText = `${ventasContadasBajoFiltro} Ventas/Post Ventas en Filtro`;
+            document.getElementById('sub-kpi-cierres').innerText = `${ventasContadasBajoFiltro} Ventas en Filtro`;
         }
 
-        // DYNAMIC CONFIGURATION CONTROLS
         function initPersonalizationConfig() {
-            let savedNames = localStorage.getItem('relax_gestores_names');
-            if(savedNames) { 
-                listadoGestores = JSON.parse(savedNames); 
-            }
-            let savedMM = localStorage.getItem('relax_mm_dinamicas');
-            if(savedMM) { 
-                metasMensualesDinamicas = JSON.parse(savedMM); 
-            }
-            let savedMD = localStorage.getItem('relax_md_dinamicas');
-            if(savedMD) { 
-                metasDiariasDinamicas = JSON.parse(savedMD); 
-            }
+            listadoGestores = JSON.parse(localStorage.getItem('relax_gestores_names')) || ["Brenda", "Joselyne", "Naty", "Fernando"];
+            metasMensualesDinamicas = JSON.parse(localStorage.getItem('relax_mm_dinamicas')) || { "Brenda": 1100, "Joselyne": 1100, "Naty": 1100, "Fernando": 0 };
+            metasDiariasDinamicas = JSON.parse(localStorage.getItem('relax_md_dinamicas')) || { "Brenda": 50, "Joselyne": 50, "Naty": 50, "Fernando": 0 };
 
-            // Popular selector de mes
-            const selectAudit = document.getElementById('audit-month-selector');
-            selectAudit.innerHTML = "";
+            const selectAudit = document.getElementById('audit-month-selector'); selectAudit.innerHTML = "";
             monthsNames.forEach((m, idx) => { 
-                let opt = document.createElement('option'); 
-                opt.value = idx + 1; 
-                opt.innerText = m; 
+                let opt = document.createElement('option'); opt.value = idx + 1; opt.innerText = m; 
                 if(idx + 1 === CURRENT_MONTH_NUM) opt.selected = true; 
                 selectAudit.appendChild(opt); 
             });
-            
-            buildDynamicButtonsFilters();
-            renderAdvisersSettingsList();
+            buildDynamicButtonsFilters(); renderAdvisersSettingsList();
         }
 
         function buildDynamicButtonsFilters() {
-            const box = document.getElementById('managers-buttons-box'); 
+            const box = document.getElementById('managers-buttons-box');
             box.innerHTML = `<button onclick="setManagerFilter('all')" class="px-3.5 py-1.5 rounded-lg border font-bold ${currentManagerFilter === 'all' ? 'bg-indigo-600 text-white border-indigo-600 shadow-2xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border-transparent'} transition-all">Todas</button>`;
-            
             listadoGestores.forEach(g => { 
                 box.innerHTML += `<button onclick="setManagerFilter('${g}')" class="px-3.5 py-1.5 rounded-lg border font-bold ml-1 transition-all ${currentManagerFilter === g ? 'bg-indigo-600 text-white border-indigo-600 shadow-2xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border-transparent'}">${g}</button>`; 
             });
-            
-            // Ficha técnica select form
-            const selectForm = document.getElementById('form-gestor'); 
-            selectForm.innerHTML = "";
-            listadoGestores.forEach(g => { 
-                let opt = document.createElement('option'); 
-                opt.value = g; 
-                opt.innerText = g; 
-                selectForm.appendChild(opt); 
-            });
+            const selectForm = document.getElementById('form-gestor'); selectForm.innerHTML = "";
+            listadoGestores.forEach(g => { selectForm.innerHTML += `<option value="${g}">${g}</option>`; });
         }
 
         function renderAdvisersSettingsList() {
-            const container = document.getElementById('advisers-config-list');
-            container.innerHTML = "";
-            
+            const container = document.getElementById('advisers-config-list'); container.innerHTML = "";
             listadoGestores.forEach((g, idx) => {
-                const metaD = metasDiariasDinamicas[g] !== undefined ? metasDiariasDinamicas[g] : 50;
-                const metaM = metasMensualesDinamicas[g] !== undefined ? metasMensualesDinamicas[g] : 1100;
-                
                 container.innerHTML += `
                     <div class="p-3 bg-white border rounded-xl shadow-2xs space-y-2 relative group hover:border-slate-300 transition-all">
                         <div class="flex items-center justify-between border-b pb-1">
                             <input type="text" id="cfg-name-${idx}" value="${g}" onchange="updateAdviserInfo(${idx})" class="font-extrabold text-slate-800 bg-transparent focus:outline-hidden uppercase text-xs w-3/4">
-                            <button onclick="removeAdviserRecord(${idx})" class="text-rose-600 hover:text-rose-800 text-[10px] font-bold" title="Eliminar asesora">
-                                <i class="fa-solid fa-user-minus"></i>
-                            </button>
+                            <button onclick="removeAdviserRecord(${idx})" class="text-rose-600 hover:text-rose-800 text-[10px] font-bold"><i class="fa-solid fa-user-minus"></i></button>
                         </div>
                         <div class="grid grid-cols-2 gap-2 text-[11px]">
-                            <div>
-                                <label class="block text-slate-400 font-bold mb-0.5">Meta Diaria ($)</label>
-                                <input type="number" id="cfg-metad-${idx}" value="${metaD}" onchange="updateAdviserInfo(${idx})" class="w-full px-2 py-1 bg-slate-50 border rounded-lg font-bold text-indigo-600 focus:outline-hidden">
-                            </div>
-                            <div>
-                                <label class="block text-slate-400 font-bold mb-0.5">Meta Mensual ($)</label>
-                                <input type="number" id="cfg-metam-${idx}" value="${metaM}" onchange="updateAdviserInfo(${idx})" class="w-full px-2 py-1 bg-slate-50 border rounded-lg font-bold text-indigo-600 focus:outline-hidden">
-                            </div>
+                            <div><label class="block text-slate-400 font-bold mb-0.5">Meta Diaria ($)</label><input type="number" id="cfg-metad-${idx}" value="${metasDiariasDinamicas[g] ?? 50}" onchange="updateAdviserInfo(${idx})" class="w-full px-2 py-1 bg-slate-50 border rounded-lg font-bold text-indigo-600 focus:outline-hidden"></div>
+                            <div><label class="block text-slate-400 font-bold mb-0.5">Meta Mensual ($)</label><input type="number" id="cfg-metam-${idx}" value="${metasMensualesDinamicas[g] ?? 1100}" onchange="updateAdviserInfo(${idx})" class="w-full px-2 py-1 bg-slate-50 border rounded-lg font-bold text-indigo-600 focus:outline-hidden"></div>
                         </div>
                     </div>`;
             });
         }
 
         function addNewAdviserPrompt() {
-            const name = prompt("Ingrese el nombre de la nueva asesora:");
-            if (!name) return;
-            const cleanName = name.trim();
-            if (cleanName === "") return;
-            
-            if (listadoGestores.includes(cleanName)) {
-                showToast("Esta asesora ya está registrada.", "warning");
-                return;
-            }
-            
-            listadoGestores.push(cleanName);
-            metasDiariasDinamicas[cleanName] = 50;
-            metasMensualesDinamicas[cleanName] = 1100;
-            
+            const name = prompt("Ingrese el nombre de la nueva asesora:"); if (!name || name.trim() === "") return;
+            let cleanName = name.trim();
+            if (listadoGestores.includes(cleanName)) return;
+            listadoGestores.push(cleanName); metasDiariasDinamicas[cleanName] = 50; metasMensualesDinamicas[cleanName] = 1100;
             saveAdvisersConfigToStorage();
-            showToast(`Asesora ${cleanName} añadida.`);
         }
-
         function removeAdviserRecord(index) {
             const targetName = listadoGestores[index];
-            if (confirm(`¿Seguro que desea eliminar a "${targetName}"? Se perderán sus metas asignadas.`)) {
-                listadoGestores.splice(index, 1);
-                delete metasDiariasDinamicas[targetName];
-                delete metasMensualesDinamicas[targetName];
-                
+            if (confirm(`¿Eliminar a ${targetName}?`)) {
+                listadoGestores.splice(index, 1); delete metasDiariasDinamicas[targetName]; delete metasMensualesDinamicas[targetName];
                 saveAdvisersConfigToStorage();
-                showToast(`Asesora ${targetName} eliminada.`);
             }
         }
-
         function updateAdviserInfo(index) {
-            const oldName = listadoGestores[index];
-            const newName = document.getElementById(`cfg-name-${index}`).value.trim();
-            
-            if (newName === "") {
-                showToast("El nombre no puede estar vacío.", "error");
-                document.getElementById(`cfg-name-${index}`).value = oldName;
-                return;
-            }
-            
-            const metaD = parseFloat(document.getElementById(`cfg-metad-${index}`).value) || 0;
-            const metaM = parseFloat(document.getElementById(`cfg-metam-${index}`).value) || 0;
-
+            const oldName = listadoGestores[index]; const newName = document.getElementById(`cfg-name-${index}`).value.trim();
+            if (newName === "") return;
             if (oldName !== newName) {
-                // Rename in lists
                 listadoGestores[index] = newName;
-                delete metasDiariasDinamicas[oldName];
-                delete metasMensualesDinamicas[oldName];
-                
-                // Rename advisers in active registry leads
-                mainLeadsRegistry.forEach(lead => {
-                    if (lead.gestor === oldName) lead.gestor = newName;
-                });
-                localStorage.setItem('relax_leads_registry_local', JSON.stringify(mainLeadsRegistry));
+                delete metasDiariasDinamicas[oldName]; delete metasMensualesDinamicas[oldName];
+                mainLeadsRegistry.forEach(l => { if (l.gestor === oldName) l.gestor = newName; });
             }
-
-            metasDiariasDinamicas[newName] = metaD;
-            metasMensualesDinamicas[newName] = metaM;
-            
+            metasDiariasDinamicas[newName] = parseFloat(document.getElementById(`cfg-metad-${index}`).value) || 0;
+            metasMensualesDinamicas[newName] = parseFloat(document.getElementById(`cfg-metam-${index}`).value) || 0;
             saveAdvisersConfigToStorage();
         }
-
         function saveAdvisersConfigToStorage() {
             localStorage.setItem('relax_gestores_names', JSON.stringify(listadoGestores));
             localStorage.setItem('relax_mm_dinamicas', JSON.stringify(metasMensualesDinamicas));
             localStorage.setItem('relax_md_dinamicas', JSON.stringify(metasDiariasDinamicas));
-            
-            buildDynamicButtonsFilters();
-            renderAdvisersSettingsList();
+            buildDynamicButtonsFilters(); renderAdvisersSettingsList(); renderApplicationCore();
+        }
+
+        function setManagerFilter(m) { currentManagerFilter = m; buildDynamicButtonsFilters(); renderApplicationCore(); }
+        function executeLiveSearch() { activeSearchQuery = document.getElementById('crm-search-bar').value.toLowerCase().trim(); renderApplicationCore(); }
+        function toggleTodayAlertsFilter() {
+            filterOnlyTodayAlerts = !filterOnlyTodayAlerts;
+            document.getElementById('btn-kpi-alerts').className = filterOnlyTodayAlerts ? "bg-fuchsia-600 p-4.5 rounded-xl border border-fuchsia-600 text-white cursor-pointer shadow-md" : "bg-fuchsia-50/70 p-4.5 rounded-xl border border-fuchsia-100 cursor-pointer text-fuchsia-700";
+            document.getElementById('kpi-filter-alerts-icon').className = filterOnlyTodayAlerts ? "fa-solid fa-filter-circle-xmark text-[10px]" : "fa-solid fa-filter text-[10px] opacity-70";
             renderApplicationCore();
         }
-
-        function setManagerFilter(m) { 
-            currentManagerFilter = m; 
-            buildDynamicButtonsFilters();
-            renderApplicationCore(); 
+        function togglePendingDebtFilter() {
+            filterOnlyPendingDebt = !filterOnlyPendingDebt;
+            document.getElementById('btn-kpi-sales').className = filterOnlyPendingDebt ? "bg-emerald-600 p-4.5 rounded-xl border border-emerald-600 text-white cursor-pointer shadow-md" : "bg-emerald-50/70 p-4.5 rounded-xl border border-emerald-100 cursor-pointer text-emerald-700";
+            document.getElementById('kpi-filter-debt-icon').className = filterOnlyPendingDebt ? "fa-solid fa-filter-circle-xmark text-[10px]" : "fa-solid fa-filter text-[10px] opacity-70";
+            renderApplicationCore();
         }
-
-        function executeLiveSearch() { 
-            activeSearchQuery = document.getElementById('crm-search-bar').value.toLowerCase().trim(); 
-            renderApplicationCore(); 
-        }
-
-        function toggleTodayAlertsFilter() { 
-            filterOnlyTodayAlerts = !filterOnlyTodayAlerts;
-            const btnAlerts = document.getElementById('btn-kpi-alerts');
-            const iconAlerts = document.getElementById('kpi-filter-alerts-icon');
-            
-            if (filterOnlyTodayAlerts) {
-                btnAlerts.className = "bg-fuchsia-600 p-4.5 rounded-xl border border-fuchsia-600 text-white cursor-pointer hover:bg-fuchsia-700 transition-all relative group select-none shadow-md";
-                iconAlerts.className = "fa-solid fa-filter-circle-xmark text-[10px]";
-                showToast("Filtro activado: Viendo llamadas programadas para hoy.");
-            } else {
-                btnAlerts.className = "bg-fuchsia-50/70 p-4.5 rounded-xl border border-fuchsia-100 cursor-pointer text-fuchsia-700 hover:bg-fuchsia-100/70 transition-all relative group select-none shadow-2xs";
-                iconAlerts.className = "fa-solid fa-filter text-[10px] opacity-70";
-                showToast("Filtro desactivado: Viendo todos los leads.");
-            }
-            renderApplicationCore(); 
-        }
-
-        function togglePendingDebtFilter() { 
-            filterOnlyPendingDebt = !filterOnlyPendingDebt; 
-            const btnSales = document.getElementById('btn-kpi-sales');
-            const iconSales = document.getElementById('kpi-filter-debt-icon');
-            const label = document.getElementById('sub-kpi-debt');
-            
-            if (filterOnlyPendingDebt) {
-                btnSales.className = "bg-emerald-600 p-4.5 rounded-xl border border-emerald-600 text-white cursor-pointer hover:bg-emerald-700 transition-all relative group select-none shadow-md";
-                iconSales.className = "fa-solid fa-filter-circle-xmark text-[10px]";
-                label.className = "text-[10px] text-emerald-100 font-medium mt-1";
-                label.innerText = "Filtro activo: Viendo saldos pendientes";
-                showToast("Filtro activado: Viendo pacientes con deudas pendientes.");
-            } else {
-                btnSales.className = "bg-emerald-50/70 p-4.5 rounded-xl border border-emerald-100 cursor-pointer text-emerald-700 hover:bg-emerald-100/70 transition-all relative group select-none shadow-2xs";
-                iconSales.className = "fa-solid fa-filter text-[10px] opacity-70";
-                label.className = "text-[10px] text-emerald-600 font-medium mt-1";
-                label.innerText = "Click para filtrar: Ver saldos pendientes";
-                showToast("Filtro desactivado: Viendo todos los cobros.");
-            }
-            renderApplicationCore(); 
-        }
-
-        function triggerMonthInteractiveFilter(monthIndex) { 
-            let targetMonth = monthIndex + 1; 
-            if (selectedMonthInteractiveFilter === targetMonth) {
-                selectedMonthInteractiveFilter = null;
-                showToast(`Filtro mensual desactivado.`);
-            } else {
-                selectedMonthInteractiveFilter = targetMonth;
-                showToast(`Filtrando leads de ${monthsNames[monthIndex]}.`);
-            }
-            renderApplicationCore(); 
-        }
-
-        function toggleConfigPanel() { 
-            document.getElementById('config-panel').classList.toggle('hidden'); 
-        }
-
-        // KANBAN MOBILE RESPONSIVE TABS
+        function triggerMonthInteractiveFilter(monthIndex) { selectedMonthInteractiveFilter = (selectedMonthInteractiveFilter === (monthIndex + 1)) ? null : (monthIndex + 1); renderApplicationCore(); }
         function switchMobileColumn(columnId) {
             currentMobileColumn = columnId;
-            const columns = ['frio', 'tibio', 'caliente', 'agenda', 'venta', 'postventa'];
-            
-            columns.forEach(col => {
-                const tabBtn = document.getElementById(`tab-${col}`);
-                if (col === columnId) {
-                    tabBtn.className = "px-3 py-2 rounded-lg font-extrabold text-xs flex-shrink-0 bg-indigo-600 text-white flex items-center gap-1.5 shadow-xs";
-                } else {
-                    tabBtn.className = "px-3 py-2 rounded-lg font-bold text-xs flex-shrink-0 bg-slate-100 text-slate-700 flex items-center gap-1.5";
-                }
+            ['frio', 'tibio', 'caliente', 'agenda', 'venta', 'postventa'].forEach(c => {
+                document.getElementById(`tab-${c}`).className = c === columnId ? "px-3 py-2 rounded-lg font-extrabold text-xs flex-shrink-0 bg-indigo-600 text-white shadow-xs" : "px-3 py-2 rounded-lg font-bold text-xs flex-shrink-0 bg-slate-100 text-slate-700";
             });
             renderApplicationCore();
         }
 
-        // DETAILS MODAL CONTROL AND LOGIC
         function openModal(mode, id = null) {
             document.getElementById('lead-modal').classList.remove('hidden');
-            
-            // Clean modal dynamic variables
-            currentModalAbonosList = [];
-            currentModalBitacoraList = [];
-            
-            // Set fields values
+            currentModalAbonosList = []; currentModalBitacoraList = [];
             if (mode === 'create') {
                 document.getElementById('modal-title').innerText = "Ficha Técnica: Registrar Nuevo Lead";
-                document.getElementById('crm-form').reset(); 
-                document.getElementById('form-id').value = ""; 
-                document.getElementById('form-date').valueAsDate = new Date();
-                document.getElementById('form-touch').value = 1;
-                document.getElementById('form-loss').value = "Ninguno";
-                document.getElementById('new-log-desc').value = "";
-                
-                renderModalAbonosList();
-                renderModalBitacoraList();
-                calcularFlujoAbonos();
-            } else if (mode === 'edit' && id) {
-                document.getElementById('modal-title').innerText = "Ficha Técnica: Detalles y Seguimiento Comercial";
+                document.getElementById('crm-form').reset(); document.getElementById('form-id').value = ""; document.getElementById('form-date').valueAsDate = new Date();
+                document.getElementById('form-touch').value = 1; document.getElementById('form-loss').value = "Ninguno";
+            } else {
+                document.getElementById('modal-title').innerText = "Ficha Técnica: Detalles y Seguimiento";
                 const lead = mainLeadsRegistry.find(l => l.id === id);
                 if (lead) {
-                    document.getElementById('form-id').value = lead.id; 
-                    document.getElementById('form-name').value = lead.name; 
-                    document.getElementById('form-phone').value = lead.phone; 
-                    document.getElementById('form-phase').value = lead.phase; 
-                    document.getElementById('form-value').value = lead.value; 
-                    document.getElementById('form-date').value = lead.date;
-                    document.getElementById('form-gestor').value = lead.gestor; 
-                    document.getElementById('form-loss').value = lead.loss || "Ninguno"; 
-                    document.getElementById('form-touch').value = lead.touch || 1;
-                    
-                    document.getElementById('new-log-desc').value = "";
-
-                    // Cargar abonos y bitácora guardada
+                    document.getElementById('form-id').value = lead.id; document.getElementById('form-name').value = lead.name; document.getElementById('form-phone').value = lead.phone; document.getElementById('form-phase').value = lead.phase; document.getElementById('form-value').value = lead.value; document.getElementById('form-date').value = lead.date; document.getElementById('form-gestor').value = lead.gestor; document.getElementById('form-loss').value = lead.loss || "Ninguno"; document.getElementById('form-touch').value = lead.touch || 1;
                     currentModalAbonosList = lead.abonos ? [...lead.abonos] : [];
                     currentModalBitacoraList = lead.bitacora ? [...lead.bitacora] : [];
-
-                    renderModalAbonosList();
-                    renderModalBitacoraList();
-                    calcularFlujoAbonos();
                 }
             }
+            renderModalAbonosList(); renderModalBitacoraList(); calcularFlujoAbonos();
         }
+        function closeModal() { document.getElementById('lead-modal').classList.add('hidden'); }
 
-        function closeModal() { 
-            document.getElementById('lead-modal').classList.add('hidden'); 
-        }
-
-        // ABONOS DYNAMIC SYSTEM
         function renderModalAbonosList() {
-            const tbody = document.getElementById('modal-abonos-list-rows');
-            tbody.innerHTML = "";
-
+            const tbody = document.getElementById('modal-abonos-list-rows'); tbody.innerHTML = "";
             if (currentModalAbonosList.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-slate-400 font-medium italic">No se han registrado abonos para este paciente</td></tr>`;
-                return;
+                tbody.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-slate-400 font-medium italic">No hay abonos registrados</td></tr>`; return;
             }
-
-            // Sort payments by date descending
-            currentModalAbonosList.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
-
-            currentModalAbonosList.forEach((a, idx) => {
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="p-2 text-left">${a.fecha}</td>
-                        <td class="p-2 text-slate-500 font-semibold">${a.metodo}</td>
-                        <td class="p-2 text-emerald-600 font-bold">$${parseFloat(a.monto).toFixed(2)}</td>
-                        <td class="p-2">
-                            <button type="button" onclick="removeAbonoRecordFromModal(${idx})" class="text-rose-600 hover:text-rose-800 transition-colors font-bold text-[10px]">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </button>
-                        </td>
-                    </tr>`;
+            currentModalAbonosList.sort((a,b) => new Date(b.fecha) - new Date(a.fecha)).forEach((a, idx) => {
+                tbody.innerHTML += `<tr class="hover:bg-slate-50"><td class="p-2 text-left">${a.fecha}</td><td class="p-2 text-slate-500 font-semibold">${a.metodo}</td><td class="p-2 text-emerald-600 font-bold">$${parseFloat(a.monto).toFixed(2)}</td><td class="p-2"><button type="button" onclick="removeAbonoRecordFromModal(${idx})" class="text-rose-600"><i class="fa-solid fa-trash-can"></i></button></td></tr>`;
             });
         }
-
         function addNewAbonoRecord() {
-            const inputMonto = document.getElementById('new-abono-monto');
-            const inputFecha = document.getElementById('new-abono-fecha');
-            const inputMetodo = document.getElementById('new-abono-metodo');
-
-            const monto = parseFloat(inputMonto.value) || 0;
-            const fecha = inputFecha.value;
-            const metodo = inputMetodo.value;
-
-            if (monto <= 0) {
-                showToast("Ingrese un monto de abono mayor a cero.", "warning");
-                return;
+            const m = parseFloat(document.getElementById('new-abono-monto').value)||0; const f = document.getElementById('new-abono-fecha').value; const met = document.getElementById('new-abono-metodo').value;
+            if(m > 0 && f) {
+                currentModalAbonosList.push({ monto: m, fecha: f, metodo: met });
+                document.getElementById('new-abono-monto').value = ""; document.getElementById('new-abono-fecha').value = "";
+                renderModalAbonosList(); calcularFlujoAbonos();
             }
-            if (!fecha) {
-                showToast("Por favor seleccione la fecha del cobro.", "warning");
-                return;
-            }
-
-            // Add payment
-            currentModalAbonosList.push({ monto, fecha, metodo });
-            
-            // Clean inputs
-            inputMonto.value = "";
-            inputFecha.value = "";
-            
-            renderModalAbonosList();
-            calcularFlujoAbonos();
-            showToast("Abono añadido a la lista temporal.");
         }
-
-        function removeAbonoRecordFromModal(index) {
-            currentModalAbonosList.splice(index, 1);
-            renderModalAbonosList();
-            calcularFlujoAbonos();
-            showToast("Abono removido de la lista temporal.");
-        }
-
+        function removeAbonoRecordFromModal(idx) { currentModalAbonosList.splice(idx, 1); renderModalAbonosList(); calcularFlujoAbonos(); }
         function calcularFlujoAbonos() {
             let valTotal = parseFloat(document.getElementById('form-value').value) || 0;
-            
-            // Calculate total from local dynamic list
             let totAbonado = currentModalAbonosList.reduce((sum, a) => sum + parseFloat(a.monto), 0);
-            
             document.getElementById('modal-total-abonado').innerText = `$${totAbonado.toFixed(2)}`;
             document.getElementById('modal-saldo-pendiente').innerText = `$${(valTotal - totAbonado).toFixed(2)}`;
         }
 
-        // BITÁCORA TIMELINE SYSTEM
         function renderModalBitacoraList() {
-            const timeline = document.getElementById('modal-bitacora-timeline');
-            timeline.innerHTML = "";
-
+            const tl = document.getElementById('modal-bitacora-timeline'); tl.innerHTML = "";
             if (currentModalBitacoraList.length === 0) {
-                timeline.innerHTML = `<div class="text-center text-slate-400 italic font-medium py-8">Historial de gestiones vacío. Registre su primera interacción comercial.</div>`;
-                return;
+                tl.innerHTML = `<div class="text-center text-slate-400 italic py-8">Historial de gestiones vacío.</div>`; return;
             }
-
-            currentModalBitacoraList.forEach((log) => {
-                let badgeColor = 'bg-slate-100 text-slate-700';
-                if (log.resultado === 'Cita Agendada' || log.resultado === 'Vendido') badgeColor = 'bg-emerald-100 text-emerald-800';
-                else if (log.resultado === 'Descartado') badgeColor = 'bg-rose-100 text-rose-800';
-                else if (log.resultado === 'Llamar Luego') badgeColor = 'bg-blue-100 text-blue-800';
-
-                timeline.innerHTML += `
-                    <div class="p-3 bg-white border border-slate-200/70 rounded-xl relative hover:shadow-2xs transition-all space-y-1">
-                        <div class="flex justify-between items-center text-[9px] text-slate-400 font-extrabold border-b pb-0.5 border-slate-100">
-                            <span><i class="fa-solid fa-user-clock text-slate-300"></i> ${log.asesora || 'Asesora'} | ${log.fecha}</span>
-                            <span class="px-1.5 py-0.5 rounded-full ${badgeColor} font-black uppercase text-[8px] tracking-wide">${log.resultado || 'Interacción'}</span>
-                        </div>
-                        <p class="text-[10.5px] text-slate-700 font-medium mt-1 leading-relaxed">${log.nota}</p>
-                    </div>`;
+            currentModalBitacoraList.forEach(log => {
+                let badge = log.resultado === 'Cita Agendada' || log.resultado === 'Vendido' ? 'bg-emerald-100 text-emerald-800' : (log.resultado === 'Descartado' ? 'bg-rose-100 text-rose-800' : 'bg-slate-100 text-slate-700');
+                tl.innerHTML += `<div class="p-3 bg-white border border-slate-200/70 rounded-xl space-y-1"><div class="flex justify-between text-[9px] text-slate-400 border-b pb-0.5"><span>${log.asesora} | ${log.fecha}</span><span class="px-1.5 py-0.5 rounded-full ${badge} font-black uppercase">${log.resultado || 'Nota'}</span></div><p class="text-[10.5px] text-slate-700 font-medium mt-1">${log.nota}</p></div>`;
             });
         }
-
         function registerNewLog() {
-            const noteText = document.getElementById('new-log-desc').value.trim();
-            const resultado = document.getElementById('new-log-resultado').value;
-            const gestor = document.getElementById('form-gestor').value;
-            const inputTouch = document.getElementById('form-touch');
-
-            if (noteText === "") {
-                showToast("Por favor escriba una descripción de la interacción.", "warning");
-                return;
-            }
-
-            const timestamp = new Date().toLocaleString();
-            
-            // Add entry to temporal list
-            currentModalBitacoraList.unshift({
-                fecha: timestamp,
-                asesora: gestor,
-                resultado: resultado,
-                nota: noteText
-            });
-
-            // Increment contact attempts
-            let currentTouches = parseInt(inputTouch.value) || 1;
-            inputTouch.value = currentTouches + 1;
-
-            // Automatically move pipeline phase based on result
-            if (resultado === 'Cita Agendada') {
-                document.getElementById('form-phase').value = 'agenda';
-                showToast("Fase de pipeline cambiada a AGENDA automáticamente.", "warning");
-            } else if (resultado === 'Vendido') {
-                document.getElementById('form-phase').value = 'venta';
-                showToast("Fase de pipeline cambiada a VENTA automáticamente.", "warning");
-            } else if (resultado === 'Descartado') {
-                document.getElementById('form-loss').value = 'No le interesa';
-                showToast("Descarte activado automáticamente.", "warning");
-            }
-
-            // Clean log entry textbox
-            document.getElementById('new-log-desc').value = "";
-
-            renderModalBitacoraList();
-            showToast("Interacción registrada en la bitácora.");
+            const txt = document.getElementById('new-log-desc').value.trim(); const res = document.getElementById('new-log-resultado').value; const gst = document.getElementById('form-gestor').value;
+            if(txt === "") return;
+            currentModalBitacoraList.unshift({ fecha: new Date().toLocaleString(), asesora: gst, resultado: res, nota: txt });
+            document.getElementById('form-touch').value = (parseInt(document.getElementById('form-touch').value)||1) + 1;
+            if (res === 'Cita Agendada') document.getElementById('form-phase').value = 'agenda';
+            if (res === 'Vendido') document.getElementById('form-phase').value = 'venta';
+            if (res === 'Descartado') document.getElementById('form-loss').value = 'No le interesa';
+            document.getElementById('new-log-desc').value = ""; renderModalBitacoraList();
         }
 
-        // SAVE FORM LOGIC
         async function handleFormSubmit(e) {
-            e.preventDefault();
-            const id = document.getElementById('form-id').value;
-            
+            e.preventDefault(); const id = document.getElementById('form-id').value;
             let payload = {
-                id: id ? parseInt(id) : Date.now(), 
-                name: document.getElementById('form-name').value.trim(), 
-                phone: document.getElementById('form-phone').value.trim(), 
-                phase: document.getElementById('form-phase').value, 
-                value: parseFloat(document.getElementById('form-value').value) || 0, 
-                date: document.getElementById('form-date').value, 
-                gestor: document.getElementById('form-gestor').value, 
-                loss: document.getElementById('form-loss').value, 
-                touch: parseInt(document.getElementById('form-touch').value) || 1,
-                desc: "", // Will be filled inside with observations detailed
-                abonos: [...currentModalAbonosList],
-                bitacora: [...currentModalBitacoraList]
+                id: id ? parseInt(id) : Date.now(), name: document.getElementById('form-name').value.trim(), phone: document.getElementById('form-phone').value.trim(), phase: document.getElementById('form-phase').value, value: parseFloat(document.getElementById('form-value').value) || 0, date: document.getElementById('form-date').value, gestor: document.getElementById('form-gestor').value, loss: document.getElementById('form-loss').value, touch: parseInt(document.getElementById('form-touch').value) || 1, desc: "", abonos: [...currentModalAbonosList], bitacora: [...currentModalBitacoraList]
             };
-
-            // If we have observations text left in the input box, save it inside logs
-            const noteText = document.getElementById('new-log-desc').value.trim();
-            if(noteText !== "") {
-                const timestamp = new Date().toLocaleString();
-                payload.bitacora.unshift({
-                    fecha: timestamp,
-                    asesora: payload.gestor,
-                    resultado: "Guardado Ficha",
-                    nota: noteText
-                });
-                payload.touch++;
+            const leftTxt = document.getElementById('new-log-desc').value.trim();
+            if(leftTxt !== "") {
+                payload.bitacora.unshift({ fecha: new Date().toLocaleString(), asesora: payload.gestor, resultado: "Nota", nota: leftTxt }); payload.touch++;
             }
-
-            // Set main description to the last note on timeline
-            if (payload.bitacora.length > 0) {
-                payload.desc = payload.bitacora[0].nota;
-            }
-
-            closeModal();
-            await saveLeadData(payload);
-            showToast(`Lead de Paciente "${payload.name}" guardado con éxito.`);
+            if (payload.bitacora.length > 0) payload.desc = payload.bitacora[0].nota;
+            closeModal(); await saveLeadData(payload);
         }
 
-        // EXCEL EXPORTER / IMPORTER ENGINE
         async function importDataEngine(event) {
-            const file = event.target.files[0]; 
-            if (!file) return;
-            
+            const file = event.target.files[0]; if (!file) return;
             const reader = new FileReader();
             reader.onload = async function(e) {
                 try {
-                    const data = new Uint8Array(e.target.result); 
-                    const wb = XLSX.read(data, { type: 'array' });
+                    const data = new Uint8Array(e.target.result); const wb = XLSX.read(data, { type: 'array' });
                     const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-                    
-                    let importedCount = 0;
                     for(let row of rows) {
-                        let idVal = parseInt(row.id || row.crm_id || Date.now() + Math.floor(Math.random() * 1000)); 
-                        
-                        // Parse values safely
                         let payload = {
-                            id: idVal, 
-                            name: String(row.name || row.nombre || 'Paciente Sin Nombre').trim(), 
-                            phone: String(row.phone || row.teléfono || row.whatsapp || '').trim(),
-                            phase: String(row.phase || row.estado || 'frio').toLowerCase().replace(/\s/g, '').trim(), 
-                            value: parseFloat(row.value || row.valor || 0) || 0,
-                            date: String(row.date || row.fecha || '').trim(), 
-                            loss: String(row.loss || row.descarte || 'Ninguno').trim(), 
-                            gestor: String(row.gestor || row.asesora || listadoGestores[0]).trim(),
-                            touch: parseInt(row.touch || row.intentos || 1) || 1, 
-                            desc: String(row.desc || row.observaciones || '').trim(),
-                            abonos: [],
-                            bitacora: []
+                            id: parseInt(row.id || row.crm_id || Date.now() + Math.floor(Math.random()*1000)), name: String(row.name || 'Paciente').trim(), phone: String(row.phone || '').trim(), phase: String(row.phase || 'frio').toLowerCase().trim(), value: parseFloat(row.value || 0)||0, date: String(row.date || '').trim(), loss: String(row.loss || 'Ninguno').trim(), gestor: String(row.gestor || listadoGestores[0]).trim(), touch: parseInt(row.touch || 1)||1, desc: String(row.desc || '').trim(), abonos: [], bitacora: []
                         };
-
-                        // Extract payments columns
-                        let a1 = parseFloat(row.a1) || 0;
-                        let a2 = parseFloat(row.a2) || 0;
-                        let a3 = parseFloat(row.a3) || 0;
-                        let a4 = parseFloat(row.a4) || 0;
-                        let a5 = parseFloat(row.a5) || 0;
-
-                        if (a1 > 0) payload.abonos.push({ monto: a1, fecha: payload.date, metodo: 'Abono 1' });
-                        if (a2 > 0) payload.abonos.push({ monto: a2, fecha: payload.date, metodo: 'Abono 2' });
-                        if (a3 > 0) payload.abonos.push({ monto: a3, fecha: payload.date, metodo: 'Abono 3' });
-                        if (a4 > 0) payload.abonos.push({ monto: a4, fecha: payload.date, metodo: 'Abono 4' });
-                        if (a5 > 0) payload.abonos.push({ monto: a5, fecha: payload.date, metodo: 'Abono 5' });
-
-                        // Timeline base log
-                        if (payload.desc) {
-                            payload.bitacora.push({
-                                fecha: new Date().toLocaleString(),
-                                asesora: payload.gestor,
-                                resultado: 'Importación',
-                                nota: payload.desc
-                            });
-                        }
-
-                        // Save lead record
+                        if (parseFloat(row.a1)>0) payload.abonos.push({ monto: parseFloat(row.a1), fecha: payload.date, metodo: 'Abo 1' });
+                        if (parseFloat(row.a2)>0) payload.abonos.push({ monto: parseFloat(row.a2), fecha: payload.date, metodo: 'Abo 2' });
+                        if (payload.desc) payload.bitacora.push({ fecha: new Date().toLocaleString(), asesora: payload.gestor, resultado: 'Importado', nota: payload.desc });
                         await saveLeadData(payload);
-                        importedCount++;
                     }
-                    
-                    showToast(`Importación Completada. ${importedCount} registros procesados.`); 
-                    
-                    if (currentStorageMode === 'supabase') {
-                        loadDataFromCloud();
-                    } else {
-                        renderApplicationCore();
-                    }
-                } catch(err) { 
-                    console.error(err); 
-                    showToast("Error al leer archivo Excel. Verifique el formato.", "error");
-                }
-            };
-            reader.readAsArrayBuffer(file);
+                    if (currentStorageMode === 'supabase') loadDataFromCloud(); else renderApplicationCore();
+                } catch(err) { console.error(err); }
+            }; reader.readAsArrayBuffer(file);
         }
 
-        function exportBackupExcel() { 
-            // Map lead object to clean spreadsheet row format
-            const exportRows = mainLeadsRegistry.map(lead => {
-                let a1 = lead.abonos[0] ? parseFloat(lead.abonos[0].monto) || 0 : 0;
-                let a2 = lead.abonos[1] ? parseFloat(lead.abonos[1].monto) || 0 : 0;
-                let a3 = lead.abonos[2] ? parseFloat(lead.abonos[2].monto) || 0 : 0;
-                let a4 = lead.abonos[3] ? parseFloat(lead.abonos[3].monto) || 0 : 0;
-                let a5 = lead.abonos[4] ? parseFloat(lead.abonos[4].monto) || 0 : 0;
-
-                let totalAbonado = lead.abonos.reduce((sum, a) => sum + parseFloat(a.monto), 0);
-
-                return {
-                    "ID Lead": lead.id,
-                    "Paciente": lead.name,
-                    "WhatsApp": lead.phone,
-                    "Estado Pipeline": lead.phase.toUpperCase(),
-                    "Valor Venta": lead.value,
-                    "Total Cobrado": totalAbonado,
-                    "Saldo Pendiente": lead.value - totalAbonado,
-                    "Fecha Registro": lead.date,
-                    "Asesora Comercial": lead.gestor,
-                    "Intentos Contacto": lead.touch,
-                    "Descarte": lead.loss,
-                    "Observaciones": lead.desc,
-                    "Abo 1": a1,
-                    "Abo 2": a2,
-                    "Abo 3": a3,
-                    "Abo 4": a4,
-                    "Abo 5": a5,
-                };
+        function exportBackupExcel() {
+            const rows = mainLeadsRegistry.map(l => {
+                let a1 = l.abonos[0] ? parseFloat(l.abonos[0].monto)||0 : 0;
+                let a2 = l.abonos[1] ? parseFloat(l.abonos[1].monto)||0 : 0;
+                return { "ID": l.id, "Paciente": l.name, "WhatsApp": l.phone, "Estado": l.phase.toUpperCase(), "Valor": l.value, "Fecha": l.date, "Asesora": l.gestor, "Observaciones": l.desc, "Abo 1": a1, "Abo 2": a2 };
             });
-
-            let ws = XLSX.utils.json_to_sheet(exportRows); 
-            let wb = XLSX.utils.book_new(); 
-            XLSX.utils.book_append_sheet(wb, ws, "Leads CRM"); 
-            XLSX.writeFile(wb, `Respaldo_CRM_RelaxTherapy_${new Date().toISOString().slice(0,10)}.xlsx`); 
-            showToast("Archivo Excel descargado con éxito.");
+            let ws = XLSX.utils.json_to_sheet(rows); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Leads");
+            XLSX.writeFile(wb, `Respaldo_RelaxTherapy_${new Date().toISOString().slice(0,10)}.xlsx`);
         }
 
-        // PURGE DATABASE CONTROL
         function confirmResetDB() {
-            if (confirm("🚨 ¡ATENCIÓN! ¿Está completamente seguro de que desea PURGAR todos los datos? Esta acción borrará de manera definitiva el historial en su modo de almacenamiento activo.")) {
-                const pass = prompt("Para confirmar la eliminación permanente, escriba 'BORRAR':");
-                if (pass === 'BORRAR') {
-                    resetDBCloud();
-                } else {
-                    showToast("Purga cancelada. Código incorrecto.", "warning");
-                }
-            }
+            if (confirm("¿Purgar todos los datos?") && prompt("Escriba 'BORRAR':") === 'BORRAR') resetDBCloud();
         }
-
-        async function resetDBCloud() { 
-            if(currentStorageMode === 'supabase' && supabaseClient) {
-                try {
-                    const { error } = await supabaseClient.from('pacientes_crm').delete().neq('id', -1);
-                    if (error) throw error;
-                    showToast("Nube Supabase purgada con éxito.");
-                } catch(e) {
-                    console.error(e);
-                    showToast("Error al purgar datos en la nube.", "error");
-                }
-            }
-            
-            // Purge local storage
-            localStorage.removeItem('relax_leads_registry_local');
-            mainLeadsRegistry = [];
-            
-            showToast("Base de datos local limpia.");
-            renderApplicationCore();
+        async function resetDBCloud() {
+            if(currentStorageMode === 'supabase' && supabaseClient) await supabaseClient.from('pacientes_crm').delete().neq('id', -1);
+            localStorage.removeItem('relax_leads_registry_local'); mainLeadsRegistry = []; renderApplicationCore();
         }
     </script>
 </body>
