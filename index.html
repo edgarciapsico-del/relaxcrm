@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM Cloud - Premium v27.0 QA Final</title>
+    <title>Relax Therapy CRM Cloud - Premium v27.1 QA Fixed</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -113,7 +113,7 @@
                 <div>
                     <span class="font-extrabold text-slate-900 tracking-tight text-xl flex items-center gap-1.5">
                         RELAX THERAPY CRM 
-                        <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold border border-slate-200">v27.0 Premium</span>
+                        <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold border border-slate-200">v27.1 Premium</span>
                     </span>
                     <span id="sync-status" class="block text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider">
                         <i class="fa-solid fa-circle-notch fa-spin"></i> Conectando...
@@ -624,7 +624,6 @@
         let metasDiariasDinamicas = { "Brenda": 50, "Joselyne": 50, "Naty": 50, "Fernando": 0 };
         const monthsNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
-        // Espera de seguridad Máster para registro UMD en objeto window
         window.onload = function() {
             initPersonalizationConfig();
             initStorageEngine();
@@ -663,14 +662,13 @@
 
             if (currentStorageMode === 'supabase') {
                 try {
-                    // Corrección definitiva de espacio de nombres UMD
                     if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
                         setTimeout(initStorageEngine, 250);
                         return;
                     }
                     supabaseClient = window.supabase.createClient(urlSetup, keySetup);
                     loadDataFromCloud();
-                } {
+                } catch(e) {
                     switchToLocalFallback("Error de objeto Supabase");
                 }
             } else {
@@ -1224,7 +1222,7 @@
         function exportBackupExcel() {
             const rows = mainLeadsRegistry.map(l => {
                 let a1 = l.abonos[0] ? parseFloat(l.abonos[0].monto)||0 : 0;
-                let a2 = l.abonos[1] ? parseFloat(l.abonos[1].monto)||0 : 0;
+                let a2 = l.l.abonos[1] ? parseFloat(l.abonos[1].monto)||0 : 0;
                 return { "ID": l.id, "Paciente": l.name, "WhatsApp": l.phone, "Estado": l.phase.toUpperCase(), "Valor": l.value, "Fecha": l.date, "Asesora": l.gestor, "Observaciones": l.desc, "Abo 1": a1, "Abo 2": a2 };
             });
             let ws = XLSX.utils.json_to_sheet(rows); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Leads");
