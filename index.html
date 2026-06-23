@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM Cloud - Premium v27.1 QA Fixed</title>
+    <title>Relax Therapy CRM Cloud - Premium v27.2 Persistent Board</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -18,91 +18,24 @@
         
         :root {
             --brand-primary: #4f46e5;
-            --brand-primary-hover: #4338ca;
-            --brand-success: #10b981;
-            --brand-warning: #f59e0b;
-            --brand-danger: #ef4444;
             --bg-main: #f8fafc;
         }
-
-        body { 
-            font-family: 'Outfit', sans-serif; 
-            background-color: var(--bg-main); 
-        }
-
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(241, 245, 249, 0.9);
-        }
-
-        .kanban-column { 
-            min-width: 310px; 
-            max-width: 360px; 
-            transition: all 0.2s ease;
-        }
-        
-        .kanban-column.drag-over {
-            background-color: rgba(79, 70, 229, 0.08) !important;
-            border: 2px dashed var(--brand-primary) !important;
-            transform: scale(1.02);
-        }
-
-        .lead-card {
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: grab;
-        }
-        
-        .lead-card:active {
-            cursor: grabbing;
-        }
-
-        .lead-card.dragging {
-            opacity: 0.4;
-            transform: scale(0.95);
-            border: 2px dashed var(--brand-primary);
-        }
-
-        .scrollbar-custom::-webkit-scrollbar { 
-            height: 8px; 
-            width: 6px; 
-        }
-        .scrollbar-custom::-webkit-scrollbar-track { 
-            background: #f1f5f9; 
-            border-radius: 8px;
-        }
-        .scrollbar-custom::-webkit-scrollbar-thumb { 
-            background: #cbd5e1; 
-            border-radius: 8px; 
-        }
-        .scrollbar-custom::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        @keyframes slideInUp {
-            from {
-                transform: translateY(20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .animate-fade-in {
-            animation: slideInUp 0.3s ease forwards;
-        }
-
-        .toast-notification {
-            animation: slideInUp 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
+        body { font-family: 'Outfit', sans-serif; background-color: var(--bg-main); }
+        .kanban-column { min-width: 310px; max-width: 360px; transition: all 0.2s ease; }
+        .kanban-column.drag-over { background-color: rgba(79, 70, 229, 0.08) !important; border: 2px dashed var(--brand-primary) !important; }
+        .lead-card { cursor: grab; transition: all 0.2s ease; }
+        .lead-card:active { cursor: grabbing; }
+        .lead-card.dragging { opacity: 0.4; }
+        .scrollbar-custom::-webkit-scrollbar { height: 8px; width: 6px; }
+        .scrollbar-custom::-webkit-scrollbar-track { background: #f1f5f9; }
+        .scrollbar-custom::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
+        @keyframes slideIn { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .animate-fade-in { animation: slideIn 0.25s ease forwards; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased text-slate-800">
 
-    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2.5 max-w-sm w-full"></div>
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full"></div>
 
     <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
         <div class="max-w-[1780px] mx-auto px-4 lg:px-8 h-20 flex flex-col md:flex-row items-center justify-between gap-4 py-2">
@@ -112,8 +45,8 @@
                 </div>
                 <div>
                     <span class="font-extrabold text-slate-900 tracking-tight text-xl flex items-center gap-1.5">
-                        RELAX THERAPY CRM 
-                        <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold border border-slate-200">v27.1 Premium</span>
+                        RELAX THERAPY CRM
+                        <span class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-bold">v27.2 Core</span>
                     </span>
                     <span id="sync-status" class="block text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider">
                         <i class="fa-solid fa-circle-notch fa-spin"></i> Conectando...
@@ -121,14 +54,14 @@
                 </div>
             </div>
 
-            <div class="flex flex-wrap items-center gap-2.5 text-xs">
+            <div class="flex flex-wrap items-center gap-2 text-xs">
                 <div id="storage-mode-badge" class="px-3 h-10 rounded-xl font-bold flex items-center gap-2 border bg-slate-50 text-slate-600 shadow-2xs">
                     <i id="storage-icon" class="fa-solid fa-database"></i>
-                    <span id="storage-text">Detectando almacenamiento...</span>
+                    <span id="storage-text">Detectando...</span>
                 </div>
 
                 <button onclick="toggleConfigPanel()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 h-10 rounded-xl font-bold flex items-center gap-1.5 border transition-all">
-                    <i class="fa-solid fa-sliders text-indigo-600 text-sm"></i> Configuración
+                    <i class="fa-solid fa-sliders text-indigo-600"></i> Configuración
                 </button>
                 
                 <div class="flex items-center gap-2 bg-slate-50 border px-3 h-10 rounded-xl border-slate-200 shadow-2xs">
@@ -136,19 +69,15 @@
                     <input type="file" id="file-uploader" accept=".xlsx,.xls,.csv" onchange="importDataEngine(event)" class="w-40 text-slate-600 text-[11px] cursor-pointer focus:outline-hidden">
                 </div>
                 
-                <button onclick="loadDataFromCloud()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 h-10 rounded-xl font-bold flex items-center gap-1.5 shadow-md shadow-indigo-600/15 transition-all">
+                <button onclick="loadDataFromCloud()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 h-10 rounded-xl font-bold flex items-center gap-1.5 transition-all">
                     <i class="fa-solid fa-arrows-rotate"></i> Sincronizar
                 </button>
                 
-                <button onclick="exportBackupExcel()" class="bg-slate-700 hover:bg-slate-800 text-white px-3.5 h-10 rounded-xl font-bold flex items-center gap-1.5 shadow-sm transition-all">
+                <button onclick="exportBackupExcel()" class="bg-slate-700 hover:bg-slate-800 text-white px-3.5 h-10 rounded-xl font-bold flex items-center gap-1.5 transition-all">
                     <i class="fa-solid fa-file-arrow-down"></i> Exportar
                 </button>
                 
-                <button onclick="confirmResetDB()" class="bg-rose-600 hover:bg-rose-700 text-white px-3.5 h-10 rounded-xl font-bold flex items-center gap-1.5 shadow-sm transition-all">
-                    <i class="fa-solid fa-trash-can"></i> Purgar Datos
-                </button>
-                
-                <button onclick="openModal('create')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 h-10 rounded-xl font-extrabold shadow-md shadow-emerald-600/15 transition-all">
+                <button onclick="openModal('create')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 h-10 rounded-xl font-extrabold transition-all">
                     <i class="fa-solid fa-plus mr-1"></i> Registrar Lead
                 </button>
             </div>
@@ -157,62 +86,39 @@
 
     <section id="config-panel" class="max-w-[1780px] w-full mx-auto px-4 lg:px-8 mt-4 hidden animate-fade-in">
         <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
-            
             <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b pb-4">
                 <div>
-                    <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                        <i class="fa-solid fa-user-gear text-indigo-600"></i> Panel de Configuración Comercial e Infraestructura
-                    </h3>
-                    <p class="text-xs text-slate-500 mt-1">Gestione credenciales de base de datos, metas dinámicas y su equipo de asesoras.</p>
+                    <h3 class="text-base font-extrabold text-slate-900"><i class="fa-solid fa-user-gear text-indigo-600"></i> Parámetros e Infraestructura</h3>
+                    <p class="text-xs text-slate-500">Credenciales de Supabase y metas de Asesoras.</p>
                 </div>
-                <div class="flex items-center gap-3 bg-slate-100 p-1.5 rounded-xl border">
-                    <button onclick="changeDatabaseMode('local')" id="btn-mode-local" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all">
-                        <i class="fa-solid fa-laptop"></i> Modo Local (LocalStorage)
-                    </button>
-                    <button onclick="changeDatabaseMode('supabase')" id="btn-mode-supabase" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all">
-                        <i class="fa-solid fa-cloud"></i> Modo Nube (Supabase)
-                    </button>
+                <div class="flex items-center gap-2 bg-slate-100 p-1.5 rounded-xl border">
+                    <button onclick="changeDatabaseMode('local')" id="btn-mode-local" class="px-4 py-1.5 rounded-lg text-xs font-bold">Local</button>
+                    <button onclick="changeDatabaseMode('supabase')" id="btn-mode-supabase" class="px-4 py-1.5 rounded-lg text-xs font-bold">Supabase Nube</button>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="p-5 bg-slate-50 rounded-2xl border space-y-4">
-                    <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-database text-blue-600"></i> Credenciales de Nube (Supabase)
-                    </h4>
+                    <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider">Credenciales</h4>
                     <div class="space-y-3 text-xs">
                         <div>
-                            <label class="block font-bold text-slate-600 mb-1">URL del Proyecto Supabase</label>
-                            <input type="text" id="db-setup-url" placeholder="https://ejemplo.supabase.co" class="w-full px-3 py-2 border rounded-xl bg-white font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-hidden">
+                            <label class="block font-bold text-slate-600 mb-1">URL Supabase</label>
+                            <input type="text" id="db-setup-url" class="w-full px-3 py-2 border rounded-xl bg-white focus:outline-hidden">
                         </div>
                         <div>
-                            <label class="block font-bold text-slate-600 mb-1">Anon API Key / Token</label>
-                            <input type="password" id="db-setup-key" placeholder="eyJhbGciOi..." class="w-full px-3 py-2 border rounded-xl bg-white font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-hidden">
+                            <label class="block font-bold text-slate-600 mb-1">Anon API Key</label>
+                            <input type="password" id="db-setup-key" class="w-full px-3 py-2 border rounded-xl bg-white focus:outline-hidden">
                         </div>
-                        <div class="pt-2 flex gap-2">
-                            <button onclick="saveSupabaseSettings()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-bold w-full transition-all">
-                                Guardar y Conectar
-                            </button>
-                            <button onclick="resetDefaultSupabaseSettings()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-2 rounded-xl font-bold transition-all" title="Restablecer credenciales de fábrica">
-                                <i class="fa-solid fa-rotate-left"></i>
-                            </button>
-                        </div>
+                        <button onclick="saveSupabaseSettings()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-bold w-full">Guardar y Conectar</button>
                     </div>
                 </div>
 
                 <div class="lg:col-span-2 p-5 bg-slate-50 rounded-2xl border space-y-4">
                     <div class="flex justify-between items-center border-b pb-2">
-                        <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                            <i class="fa-solid fa-users text-indigo-600"></i> Metas y Presupuestos del Equipo
-                        </h4>
-                        <button onclick="addNewAdviserPrompt()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-all border border-indigo-200">
-                            <i class="fa-solid fa-plus text-[10px]"></i> Agregar Asesora
-                        </button>
+                        <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider">Equipo de Asesoras</h4>
+                        <button onclick="addNewAdviserPrompt()" class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-lg text-xs font-bold border border-indigo-200">+ Agregar</button>
                     </div>
-                    
-                    <div class="overflow-y-auto max-h-[170px] scrollbar-custom">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="advisers-config-list"></div>
-                    </div>
+                    <div class="overflow-y-auto max-h-[170px] scrollbar-custom" id="advisers-config-list"></div>
                 </div>
             </div>
         </div>
@@ -221,377 +127,115 @@
     <section class="max-w-[1780px] w-full mx-auto px-4 lg:px-8 mt-4">
         <div class="bg-white p-6 rounded-2xl border border-slate-200 space-y-6 shadow-xs">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div class="bg-slate-50 p-4.5 rounded-xl border border-slate-200 hover:shadow-2xs transition-all relative group">
-                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Pipeline Activo</span>
-                    <h3 id="kpi-pipeline" class="text-2xl font-black text-slate-800 mt-1">$0.00</h3>
-                    <p class="text-[10px] text-slate-500 mt-1">Valor total de contratos bajo filtros activos</p>
-                    <i class="fa-solid fa-chart-line absolute top-4 right-4 text-slate-300 group-hover:text-indigo-600 transition-colors text-lg"></i>
-                </div>
-                
-                <div onclick="togglePendingDebtFilter()" id="btn-kpi-sales" class="bg-emerald-50/70 p-4.5 rounded-xl border border-emerald-100 cursor-pointer hover:bg-emerald-100/70 transition-all relative group select-none shadow-2xs">
-                    <span class="text-[10px] font-black text-emerald-600 uppercase tracking-wider flex items-center justify-between">
-                        Cobrado Real <i id="kpi-filter-debt-icon" class="fa-solid fa-filter text-[10px] opacity-70"></i>
-                    </span>
-                    <h3 id="kpi-sales" class="text-2xl font-black text-emerald-700 mt-1">$0.00</h3>
-                    <p id="sub-kpi-debt" class="text-[10px] text-emerald-600 font-medium mt-1">Click para filtrar: Ver saldos pendientes</p>
-                    <i class="fa-solid fa-circle-dollar-to-slot absolute top-4 right-4 text-emerald-300 group-hover:text-emerald-600 transition-colors text-lg"></i>
-                </div>
-
-                <div class="bg-blue-50/70 p-4.5 rounded-xl border border-blue-100 hover:shadow-2xs transition-all relative group">
-                    <span class="text-[10px] font-black text-blue-600 uppercase tracking-wider">Tasa Agendamiento</span>
-                    <h3 id="kpi-scheduling-rate" class="text-2xl font-black text-blue-700 mt-1">0%</h3>
-                    <p id="sub-kpi-agendas" class="text-[10px] text-blue-500 font-medium mt-1">0 Citas en Filtro</p>
-                    <i class="fa-solid fa-calendar-check absolute top-4 right-4 text-blue-300 group-hover:text-blue-600 transition-colors text-lg"></i>
-                </div>
-
-                <div class="bg-violet-50/70 p-4.5 rounded-xl border border-violet-100 hover:shadow-2xs transition-all relative group">
-                    <span class="text-[10px] font-black text-violet-600 uppercase tracking-wider">Tasa Cierre Real</span>
-                    <h3 id="kpi-conversion" class="text-2xl font-black text-violet-700 mt-1">0%</h3>
-                    <p id="sub-kpi-cierres" class="text-[10px] text-violet-500 font-medium mt-1">0 Convertidos en Filtro</p>
-                    <i class="fa-solid fa-award absolute top-4 right-4 text-violet-300 group-hover:text-violet-600 transition-colors text-lg"></i>
-                </div>
-
-                <div onclick="toggleTodayAlertsFilter()" id="btn-kpi-alerts" class="bg-fuchsia-50/70 p-4.5 rounded-xl border border-fuchsia-100 cursor-pointer hover:bg-fuchsia-100/70 transition-all relative group select-none shadow-2xs">
-                    <span class="text-[10px] font-black text-fuchsia-600 uppercase tracking-wider flex items-center justify-between">
-                        Llamadas Hoy <i id="kpi-filter-alerts-icon" class="fa-solid fa-filter text-[10px] opacity-70"></i>
-                    </span>
-                    <h3 id="kpi-alerts" class="text-2xl font-black text-fuchsia-700 mt-1">0</h3>
-                    <p class="text-[10px] text-fuchsia-600 font-medium mt-1">Click para filtrar: Contactos del día</p>
-                    <i class="fa-solid fa-phone-volume absolute top-4 right-4 text-fuchsia-300 group-hover:text-fuchsia-600 transition-colors text-lg"></i>
-                </div>
+                <div class="bg-slate-50 p-4 rounded-xl border"><span class="text-[10px] font-black text-slate-400 uppercase">Pipeline Activo</span><h3 id="kpi-pipeline" class="text-xl font-black mt-1">$0.00</h3></div>
+                <div onclick="togglePendingDebtFilter()" id="btn-kpi-sales" class="bg-emerald-50 p-4 rounded-xl border border-emerald-100 cursor-pointer"><span class="text-[10px] font-black text-emerald-600 uppercase">Cobrado Real</span><h3 id="kpi-sales" class="text-xl font-black text-emerald-700 mt-1">$0.00</h3></div>
+                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100"><span class="text-[10px] font-black text-blue-600 uppercase">Tasa Agendamiento</span><h3 id="kpi-scheduling-rate" class="text-xl font-black text-blue-700 mt-1">0%</h3></div>
+                <div class="bg-violet-50 p-4 rounded-xl border border-violet-100"><span class="text-[10px] font-black text-violet-600 uppercase">Tasa Cierre Real</span><h3 id="kpi-conversion" class="text-xl font-black text-violet-700 mt-1">0%</h3></div>
+                <div onclick="toggleTodayAlertsFilter()" id="btn-kpi-alerts" class="bg-fuchsia-50 p-4 rounded-xl border border-fuchsia-100 cursor-pointer"><span class="text-[10px] font-black text-fuchsia-600 uppercase">Gestiones Hoy</span><h3 id="kpi-alerts" class="text-xl font-black text-fuchsia-700 mt-1">0</h3></div>
             </div>
 
-            <div class="bg-slate-50 p-4.5 rounded-xl border border-slate-200 space-y-3">
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
                 <div class="flex items-center justify-between border-b pb-1.5">
-                    <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-chart-simple text-indigo-500"></i> Historial Comercial Mensual
-                    </h4>
-                    <span class="text-[10px] text-slate-400 font-bold uppercase">Haz clic en un mes para filtrar el Kanban</span>
+                    <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider">Historial Comercial Mensual</h4>
+                    <span class="text-[10px] text-indigo-600 font-bold uppercase">Los Leads de Seguimiento Persisten en Todos los Meses</span>
                 </div>
-                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-12 gap-3.5" id="months-grid-container"></div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-12 gap-3" id="months-grid-container"></div>
             </div>
 
-            <div class="bg-slate-50 p-4.5 rounded-xl border border-slate-200 space-y-3">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b pb-2">
-                    <h4 class="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-trophy text-amber-500"></i> Rendimiento Comercial de Asesoras
-                    </h4>
-                    <div class="flex items-center gap-2 text-xs">
-                        <span class="text-[11px] text-slate-400 font-bold uppercase">Mes Evaluado:</span>
-                        <select id="audit-month-selector" onchange="renderApplicationCore()" class="bg-white border rounded-xl px-3 py-1 font-bold text-indigo-600 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"></select>
-                    </div>
-                </div>
-                
-                <div class="overflow-x-auto rounded-xl border border-slate-200">
-                    <table class="w-full text-left border-collapse bg-white text-xs">
-                        <thead>
-                            <tr class="bg-slate-800 text-white font-extrabold uppercase text-center border-b">
-                                <th class="p-3.5 text-left font-bold">Asesora</th>
-                                <th class="p-3.5 font-bold">Contratado ($)</th>
-                                <th class="p-3.5 font-bold">Cobrado Real ($)</th>
-                                <th class="p-3.5 bg-fuchsia-900 text-fuchsia-100 font-bold">Gestiones Hoy</th>
-                                <th class="p-3.5 font-bold">Leads Atendidos</th>
-                                <th class="p-3.5 font-bold">Meta Diaria</th>
-                                <th class="p-3.5 font-bold">Meta Mensual</th>
-                                <th class="p-3.5 w-60 font-bold text-left">Progreso de Ventas</th>
-                            </tr>
-                        </thead>
-                        <tbody id="goals-table-body" class="text-center font-medium divide-y divide-slate-100"></tbody>
-                    </table>
-                </div>
+            <div class="overflow-x-auto rounded-xl border">
+                <table class="w-full text-left border-collapse bg-white text-xs">
+                    <thead>
+                        <tr class="bg-slate-800 text-white font-bold text-center">
+                            <th class="p-3 text-left">Asesora</th>
+                            <th class="p-3">Contratado ($)</th>
+                            <th class="p-3">Cobrado Real ($)</th>
+                            <th class="p-3">Gestiones Hoy</th>
+                            <th class="p-3">Meta Mensual</th>
+                            <th class="p-3 w-60">Progreso</th>
+                        </tr>
+                    </thead>
+                    <tbody id="goals-table-body" class="text-center divide-y font-medium"></tbody>
+                </table>
             </div>
         </div>
     </section>
 
     <section class="max-w-[1780px] w-full mx-auto px-4 lg:px-8 mt-4">
-        <div class="bg-white px-5 py-3 rounded-2xl border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4 shadow-2xs">
-            <div class="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-filter text-indigo-600"></i>
-                    <span class="text-xs font-black text-slate-700 uppercase">Filtrar Asesora:</span>
-                </div>
-                <div class="flex flex-wrap gap-1.5" id="managers-buttons-box"></div>
-            </div>
+        <div class="bg-white px-5 py-3 rounded-2xl border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex flex-wrap items-center gap-2" id="managers-buttons-box"></div>
             <div class="relative w-full md:w-96">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
-                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
-                </span>
-                <input type="text" id="crm-search-bar" oninput="executeLiveSearch()" placeholder="Buscar por Paciente, WhatsApp, notas o bitácora..." class="w-full pl-9 pr-4 h-11 text-xs bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-hidden focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400"><i class="fa-solid fa-magnifying-glass text-xs"></i></span>
+                <input type="text" id="crm-search-bar" oninput="executeLiveSearch()" placeholder="Buscar por paciente, teléfono o notas..." class="w-full pl-9 pr-4 h-11 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:bg-white focus:border-indigo-500 transition-all">
             </div>
         </div>
     </section>
 
     <section class="max-w-[1780px] w-full mx-auto px-4 mt-4 lg:hidden">
-        <div class="bg-white p-2 rounded-xl border flex overflow-x-auto gap-1 scrollbar-custom">
-            <button onclick="switchMobileColumn('frio')" id="tab-frio" class="px-3 py-2 rounded-lg font-bold text-xs flex-shrink-0 bg-slate-100 text-slate-700 flex items-center gap-1.5">
-                Frío <span id="badge-tab-frio" class="bg-white text-slate-700 px-1.5 py-0.5 rounded-full text-[9px] border">0</span>
-            </button>
-            <button onclick="switchMobileColumn('tibio')" id="tab-tibio" class="px-3 py-2 rounded-lg font-bold text-xs flex-shrink-0 text-slate-700 flex items-center gap-1.5">
-                Tibio <span id="badge-tab-tibio" class="bg-white text-slate-700 px-1.5 py-0.5 rounded-full text-[9px] border">0</span>
-            </button>
-            <button onclick="switchMobileColumn('caliente')" id="tab-caliente" class="px-3 py-2 rounded-lg font-bold text-xs flex-shrink-0 text-slate-700 flex items-center gap-1.5">
-                Caliente <span id="badge-tab-caliente" class="bg-white text-slate-700 px-1.5 py-0.5 rounded-full text-[9px] border">0</span>
-            </button>
-            <button onclick="switchMobileColumn('agenda')" id="tab-agenda" class="px-3 py-2 rounded-lg font-bold text-xs flex-shrink-0 text-slate-700 flex items-center gap-1.5">
-                Agenda <span id="badge-tab-agenda" class="bg-white text-slate-700 px-1.5 py-0.5 rounded-full text-[9px] border">0</span>
-            </button>
-            <button onclick="switchMobileColumn('venta')" id="tab-venta" class="px-3 py-2 rounded-lg font-bold text-xs flex-shrink-0 text-slate-700 flex items-center gap-1.5">
-                Venta <span id="badge-tab-venta" class="bg-white text-slate-700 px-1.5 py-0.5 rounded-full text-[9px] border">0</span>
-            </button>
-            <button onclick="switchMobileColumn('postventa')" id="tab-postventa" class="px-3 py-2 rounded-lg font-bold text-xs flex-shrink-0 text-slate-700 flex items-center gap-1.5">
-                Post Venta <span id="badge-tab-postventa" class="bg-white text-slate-700 px-1.5 py-0.5 rounded-full text-[9px] border">0</span>
-            </button>
-        </div>
+        <div class="bg-white p-2 rounded-xl border flex overflow-x-auto gap-1 scrollbar-custom" id="mobile-tabs-row"></div>
     </section>
 
     <main class="flex-1 max-w-[1780px] w-full mx-auto px-4 lg:px-8 py-4 overflow-x-auto">
-        <div class="flex gap-4.5 pb-6 items-start scrollbar-custom">
-            
-            <div id="column-container-frio" class="kanban-column bg-slate-100 p-3.5 rounded-2xl flex flex-col flex-shrink-0 min-h-[550px] border border-slate-200/80 shadow-2xs"
-                 ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event, 'frio')" ondragleave="handleDragLeave(event, 'frio')" ondrop="handleDrop(event, 'frio')">
-                <div class="flex items-center justify-between mb-3.5 px-1 font-extrabold text-xs uppercase text-slate-600">
-                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-snowflake text-blue-400"></i> Leads Frío</span>
-                    <span id="b-frio" class="bg-white text-slate-600 px-2 py-0.5 rounded-md border shadow-2xs font-extrabold">0</span>
-                </div>
-                <div id="col-frio" class="space-y-3.5 flex-grow overflow-y-auto max-h-[580px] scrollbar-custom pb-4"></div>
-            </div>
-            
-            <div id="column-container-tibio" class="kanban-column bg-slate-100 p-3.5 rounded-2xl flex flex-col flex-shrink-0 min-h-[550px] border border-slate-200/80 shadow-2xs"
-                 ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event, 'tibio')" ondragleave="handleDragLeave(event, 'tibio')" ondrop="handleDrop(event, 'tibio')">
-                <div class="flex items-center justify-between mb-3.5 px-1 font-extrabold text-xs uppercase text-slate-600">
-                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-fire text-amber-500"></i> Leads Tibio</span>
-                    <span id="b-tibio" class="bg-white text-slate-600 px-2 py-0.5 rounded-md border shadow-2xs font-extrabold">0</span>
-                </div>
-                <div id="col-tibio" class="space-y-3.5 flex-grow overflow-y-auto max-h-[580px] scrollbar-custom pb-4"></div>
-            </div>
-            
-            <div id="column-container-caliente" class="kanban-column bg-slate-100 p-3.5 rounded-2xl flex flex-col flex-shrink-0 min-h-[550px] border border-slate-200/80 shadow-2xs"
-                 ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event, 'caliente')" ondragleave="handleDragLeave(event, 'caliente')" ondrop="handleDrop(event, 'caliente')">
-                <div class="flex items-center justify-between mb-3.5 px-1 font-extrabold text-xs uppercase text-slate-600">
-                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-fire-flame-curved text-rose-500"></i> Leads Caliente</span>
-                    <span id="b-caliente" class="bg-white text-slate-600 px-2 py-0.5 rounded-md border shadow-2xs font-extrabold">0</span>
-                </div>
-                <div id="col-caliente" class="space-y-3.5 flex-grow overflow-y-auto max-h-[580px] scrollbar-custom pb-4"></div>
-            </div>
-            
-            <div id="column-container-agenda" class="kanban-column bg-indigo-50/60 p-3.5 rounded-2xl flex flex-col flex-shrink-0 min-h-[550px] border border-indigo-100 shadow-2xs"
-                 ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event, 'agenda')" ondragleave="handleDragLeave(event, 'agenda')" ondrop="handleDrop(event, 'agenda')">
-                <div class="flex items-center justify-between mb-3.5 px-1 font-extrabold text-xs uppercase text-indigo-700">
-                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-calendar-check"></i> Agenda Cita</span>
-                    <span id="b-agenda" class="bg-white text-indigo-700 px-2 py-0.5 rounded-md border border-indigo-100 shadow-2xs font-extrabold">0</span>
-                </div>
-                <div id="col-agenda" class="space-y-3.5 flex-grow overflow-y-auto max-h-[580px] scrollbar-custom pb-4"></div>
-            </div>
-            
-            <div id="column-container-venta" class="kanban-column bg-emerald-50/60 p-3.5 rounded-2xl flex flex-col flex-shrink-0 min-h-[550px] border border-emerald-100 shadow-2xs"
-                 ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event, 'venta')" ondragleave="handleDragLeave(event, 'venta')" ondrop="handleDrop(event, 'venta')">
-                <div class="flex items-center justify-between mb-3.5 px-1 font-extrabold text-xs uppercase text-emerald-700">
-                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-circle-dollar-to-slot"></i> Venta Cerrada</span>
-                    <span id="b-venta" class="bg-white text-emerald-700 px-2 py-0.5 rounded-md border border-emerald-100 shadow-2xs font-extrabold">0</span>
-                </div>
-                <div id="col-venta" class="space-y-3.5 flex-grow overflow-y-auto max-h-[580px] scrollbar-custom pb-4"></div>
-            </div>
-            
-            <div id="column-container-postventa" class="kanban-column bg-purple-50/60 p-3.5 rounded-2xl flex flex-col flex-shrink-0 min-h-[550px] border border-purple-100 shadow-2xs"
-                 ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event, 'postventa')" ondragleave="handleDragLeave(event, 'postventa')" ondrop="handleDrop(event, 'postventa')">
-                <div class="flex items-center justify-between mb-3.5 px-1 font-extrabold text-xs uppercase text-purple-700">
-                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-handshake-angle"></i> Post Venta</span>
-                    <span id="b-postventa" class="bg-white text-purple-700 px-2 py-0.5 rounded-md border border-purple-100 shadow-2xs font-extrabold">0</span>
-                </div>
-                <div id="col-postventa" class="space-y-3.5 flex-grow overflow-y-auto max-h-[580px] scrollbar-custom pb-4"></div>
-            </div>
-            
-        </div>
+        <div class="flex gap-4 pb-6 items-start scrollbar-custom" id="kanban-board-row"></div>
     </main>
 
     <div id="lead-modal" class="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-50 flex items-center justify-center hidden">
-        <div class="bg-white rounded-2xl w-full max-w-4xl p-6 shadow-2xl border border-slate-200 mx-4 max-h-[92vh] overflow-y-auto scrollbar-custom animate-fade-in">
-            
-            <div class="flex items-center justify-between mb-5 border-b border-slate-100 pb-3">
-                <div>
-                    <h3 id="modal-title" class="text-sm font-black uppercase text-slate-800 tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-address-card text-indigo-600 text-base"></i> Ficha Comercial del Paciente
-                    </h3>
-                    <p class="text-[10px] text-slate-400 font-bold mt-0.5 uppercase tracking-wide">Relación y seguimiento de pacientes en Relax Therapy</p>
-                </div>
-                <button type="button" onclick="closeModal()" class="text-slate-400 hover:text-slate-700 transition-colors w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
+        <div class="bg-white rounded-2xl w-full max-w-4xl p-6 shadow-2xl border mx-4 max-h-[92vh] overflow-y-auto scrollbar-custom animate-fade-in">
+            <div class="flex items-center justify-between mb-4 border-b pb-2">
+                <h3 id="modal-title" class="text-sm font-black uppercase text-slate-800">Ficha del Paciente</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             
-            <form id="crm-form" onsubmit="handleFormSubmit(event)" class="space-y-6 text-xs">
+            <form id="crm-form" onsubmit="handleFormSubmit(event)" class="space-y-4 text-xs">
                 <input type="hidden" id="form-id">
-                
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block font-bold text-slate-500 mb-1">Nombre Completo del Paciente</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><i class="fa-solid fa-user"></i></span>
-                            <input type="text" id="form-name" required placeholder="Nombre Apellido" class="w-full pl-9 pr-3 h-10 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block font-bold text-slate-500 mb-1">Número de WhatsApp</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><i class="fa-brands fa-whatsapp font-bold"></i></span>
-                            <input type="text" id="form-phone" required placeholder="0999999999" class="w-full pl-9 pr-3 h-10 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block font-bold text-slate-500 mb-1">Fecha de Registro</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><i class="fa-solid fa-calendar"></i></span>
-                            <input type="date" id="form-date" required class="w-full pl-9 pr-3 h-10 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
-                        </div>
-                    </div>
+                    <div><label class="block font-bold text-slate-500 mb-1">Nombre Completo</label><input type="text" id="form-name" required class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-medium focus:outline-hidden"></div>
+                    <div><label class="block font-bold text-slate-500 mb-1">WhatsApp</label><input type="text" id="form-phone" required class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-medium focus:outline-hidden"></div>
+                    <div><label class="block font-bold text-slate-500 mb-1">Fecha Registro</label><input type="date" id="form-date" required class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-medium focus:outline-hidden"></div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-indigo-50/30 p-4 rounded-xl border border-indigo-100/50">
-                    <div>
-                        <label class="block font-bold text-indigo-950 mb-1">Estado de Pipeline</label>
-                        <select id="form-phase" class="w-full px-3 h-10 bg-white border border-slate-200 rounded-xl font-bold focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
-                            <option value="frio">❄️ Frío</option>
-                            <option value="tibio">🔥 Tibio</option>
-                            <option value="caliente">💥 Caliente</option>
-                            <option value="agenda">📅 Agenda Cita</option>
-                            <option value="venta">💰 Venta Cerrada</option>
-                            <option value="postventa">🤝 Post Venta</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block font-bold text-indigo-950 mb-1">Valor Comercial Total ($)</label>
-                        <div class="relative font-bold text-indigo-600">
-                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center">$</span>
-                            <input type="number" id="form-value" step="0.01" value="0.00" oninput="calcularFlujoAbonos()" class="w-full pl-7 pr-3 h-10 bg-white border border-slate-200 rounded-xl font-extrabold focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block font-bold text-indigo-950 mb-1">Asesora Gestora</label>
-                        <select id="form-gestor" class="w-full px-3 h-10 bg-white border border-slate-200 rounded-xl font-semibold focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"></select>
-                    </div>
-                    <div>
-                        <label class="block font-bold text-indigo-950 mb-1">Causa de Descarte</label>
-                        <select id="form-loss" class="w-full px-3 h-10 bg-white border border-slate-200 rounded-xl font-bold text-rose-700 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
-                            <option value="Ninguno">Ninguno (Activo)</option>
-                            <option value="Fuera de la ciudad">Fuera de la ciudad</option>
-                            <option value="No le interesa">No le interesa</option>
-                            <option value="Precios">Precios elevados</option>
-                            <option value="No responde">No responde llamadas</option>
-                        </select>
-                    </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-indigo-50/40 p-4 rounded-xl border">
+                    <div><label class="block font-bold mb-1">Estado Pipeline</label><select id="form-phase" class="w-full px-2 h-10 bg-white border rounded-xl font-bold"><option value="frio">❄️ Frío</option><option value="tibio">🔥 Tibio</option><option value="caliente">💥 Caliente</option><option value="agenda">📅 Agenda Cita</option><option value="venta">💰 Venta Cerrada</option><option value="postventa">🤝 Post Venta</option></select></div>
+                    <div><label class="block font-bold mb-1">Valor Contrato ($)</label><input type="number" id="form-value" step="0.01" oninput="calcularFlujoAbonos()" class="w-full px-3 h-10 bg-white border rounded-xl font-extrabold text-indigo-600"></div>
+                    <div><label class="block font-bold mb-1">Asesora</label><select id="form-gestor" class="w-full px-2 h-10 bg-white border rounded-xl font-semibold"></select></div>
+                    <div><label class="block font-bold mb-1">Descarte</label><select id="form-loss" class="w-full px-2 h-10 bg-white border rounded-xl font-bold text-rose-700"><option value="Ninguno">Ninguno (Activo)</option><option value="Fuera de la ciudad">Fuera de la ciudad</option><option value="No le interesa">No le interesa</option><option value="Precios">Precios elevados</option><option value="No responde">No responde</option></select></div>
                 </div>
 
-                <div class="bg-slate-50 p-4.5 rounded-xl border border-slate-200/80 space-y-4">
-                    <span class="block text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                        <i class="fa-solid fa-wallet text-emerald-600"></i> Control y Registro de Abonos Realizados
-                    </span>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-2xs items-end">
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 mb-1">Monto del Abono ($)</label>
-                            <input type="number" id="new-abono-monto" step="0.01" placeholder="0.00" class="w-full px-3 h-8 bg-slate-50 border rounded-lg font-bold focus:outline-hidden">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 mb-1">Fecha de Abono</label>
-                            <input type="date" id="new-abono-fecha" class="w-full px-3 h-8 bg-slate-50 border rounded-lg focus:outline-hidden">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 mb-1">Método de Pago</label>
-                            <select id="new-abono-metodo" class="w-full px-3 h-8 bg-slate-50 border rounded-lg focus:outline-hidden">
-                                <option value="Efectivo">Efectivo</option>
-                                <option value="Transferencia">Transferencia Bancaria</option>
-                                <option value="Tarjeta de Crédito">Tarjeta de Crédito</option>
-                                <option value="Depósito">Depósito</option>
-                                <option value="Otro">Otro</option>
-                            </select>
-                        </div>
-                        <div>
-                            <button type="button" onclick="addNewAbonoRecord()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-8 rounded-lg font-bold flex items-center justify-center gap-1 transition-all">
-                                <i class="fa-solid fa-plus text-[9px]"></i> Registrar Abono
-                            </button>
-                        </div>
+                <div class="bg-slate-50 p-4 rounded-xl border space-y-3">
+                    <span class="block font-black text-slate-800 uppercase tracking-wider"><i class="fa-solid fa-wallet text-emerald-600"></i> Registro de Pagos / Abonos</span>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-2 bg-white p-3 rounded-xl border items-end">
+                        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Monto ($)</label><input type="number" id="new-abono-monto" step="0.01" class="w-full px-2 h-8 bg-slate-50 border rounded-md font-bold"></div>
+                        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Fecha</label><input type="date" id="new-abono-fecha" class="w-full px-2 h-8 bg-slate-50 border rounded-md"></div>
+                        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Método</label><select id="new-abono-metodo" class="w-full px-2 h-8 bg-slate-50 border rounded-md"><option value="Efectivo">Efectivo</option><option value="Transferencia">Transferencia</option><option value="Tarjeta">Tarjeta de Crédito</option></select></div>
+                        <button type="button" onclick="addNewAbonoRecord()" class="bg-emerald-600 text-white h-8 rounded-md font-bold text-xs">+ Agregar</button>
                     </div>
-
-                    <div class="overflow-x-auto max-h-[140px] scrollbar-custom border rounded-lg bg-white">
-                        <table class="w-full text-[11px] text-left border-collapse">
-                            <thead>
-                                <tr class="bg-slate-100 text-slate-600 font-bold border-b text-center">
-                                    <th class="p-2 text-left">Fecha</th>
-                                    <th class="p-2">Método</th>
-                                    <th class="p-2">Monto</th>
-                                    <th class="p-2 w-16">Acción</th>
-                                </tr>
-                            </thead>
-                            <tbody id="modal-abonos-list-rows" class="divide-y text-center font-semibold"></tbody>
-                        </table>
+                    <div class="overflow-x-auto max-h-[120px] border rounded-lg bg-white">
+                        <table class="w-full text-[11px] text-left"><thead class="bg-slate-100 text-center font-bold"><tr><th class="p-2 text-left">Fecha</th><th class="p-2">Método</th><th class="p-2">Monto</th><th class="p-2 w-12"></th></tr></thead><tbody id="modal-abonos-list-rows" class="divide-y text-center font-semibold"></tbody></table>
                     </div>
-
-                    <div class="grid grid-cols-2 gap-4 pt-2 border-t border-slate-200/60 text-center font-bold">
-                        <div class="bg-emerald-50 p-2.5 rounded-lg border border-emerald-100">
-                            <span class="block text-[10px] text-emerald-700 uppercase">Monto Total Cobrado</span>
-                            <strong id="modal-total-abonado" class="text-base font-extrabold text-emerald-800">$0.00</strong>
-                        </div>
-                        <div class="bg-rose-50 p-2.5 rounded-lg border border-rose-100">
-                            <span class="block text-[10px] text-rose-700 uppercase">Saldo Pendiente de Cobro</span>
-                            <strong id="modal-saldo-pendiente" class="text-base font-extrabold text-rose-800">$0.00</strong>
-                        </div>
+                    <div class="grid grid-cols-2 gap-4 text-center font-bold">
+                        <div class="bg-emerald-50 p-2 rounded-lg text-emerald-800 text-[11px]">Total Cobrado: <strong id="modal-total-abonado">$0.00</strong></div>
+                        <div class="bg-rose-50 p-2 rounded-lg text-rose-800 text-[11px]">Saldo Pendiente: <strong id="modal-saldo-pendiente">$0.00</strong></div>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <div class="bg-slate-50 p-4.5 rounded-xl border border-slate-200/80 space-y-3">
-                        <span class="block text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                            <i class="fa-solid fa-clock-rotate-left text-indigo-600"></i> Registrar Nueva Gestión Comercial
-                        </span>
-                        
-                        <div class="space-y-3">
-                            <div>
-                                <label class="block font-bold text-slate-500 mb-1">Descripción de la Interacción</label>
-                                <textarea id="new-log-desc" rows="3" placeholder="Ej. El paciente tiene dudas de precios. Solicita que le llame mañana." class="w-full p-2.5 bg-white border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"></textarea>
-                            </div>
-                            
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block font-bold text-slate-500 mb-1">Resultado del Contacto</label>
-                                    <select id="new-log-resultado" class="w-full px-3 h-9 bg-white border border-slate-200 rounded-xl focus:outline-hidden">
-                                        <option value="Interesado">Interesado (Seguimiento)</option>
-                                        <option value="Llamar Luego">Llamar Luego</option>
-                                        <option value="No contestó">No contestó</option>
-                                        <option value="Cita Agendada">Cita Agendada (Pasar a Agenda)</option>
-                                        <option value="Vendido">Vendido (Pasar a Venta)</option>
-                                        <option value="Descartado">Descartado (Pasar a Descarte)</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block font-bold text-slate-500 mb-1">Intentos de Contacto (Totales)</label>
-                                    <div class="flex items-center gap-2">
-                                        <input type="number" id="form-touch" value="1" min="1" class="w-20 px-3 h-9 bg-white border border-slate-200 rounded-xl font-bold text-center focus:outline-hidden">
-                                        <span class="text-[10px] text-slate-400 font-bold">Intentos</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <button type="button" onclick="registerNewLog()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white h-9 rounded-xl font-bold flex items-center justify-center gap-1.5 transition-all">
-                                <i class="fa-solid fa-plus text-[10px]"></i> Registrar Nota en Bitácora
-                            </button>
+                    <div class="bg-slate-50 p-4 rounded-xl border space-y-2">
+                        <span class="block font-black text-slate-800 uppercase tracking-wider">Nueva Gestión Comercial</span>
+                        <textarea id="new-log-desc" rows="3" placeholder="Añadir comentarios sobre la llamada o estado del paciente..." class="w-full p-2.5 bg-white border rounded-xl focus:outline-hidden"></textarea>
+                        <div class="grid grid-cols-2 gap-2">
+                            <select id="new-log-resultado" class="w-full h-9 bg-white border rounded-xl"><option value="Interesado">Interesado</option><option value="Llamar Luego">Llamar Luego</option><option value="No contestó">No contestó</option><option value="Cita Agendada">Cita Agendada</option><option value="Vendido">Vendido</option></select>
+                            <div class="flex items-center gap-2"><input type="number" id="form-touch" value="1" class="w-16 h-9 bg-white border rounded-xl text-center font-bold"><span class="text-[10px] text-slate-400 font-bold">Contactos</span></div>
                         </div>
+                        <button type="button" onclick="registerNewLog()" class="w-full bg-indigo-600 text-white h-9 rounded-xl font-bold">Registrar Gestión</button>
                     </div>
-
-                    <div class="bg-slate-50 p-4.5 rounded-xl border border-slate-200/80 flex flex-col h-[270px]">
-                        <span class="block text-xs font-black text-slate-800 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                            <i class="fa-solid fa-list-ul text-slate-500"></i> Bitácora e Historial de Contacto
-                        </span>
-                        <div class="flex-1 overflow-y-auto space-y-3.5 pr-1.5 scrollbar-custom" id="modal-bitacora-timeline"></div>
+                    <div class="bg-slate-50 p-4 rounded-xl border flex flex-col h-[230px]">
+                        <span class="block font-black text-slate-800 uppercase tracking-wider mb-2">Bitácora de Contactos</span>
+                        <div class="flex-1 overflow-y-auto space-y-2.5 pr-1 scrollbar-custom" id="modal-bitacora-timeline"></div>
                     </div>
                 </div>
 
-                <div class="pt-3.5 flex justify-end gap-2.5 border-t border-slate-100">
-                    <button type="button" onclick="closeModal()" class="px-4.5 h-11 font-bold text-slate-500 hover:text-slate-700 transition-colors">
-                        Cancelar
-                    </button>
-                    <button type="submit" id="btn-submit-form" class="px-6 h-11 bg-indigo-600 text-white font-extrabold rounded-xl shadow-md shadow-indigo-600/10 hover:bg-indigo-700 transition-all">
-                        Guardar Ficha Técnica
-                    </button>
+                <div class="pt-3 flex justify-end gap-2 border-t">
+                    <button type="button" onclick="closeModal()" class="font-bold text-slate-500 px-4">Cancelar</button>
+                    <button type="submit" class="px-6 h-11 bg-indigo-600 text-white font-extrabold rounded-xl shadow-md">Guardar Cambios</button>
                 </div>
             </form>
         </div>
@@ -603,9 +247,7 @@
 
         let supabaseClient = null;
         const liveClock = new Date();
-        const CURRENT_DAY_NUM = liveClock.getDate();
         const CURRENT_MONTH_NUM = liveClock.getMonth() + 1;
-        const CURRENT_YEAR_NUM = liveClock.getFullYear();
         
         let mainLeadsRegistry = [];
         let currentStorageMode = 'local'; 
@@ -613,7 +255,7 @@
         let filterOnlyTodayAlerts = false;
         let filterOnlyPendingDebt = false; 
         let activeSearchQuery = "";
-        let selectedMonthInteractiveFilter = null; 
+        let selectedMonthInteractiveFilter = CURRENT_MONTH_NUM; // Por defecto el mes real actual
         let currentMobileColumn = 'frio'; 
         
         let currentModalAbonosList = [];
@@ -623,54 +265,73 @@
         let metasMensualesDinamicas = { "Brenda": 1100, "Joselyne": 1100, "Naty": 1100, "Fernando": 0 };
         let metasDiariasDinamicas = { "Brenda": 50, "Joselyne": 50, "Naty": 50, "Fernando": 0 };
         const monthsNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        const internalPhasesConfig = [
+            { id: 'frio', name: 'Leads Frío', icon: 'fa-snowflake text-blue-400' },
+            { id: 'tibio', name: 'Leads Tibio', icon: 'fa-fire text-amber-500' },
+            { id: 'caliente', name: 'Leads Caliente', icon: 'fa-fire-flame-curved text-rose-500' },
+            { id: 'agenda', name: 'Agenda Cita', icon: 'fa-calendar-check text-indigo-500' },
+            { id: 'venta', name: 'Venta Cerrada', icon: 'fa-circle-dollar-to-slot text-emerald-500' },
+            { id: 'postventa', name: 'Post Venta', icon: 'fa-handshake-angle text-purple-500' }
+        ];
 
         window.onload = function() {
+            renderStructureHTML();
             initPersonalizationConfig();
             initStorageEngine();
         };
 
-        function showToast(message, type = 'success') {
+        function renderStructureHTML() {
+            // Render columnas del Kanban dinámicamente
+            const boardRow = document.getElementById('kanban-board-row');
+            boardRow.innerHTML = '';
+            internalPhasesConfig.forEach(p => {
+                boardRow.innerHTML += `
+                    <div id="column-container-${p.id}" class="kanban-column bg-slate-100 p-3.5 rounded-2xl flex flex-col flex-shrink-0 min-h-[550px] border border-slate-200"
+                         ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event, '${p.id}')" ondragleave="handleDragLeave(event, '${p.id}')" ondrop="handleDrop(event, '${p.id}')">
+                        <div class="flex items-center justify-between mb-3 px-1 font-extrabold text-xs uppercase text-slate-600">
+                            <span class="flex items-center gap-1.5"><i class="fa-solid ${p.icon}"></i> ${p.name}</span>
+                            <span id="b-${p.id}" class="bg-white text-slate-600 px-2 py-0.5 rounded-md border shadow-2xs">0</span>
+                        </div>
+                        <div id="col-${p.id}" class="space-y-3 flex-grow overflow-y-auto max-h-[580px] scrollbar-custom pb-4"></div>
+                    </div>`;
+            });
+
+            // Render pestañas móviles dinámicamente
+            const tabsRow = document.getElementById('mobile-tabs-row');
+            tabsRow.innerHTML = '';
+            internalPhasesConfig.forEach(p => {
+                tabsRow.innerHTML += `
+                    <button onclick="switchMobileColumn('${p.id}')" id="tab-${p.id}" class="px-3 py-2 rounded-lg font-bold text-xs flex-shrink-0 bg-slate-100 text-slate-700 flex items-center gap-1">
+                        ${p.name.split(' ')[1] || p.name} <span id="badge-tab-${p.id}" class="bg-white px-1.5 py-0.5 rounded-full text-[9px] border">0</span>
+                    </button>`;
+            });
+        }
+
+        function showToast(message) {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            toast.className = `toast-notification flex items-center gap-3 p-4 rounded-xl border text-xs font-bold shadow-lg bg-white border-slate-200 transition-all duration-300`;
-            
-            let icon = '';
-            if (type === 'success') icon = '<i class="fa-solid fa-circle-check text-emerald-500 text-base"></i>';
-            else if (type === 'warning') icon = '<i class="fa-solid fa-triangle-exclamation text-amber-500 text-base"></i>';
-            else icon = '<i class="fa-solid fa-circle-xmark text-rose-500 text-base"></i>';
-            
-            toast.innerHTML = `${icon}<div class="flex-1 text-slate-800">${message}</div><button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>`;
+            toast.className = `p-3.5 rounded-xl border text-xs font-bold shadow-md bg-white border-slate-200 flex items-center justify-between animate-fade-in`;
+            toast.innerHTML = `<span class="text-slate-800">${message}</span>`;
             container.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-2');
-                setTimeout(() => { toast.remove(); }, 300);
-            }, 4500);
+            setTimeout(() => { toast.remove(); }, 3500);
         }
 
         function initStorageEngine() {
             const savedMode = localStorage.getItem('relax_storage_mode') || 'supabase';
             currentStorageMode = savedMode;
-
+            
             const urlSetup = localStorage.getItem('supabase_url') || DB_CLOUD_URL;
             const keySetup = localStorage.getItem('supabase_key') || DB_CLOUD_KEY;
             
             document.getElementById('db-setup-url').value = urlSetup;
             document.getElementById('db-setup-key').value = keySetup;
-
             updateStorageBadges();
 
             if (currentStorageMode === 'supabase') {
                 try {
-                    if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
-                        setTimeout(initStorageEngine, 250);
-                        return;
-                    }
                     supabaseClient = window.supabase.createClient(urlSetup, keySetup);
                     loadDataFromCloud();
-                } catch(e) {
-                    switchToLocalFallback("Error de objeto Supabase");
-                }
+                } catch(e) { switchToLocalFallback(); }
             } else {
                 loadDataFromLocalStorage();
             }
@@ -678,139 +339,75 @@
 
         function updateStorageBadges() {
             const status = document.getElementById('sync-status');
-            const badge = document.getElementById('storage-mode-badge');
-            const icon = document.getElementById('storage-icon');
             const text = document.getElementById('storage-text');
-            const btnLocal = document.getElementById('btn-mode-local');
-            const btnSupa = document.getElementById('btn-mode-supabase');
-
             if (currentStorageMode === 'supabase') {
-                badge.className = "px-3 h-10 rounded-xl font-bold flex items-center gap-2 border bg-indigo-50 border-indigo-100 text-indigo-700 shadow-2xs";
-                icon.className = "fa-solid fa-cloud text-indigo-600";
-                text.innerText = "Base Nube (Supabase)";
-                btnSupa.className = "px-4 py-1.5 rounded-lg text-xs font-bold bg-white text-indigo-700 shadow-2xs border border-indigo-100";
-                btnLocal.className = "px-4 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:bg-slate-200/50";
+                text.innerText = "Base Nube (Online)";
             } else {
-                badge.className = "px-3 h-10 rounded-xl font-bold flex items-center gap-2 border bg-amber-50 border-amber-100 text-amber-700 shadow-2xs";
-                icon.className = "fa-solid fa-laptop text-amber-600";
                 text.innerText = "Modo Local (Offline)";
-                btnLocal.className = "px-4 py-1.5 rounded-lg text-xs font-bold bg-white text-amber-700 shadow-2xs border border-amber-100";
-                btnSupa.className = "px-4 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:bg-slate-200/50";
-                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Modo Offline Activo`;
-                status.className = "block text-[11px] font-extrabold text-amber-600 uppercase tracking-wider";
+                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Modo Offline`;
             }
         }
 
         function changeDatabaseMode(mode) {
-            if (currentStorageMode === mode) return;
             currentStorageMode = mode;
             localStorage.setItem('relax_storage_mode', mode);
-            showToast(`Cambiando a Modo ${mode === 'supabase' ? 'Nube' : 'Local'}...`, 'warning');
             initStorageEngine();
         }
 
         function saveSupabaseSettings() {
-            const url = document.getElementById('db-setup-url').value.trim();
-            const key = document.getElementById('db-setup-key').value.trim();
-            if(!url || !key) {
-                showToast("Por favor complete todos los campos.", "error");
-                return;
-            }
-            localStorage.setItem('supabase_url', url);
-            localStorage.setItem('supabase_key', key);
+            localStorage.setItem('supabase_url', document.getElementById('db-setup-url').value.trim());
+            localStorage.setItem('supabase_key', document.getElementById('db-setup-key').value.trim());
             localStorage.setItem('relax_storage_mode', 'supabase');
             currentStorageMode = 'supabase';
-            showToast("Credenciales de nube guardadas.", "warning");
             initStorageEngine();
         }
 
-        function resetDefaultSupabaseSettings() {
-            if (confirm("¿Seguro que desea restaurar las credenciales predeterminadas?")) {
-                localStorage.removeItem('supabase_url');
-                localStorage.removeItem('supabase_key');
-                document.getElementById('db-setup-url').value = DB_CLOUD_URL;
-                document.getElementById('db-setup-key').value = DB_CLOUD_KEY;
-                saveSupabaseSettings();
-            }
-        }
-
-        function switchToLocalFallback(reason = "") {
+        function switchToLocalFallback() {
             currentStorageMode = 'local';
             updateStorageBadges();
-            showToast(`⚠️ Modo Local Activado de Respaldo.`, 'error');
             loadDataFromLocalStorage();
         }
 
         function loadDataFromLocalStorage() {
-            const localData = localStorage.getItem('relax_leads_registry_local');
-            mainLeadsRegistry = localData ? JSON.parse(localData) : [];
+            mainLeadsRegistry = JSON.parse(localStorage.getItem('relax_leads_registry_local')) || [];
             renderApplicationCore();
-            showToast(`Datos locales cargados (${mainLeadsRegistry.length} leads).`);
         }
 
         async function loadDataFromCloud() {
             if(!supabaseClient) return;
-            const status = document.getElementById('sync-status');
-            status.innerHTML = `⏳ Sincronizando datos cloud...`;
-            status.className = "block text-[11px] font-extrabold text-indigo-600 uppercase tracking-wider";
             try {
                 let { data, error } = await supabaseClient.from('pacientes_crm').select('*');
                 if(error) throw error;
                 mainLeadsRegistry = data.map(item => parseRowToLead(item));
                 localStorage.setItem('relax_leads_registry_local', JSON.stringify(mainLeadsRegistry));
-                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sincronizado (${mainLeadsRegistry.length} Leads)`;
-                status.className = "block text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider";
+                document.getElementById('sync-status').innerHTML = `<i class="fa-solid fa-circle-check"></i> Conectado (${mainLeadsRegistry.length} Leads)`;
                 renderApplicationCore();
-            } catch(e) { 
-                console.error(e); 
-                switchToLocalFallback("Error de conexión");
-            }
+            } catch(e) { switchToLocalFallback(); }
         }
 
         function parseRowToLead(item) {
             let lead = {
-                id: parseInt(item.crm_id || item.id), 
-                name: String(item.name || ''), 
-                phone: String(item.phone || ''), 
-                phase: String(item.phase || 'frio').toLowerCase().trim(),
-                value: parseFloat(item.value) || 0, 
-                date: item.date ? String(item.date).trim() : '', 
-                loss: item.loss || 'Ninguno', 
-                gestor: item.gestor || 'Brenda',
-                touch: parseInt(item.touch) || 1,
-                desc: '', abonos: [], bitacora: []
+                id: parseInt(item.crm_id || item.id), name: String(item.name || ''), phone: String(item.phone || ''), 
+                phase: String(item.phase || 'frio').toLowerCase().trim(), value: parseFloat(item.value) || 0, 
+                date: item.date ? String(item.date).trim() : '', loss: item.loss || 'Ninguno', gestor: item.gestor || 'Brenda',
+                touch: parseInt(item.touch) || 1, desc: '', abonos: [], bitacora: []
             };
             let obsVal = item.observaciones || item.desc || '';
-            if (obsVal.trim().startsWith('{') && obsVal.trim().endsWith('}')) {
+            if (obsVal.trim().startsWith('{')) {
                 try {
                     let parsed = JSON.parse(obsVal);
-                    lead.desc = parsed.desc || '';
-                    lead.abonos = parsed.abonos || [];
-                    lead.bitacora = parsed.bitacora || [];
+                    lead.desc = parsed.desc || ''; lead.abonos = parsed.abonos || []; lead.bitacora = parsed.bitacora || [];
                 } catch (e) { lead.desc = obsVal; }
             } else { lead.desc = obsVal; }
-
-            if (lead.abonos.length === 0) {
-                if ((parseFloat(item.a1)||0) > 0) lead.abonos.push({ monto: parseFloat(item.a1), fecha: lead.date, metodo: 'Abono 1' });
-                if ((parseFloat(item.a2)||0) > 0) lead.abonos.push({ monto: parseFloat(item.a2), fecha: lead.date, metodo: 'Abono 2' });
-                if ((parseFloat(item.a3)||0) > 0) lead.abonos.push({ monto: parseFloat(item.a3), fecha: lead.date, metodo: 'Abono 3' });
-                if ((parseFloat(item.a4)||0) > 0) lead.abonos.push({ monto: parseFloat(item.a4), fecha: lead.date, metodo: 'Abono 4' });
-                if ((parseFloat(item.a5)||0) > 0) lead.abonos.push({ monto: parseFloat(item.a5), fecha: lead.date, metodo: 'Abono 5' });
-            }
             return lead;
         }
 
         function prepareLeadToRow(leadData) {
-            let a1 = leadData.abonos[0] ? parseFloat(leadData.abonos[0].monto) || 0 : 0;
-            let a2 = leadData.abonos[1] ? parseFloat(leadData.abonos[1].monto) || 0 : 0;
-            let a3 = leadData.abonos[2] ? parseFloat(leadData.abonos[2].monto) || 0 : 0;
-            let a4 = leadData.abonos[3] ? parseFloat(leadData.abonos[3].monto) || 0 : 0;
-            let a5 = leadData.abonos[4] ? parseFloat(leadData.abonos[4].monto) || 0 : 0;
             let obsJSONString = JSON.stringify({ desc: leadData.desc, abonos: leadData.abonos, bitacora: leadData.bitacora });
             return {
                 crm_id: String(leadData.id), name: leadData.name, phone: leadData.phone, phase: leadData.phase,
                 value: String(leadData.value), date: leadData.date, loss: leadData.loss, gestor: leadData.gestor, 
-                a1: String(a1), a2: String(a2), a3: String(a3), a4: String(a4), a5: String(a5), touch: String(leadData.touch), observaciones: obsJSONString
+                touch: String(leadData.touch), observaciones: obsJSONString
             };
         }
 
@@ -822,188 +419,126 @@
             if (currentStorageMode === 'supabase' && supabaseClient) {
                 try {
                     const rowPayload = prepareLeadToRow(leadData);
-                    const { data: existing } = await supabaseClient.from('pacientes_crm').select('crm_id').eq('crm_id', String(leadData.id));
-                    if(existing && existing.length > 0) {
-                        await supabaseClient.from('pacientes_crm').update(rowPayload).eq('crm_id', String(leadData.id));
-                    } else {
-                        await supabaseClient.from('pacientes_crm').insert([rowPayload]);
-                    }
-                } catch(e) {
-                    console.error(e);
-                    showToast("Guardado localmente. Error de sincronización cloud.", "warning");
-                }
+                    await supabaseClient.from('pacientes_crm').upsert([rowPayload], { onConflict: 'crm_id' });
+                } catch(e) { console.error(e); }
             }
             renderApplicationCore();
         }
 
-        function handleDragStart(e, id) {
-            e.dataTransfer.setData("text/plain", id);
-            setTimeout(() => {
-                const card = document.getElementById(`lead-card-${id}`);
-                if (card) card.classList.add('dragging');
-            }, 0);
-        }
-        function handleDragEnd(e) {
-            document.querySelectorAll('.lead-card.dragging').forEach(c => c.classList.remove('dragging'));
-        }
+        function handleDragStart(e, id) { e.dataTransfer.setData("text/plain", id); }
         function handleDragOver(e) { e.preventDefault(); }
-        function handleDragEnter(e, columnId) {
-            e.preventDefault();
-            const colContainer = document.getElementById(`column-container-${columnId}`);
-            if (colContainer) colContainer.classList.add('drag-over');
-        }
-        function handleDragLeave(e, columnId) {
-            const colContainer = document.getElementById(`column-container-${columnId}`);
-            if (colContainer) colContainer.classList.remove('drag-over');
-        }
+        function handleDragEnter(e, columnId) { document.getElementById(`column-container-${columnId}`).classList.add('drag-over'); }
+        function handleDragLeave(e, columnId) { document.getElementById(`column-container-${columnId}`).classList.remove('drag-over'); }
         async function handleDrop(e, targetPhase) {
             e.preventDefault();
-            const colContainer = document.getElementById(`column-container-${targetPhase}`);
-            if (colContainer) colContainer.classList.remove('drag-over');
+            document.getElementById(`column-container-${targetPhase}`).classList.remove('drag-over');
             const id = e.dataTransfer.getData("text/plain"); if (!id) return;
             const lead = mainLeadsRegistry.find(l => l.id === parseInt(id));
             if (lead && lead.phase !== targetPhase) {
-                const oldPhase = lead.phase; lead.phase = targetPhase;
-                lead.bitacora.unshift({
-                    fecha: new Date().toLocaleString(), asesora: "Sistema",
-                    nota: `Lead movido de [${oldPhase.toUpperCase()}] a [${targetPhase.toUpperCase()}] vía arrastrar.`
-                });
-                showToast(`Moviendo a ${targetPhase.toUpperCase()}`);
+                lead.phase = targetPhase;
+                lead.bitacora.unshift({ fecha: new Date().toLocaleString(), asesora: "Sistema", nota: `Movido a [${targetPhase.toUpperCase()}]` });
                 await saveLeadData(lead);
             }
         }
 
         function renderApplicationCore() {
-            const phases = ['frio', 'tibio', 'caliente', 'agenda', 'venta', 'postventa'];
             let pipelineSum = 0, salesSum = 0, todayAlerts = 0;
             let phaseCounts = { frio: 0, tibio: 0, caliente: 0, agenda: 0, venta: 0, postventa: 0 };
-            let totalLeadsBajoFiltro = 0; let agendasContadasBajoFiltro = 0; let ventasContadasBajoFiltro = 0;
-
-            let gestoresSales = {}; let gestoresContracted = {}; let gestoresTodayCount = {}; let gestoresMonthTotalCount = {};
-            listadoGestores.forEach(g => { gestoresSales[g] = 0; gestoresContracted[g] = 0; gestoresTodayCount[g] = 0; gestoresMonthTotalCount[g] = 0; });
+            let gestoresSales = {}; let gestoresContracted = {};
             
-            let yearMonthsData = Array.from({ length: 12 }, () => ({ totalLeads: 0, totalSalesLeads: 0, totalContracted: 0, totalCollected: 0 }));
-            let selectedAuditMonth = parseInt(document.getElementById('audit-month-selector').value) || CURRENT_MONTH_NUM;
+            listadoGestores.forEach(g => { gestoresSales[g] = 0; gestoresContracted[g] = 0; });
+            let yearMonthsData = Array.from({ length: 12 }, () => ({ totalLeads: 0, totalCollected: 0 }));
 
-            phases.forEach(p => document.getElementById(`col-${p}`).innerHTML = '');
+            internalPhasesConfig.forEach(p => document.getElementById(`col-${p.id}`).innerHTML = '');
 
             mainLeadsRegistry.forEach(lead => {
                 let currentPhase = lead.phase;
-                if (!phases.includes(currentPhase)) currentPhase = 'frio';
-
                 let valContrato = lead.value || 0;
                 let totalAbonado = lead.abonos ? lead.abonos.reduce((sum, a) => sum + parseFloat(a.monto), 0) : 0;
                 let saldoPendiente = valContrato - totalAbonado;
                 
-                let leadDay = CURRENT_DAY_NUM; let leadMonth = CURRENT_MONTH_NUM; let leadYear = CURRENT_YEAR_NUM;
+                let leadMonth = CURRENT_MONTH_NUM;
                 if (lead.date && lead.date.includes('-')) {
                     let parts = lead.date.split('-');
-                    if(parts.length === 3) {
-                        if(parts[0].length === 4) {
-                            leadYear = parseInt(parts[0]); leadMonth = parseInt(parts[1]); leadDay = parseInt(parts[2]);
-                        } else {
-                            leadDay = parseInt(parts[0]); leadMonth = parseInt(parts[1]); leadYear = parseInt(parts[2]);
-                        }
-                    }
+                    leadMonth = parts[0].length === 4 ? parseInt(parts[1]) : parseInt(parts[1]);
                 }
 
                 if(leadMonth >= 1 && leadMonth <= 12) {
                     yearMonthsData[leadMonth - 1].totalLeads++;
-                    if(currentPhase === 'venta' || currentPhase === 'postventa') yearMonthsData[leadMonth - 1].totalSalesLeads++;
-                    yearMonthsData[leadMonth - 1].totalContracted += valContrato;
                     yearMonthsData[leadMonth - 1].totalCollected += totalAbonado;
                 }
 
-                let gName = lead.gestor;
-                let isToday = (leadDay === CURRENT_DAY_NUM && leadMonth === CURRENT_MONTH_NUM && leadYear === CURRENT_YEAR_NUM);
-
-                if(leadMonth === selectedAuditMonth && gestoresSales[gName] !== undefined) {
-                    gestoresSales[gName] += totalAbonado; 
-                    gestoresContracted[gName] += valContrato; 
-                    gestoresMonthTotalCount[gName]++;
+                // NUEVA LÓGICA DE PERSISTENCIA EXPLICADA POR EL USUARIO:
+                // Si el lead está en Frío, Tibio, Caliente o Agenda -> PASA DE LARGO E HISTÓRICO SIEMPRE VISIBLE.
+                // Si está en Venta o Postventa -> Sí se segmenta rigurosamente en el mes que se cobró/cerró.
+                let belongsToSelectedMonth = true;
+                if (currentPhase === 'venta' || currentPhase === 'postventa') {
+                    belongsToSelectedMonth = (leadMonth === selectedMonthInteractiveFilter);
                 }
-                if(isToday && gestoresTodayCount[gName] !== undefined) gestoresTodayCount[gName]++;
+
+                if (leadMonth === selectedMonthInteractiveFilter && gestoresSales[lead.gestor] !== undefined) {
+                    gestoresSales[lead.gestor] += totalAbonado;
+                    gestoresContracted[lead.gestor] += valContrato;
+                }
+
+                let isToday = lead.bitacora && lead.bitacora.some(log => log.fecha.includes(new Date().toLocaleDateString()));
                 if (isToday) todayAlerts++;
 
-                if ((currentManagerFilter === 'all' || lead.gestor === currentManagerFilter) &&
-                    (selectedMonthInteractiveFilter === null || leadMonth === selectedMonthInteractiveFilter) &&
+                if (belongsToSelectedMonth && (currentManagerFilter === 'all' || lead.gestor === currentManagerFilter) &&
                     (!filterOnlyTodayAlerts || isToday) && (!filterOnlyPendingDebt || saldoPendiente > 0.05) &&
-                    (activeSearchQuery === "" || lead.name.toLowerCase().includes(activeSearchQuery) || lead.phone.includes(activeSearchQuery) || lead.desc.toLowerCase().includes(activeSearchQuery))) {
+                    (activeSearchQuery === "" || lead.name.toLowerCase().includes(activeSearchQuery) || lead.phone.includes(activeSearchQuery))) {
                     
-                    totalLeadsBajoFiltro++;
-                    if (currentPhase === 'agenda') agendasContadasBajoFiltro++;
-                    if (currentPhase === 'venta' || currentPhase === 'postventa') ventasContadasBajoFiltro++;
-
                     pipelineSum += valContrato; salesSum += totalAbonado; phaseCounts[currentPhase]++;
 
-                    let cleanDigits = lead.phone.replace(/[^0-9]/g, '');
-                    if (cleanDigits.startsWith('09') && cleanDigits.length === 10) cleanDigits = '593' + cleanDigits.substring(1);
-
                     const card = document.createElement('div');
-                    card.id = `lead-card-${lead.id}`; card.draggable = true;
-                    card.ondragstart = (e) => handleDragStart(e, lead.id);
-                    card.ondragend = (e) => handleDragEnd(e);
-                    
-                    let displayObs = lead.desc ? lead.desc : "Sin observaciones";
-                    if (displayObs.length > 55) displayObs = displayObs.substring(0, 52) + "...";
-
-                    let cardBorderClass = lead.loss && lead.loss !== 'Ninguno' ? 'border-rose-300 bg-rose-50/20' : (currentPhase === 'venta' || currentPhase === 'postventa' ? 'border-emerald-300' : 'border-slate-200');
-                    card.className = `lead-card p-3 rounded-xl border bg-white shadow-xs space-y-2 hover:shadow-md transition-all ${cardBorderClass} ${currentMobileColumn !== currentPhase ? 'hidden lg:block' : ''}`;
+                    card.className = `lead-card p-3 rounded-xl border bg-white shadow-2xs space-y-2 hover:shadow-md ${currentMobileColumn !== currentPhase ? 'hidden lg:block' : ''}`;
                     card.innerHTML = `
-                        <div class="flex justify-between font-bold text-xs">
-                            <span onclick="openModal('edit', ${lead.id})" class="underline cursor-pointer text-indigo-600 hover:text-indigo-800 font-extrabold">${lead.name}</span>
-                            <span class="text-[9px] ${lead.loss && lead.loss !== 'Ninguno' ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-600'} px-1.5 py-0.5 rounded font-black uppercase">${lead.loss && lead.loss !== 'Ninguno' ? 'Descarte' : `Int: ${lead.touch}`}</span>
+                        <div class="flex justify-between font-bold">
+                            <span onclick="openModal('edit', ${lead.id})" class="underline cursor-pointer text-indigo-600 font-extrabold">${lead.name}</span>
+                            <span class="text-[9px] bg-slate-100 px-1.5 py-0.5 rounded font-black uppercase">INT: ${lead.touch}</span>
                         </div>
-                        <p class="text-[10px] text-slate-500 font-medium"><i class="fa-solid fa-notes-medical text-slate-400"></i> ${displayObs}</p>
-                        <div class="text-[10px] font-extrabold flex justify-between bg-slate-50 p-1.5 rounded-lg border border-slate-100">
+                        <p class="text-[10px] text-slate-500 truncate">${lead.desc || 'Sin bitácora reciente'}</p>
+                        <div class="text-[10px] font-bold flex justify-between bg-slate-50 p-1.5 rounded-lg border">
                             <span class="text-emerald-600">Cobrado: $${totalAbonado.toFixed(2)}</span>
                             <span class="text-rose-600">Pend: $${saldoPendiente.toFixed(2)}</span>
                         </div>
-                        <div class="flex justify-between items-center text-[10px] text-slate-400 font-bold pt-1 border-t border-slate-100">
+                        <div class="flex justify-between items-center text-[10px] text-slate-400 font-bold pt-1 border-t">
                             <span class="uppercase text-[9px]"><i class="fa-solid fa-circle-user text-slate-300"></i> ${lead.gestor}</span>
-                            <a href="https://wa.me/${cleanDigits}" target="_blank" class="flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded-lg text-[9px] font-black transition-all"><i class="fa-brands fa-whatsapp text-xs"></i> WhatsApp</a>
+                            <a href="https://wa.me/${lead.phone.replace(/[^0-9]/g, '')}" target="_blank" class="bg-emerald-600 text-white px-2 py-0.5 rounded text-[9px] font-black">WhatsApp</a>
                         </div>`;
                     
                     document.getElementById(`col-${currentPhase}`).appendChild(card);
                 }
             });
 
+            // Grid Mensual Interactivo
             const mContainer = document.getElementById('months-grid-container'); mContainer.innerHTML = '';
             yearMonthsData.forEach((mData, idx) => {
-                let borderStyle = (selectedMonthInteractiveFilter === (idx + 1)) ? 'border-indigo-600 bg-indigo-50/70 ring-2 ring-indigo-500/20' : 'border-slate-200 bg-white hover:border-slate-300';
-                let tasaCierreMes = mData.totalLeads > 0 ? Math.round((mData.totalSalesLeads / mData.totalLeads) * 100) : 0;
+                let activeClass = (selectedMonthInteractiveFilter === (idx + 1)) ? 'border-indigo-600 bg-indigo-50 font-black' : 'border-slate-200 bg-white';
                 mContainer.innerHTML += `
-                    <div onclick="triggerMonthInteractiveFilter(${idx})" class="p-2.5 rounded-xl border text-center shadow-2xs cursor-pointer transition-all ${borderStyle}">
-                        <span class="block font-black text-slate-700 border-b pb-1 mb-1.5 text-[10px] uppercase tracking-wide">${monthsNames[idx]}</span>
-                        <div class="text-left text-[9px] text-slate-500 space-y-0.5">
-                            <div class="flex justify-between"><span>Leads:</span> <strong class="text-slate-700">${mData.totalLeads}</strong></div>
-                            <div class="flex justify-between font-bold text-violet-600"><span>% Cierre:</span> <strong>${tasaCierreMes}%</strong></div>
-                            <div class="flex justify-between font-bold text-emerald-600"><span>Vendido:</span> <strong>$${mData.totalCollected.toFixed(0)}</strong></div>
-                        </div>
+                    <div onclick="triggerMonthInteractiveFilter(${idx + 1})" class="p-2 rounded-xl border text-center cursor-pointer transition-all ${activeClass}">
+                        <span class="block text-[10px] uppercase">${monthsNames[idx]}</span>
+                        <span class="block text-[11px] font-bold text-emerald-600">$${mData.totalCollected.toFixed(0)}</span>
                     </div>`;
             });
 
+            // Tabla Asesoras
             const gBody = document.getElementById('goals-table-body'); gBody.innerHTML = '';
             Object.keys(gestoresSales).forEach(g => {
-                let totCobradoMes = gestoresSales[g] || 0; let totContratadoMes = gestoresContracted[g] || 0;
-                let hoyGestiones = gestoresTodayCount[g] || 0; let acumuladoMesLeads = gestoresMonthTotalCount[g] || 0;
-                let metaMensualBase = metasMensualesDinamicas[g] ?? 1100; let metaDiariaBase = metasDiariasDinamicas[g] ?? 50;
-                let pctAvance = metaMensualBase > 0 ? Math.min(Math.round((totCobradoMes / metaMensualBase) * 100), 100) : 0;
-                let barColor = pctAvance < 40 ? 'bg-rose-500' : (pctAvance < 75 ? 'bg-amber-500' : 'bg-emerald-600');
-
+                let cobrado = gestoresSales[g] || 0; let contratado = gestoresContracted[g] || 0;
+                let meta = metasMensualesDinamicas[g] || 1100;
+                let pct = meta > 0 ? Math.min(Math.round((cobrado / meta) * 100), 100) : 0;
                 gBody.innerHTML += `
-                    <tr class="border-b h-12 hover:bg-slate-50/50 text-center font-medium">
-                        <td class="p-2.5 font-extrabold text-slate-800 text-left pl-4">${g}</td>
-                        <td class="p-2.5 font-bold text-slate-500">$${totContratadoMes.toFixed(2)}</td>
-                        <td class="p-2.5 font-extrabold text-emerald-600">$${totCobradoMes.toFixed(2)}</td>
-                        <td class="p-2.5 font-extrabold text-fuchsia-700 bg-fuchsia-50/20">${hoyGestiones} gestiones</td>
-                        <td class="p-2.5 font-bold text-slate-700">${acumuladoMesLeads} Leads</td>
-                        <td class="p-2.5 font-bold text-blue-600">$${metaDiariaBase.toFixed(2)}</td>
-                        <td class="p-2.5 font-bold text-indigo-600">$${metaMensualBase.toFixed(2)}</td>
-                        <td class="p-2.5 text-left pl-2">
+                    <tr class="border-b h-10 hover:bg-slate-50/50">
+                        <td class="p-2 font-bold text-left pl-4">${g}</td>
+                        <td class="p-2 text-slate-500">$${contratado.toFixed(2)}</td>
+                        <td class="p-2 text-emerald-600 font-extrabold">$${cobrado.toFixed(2)}</td>
+                        <td class="p-2 text-fuchsia-600 font-bold">Activa</td>
+                        <td class="p-2 font-bold text-indigo-600">$${meta}</td>
+                        <td class="p-2 text-left pl-2">
                             <div class="flex items-center gap-2">
-                                <div class="w-full bg-slate-200 rounded-full h-2 shadow-2xs"><div class="${barColor} h-2 rounded-full transition-all duration-500" style="width: ${pctAvance}%"></div></div>
-                                <span class="font-extrabold w-8 text-right text-slate-600">${pctAvance}%</span>
+                                <div class="w-full bg-slate-200 rounded-full h-1.5"><div class="bg-emerald-600 h-1.5 rounded-full" style="width: ${pct}%"></div></div>
+                                <span class="font-bold text-[11px]">${pct}%</span>
                             </div>
                         </td>
                     </tr>`;
@@ -1012,35 +547,23 @@
             document.getElementById('kpi-pipeline').innerText = `$${pipelineSum.toFixed(2)}`;
             document.getElementById('kpi-sales').innerText = `$${salesSum.toFixed(2)}`;
             document.getElementById('kpi-alerts').innerText = todayAlerts;
-            phases.forEach(p => {
-                document.getElementById(`b-${p}`).innerText = phaseCounts[p];
-                if (document.getElementById(`badge-tab-${p}`)) document.getElementById(`badge-tab-${p}`).innerText = phaseCounts[p];
+            
+            internalPhasesConfig.forEach(p => {
+                document.getElementById(`b-${p.id}`).innerText = phaseCounts[p.id];
+                if (document.getElementById(`badge-tab-${p.id}`)) document.getElementById(`badge-tab-${p.id}`).innerText = phaseCounts[p.id];
             });
-            document.getElementById('kpi-scheduling-rate').innerText = `${totalLeadsBajoFiltro > 0 ? Math.round((agendasContadasBajoFiltro / totalLeadsBajoFiltro) * 100) : 0}%`;
-            document.getElementById('sub-kpi-agendas').innerText = `${agendasContadasBajoFiltro} Agenda Cita en Filtro`;
-            document.getElementById('kpi-conversion').innerText = `${totalLeadsBajoFiltro > 0 ? Math.round((ventasContadasBajoFiltro / totalLeadsBajoFiltro) * 100) : 0}%`;
-            document.getElementById('sub-kpi-cierres').innerText = `${ventasContadasBajoFiltro} Ventas en Filtro`;
         }
 
         function initPersonalizationConfig() {
-            listadoGestores = JSON.parse(localStorage.getItem('relax_gestores_names')) || ["Brenda", "Joselyne", "Naty", "Fernando"];
-            metasMensualesDinamicas = JSON.parse(localStorage.getItem('relax_mm_dinamicas')) || { "Brenda": 1100, "Joselyne": 1100, "Naty": 1100, "Fernando": 0 };
-            metasDiariasDinamicas = JSON.parse(localStorage.getItem('relax_md_dinamicas')) || { "Brenda": 50, "Joselyne": 50, "Naty": 50, "Fernando": 0 };
-
-            const selectAudit = document.getElementById('audit-month-selector'); selectAudit.innerHTML = "";
-            monthsNames.forEach((m, idx) => { 
-                let opt = document.createElement('option'); opt.value = idx + 1; opt.innerText = m; 
-                if(idx + 1 === CURRENT_MONTH_NUM) opt.selected = true; 
-                selectAudit.appendChild(opt); 
-            });
-            buildDynamicButtonsFilters(); renderAdvisersSettingsList();
+            buildDynamicButtonsFilters();
+            renderAdvisersSettingsList();
         }
 
         function buildDynamicButtonsFilters() {
             const box = document.getElementById('managers-buttons-box');
-            box.innerHTML = `<button onclick="setManagerFilter('all')" class="px-3.5 py-1.5 rounded-lg border font-bold ${currentManagerFilter === 'all' ? 'bg-indigo-600 text-white border-indigo-600 shadow-2xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border-transparent'} transition-all">Todas</button>`;
+            box.innerHTML = `<button onclick="setManagerFilter('all')" class="px-3 py-1.5 rounded-lg border text-xs font-bold ${currentManagerFilter === 'all' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'}">Todas</button>`;
             listadoGestores.forEach(g => { 
-                box.innerHTML += `<button onclick="setManagerFilter('${g}')" class="px-3.5 py-1.5 rounded-lg border font-bold ml-1 transition-all ${currentManagerFilter === g ? 'bg-indigo-600 text-white border-indigo-600 shadow-2xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border-transparent'}">${g}</button>`; 
+                box.innerHTML += `<button onclick="setManagerFilter('${g}')" class="px-3 py-1.5 rounded-lg border text-xs font-bold ${currentManagerFilter === g ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'}">${g}</button>`; 
             });
             const selectForm = document.getElementById('form-gestor'); selectForm.innerHTML = "";
             listadoGestores.forEach(g => { selectForm.innerHTML += `<option value="${g}">${g}</option>`; });
@@ -1050,84 +573,41 @@
             const container = document.getElementById('advisers-config-list'); container.innerHTML = "";
             listadoGestores.forEach((g, idx) => {
                 container.innerHTML += `
-                    <div class="p-3 bg-white border rounded-xl shadow-2xs space-y-2 relative group hover:border-slate-300 transition-all">
-                        <div class="flex items-center justify-between border-b pb-1">
-                            <input type="text" id="cfg-name-${idx}" value="${g}" onchange="updateAdviserInfo(${idx})" class="font-extrabold text-slate-800 bg-transparent focus:outline-hidden uppercase text-xs w-3/4">
-                            <button onclick="removeAdviserRecord(${idx})" class="text-rose-600 hover:text-rose-800 text-[10px] font-bold"><i class="fa-solid fa-user-minus"></i></button>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2 text-[11px]">
-                            <div><label class="block text-slate-400 font-bold mb-0.5">Meta Diaria ($)</label><input type="number" id="cfg-metad-${idx}" value="${metasDiariasDinamicas[g] ?? 50}" onchange="updateAdviserInfo(${idx})" class="w-full px-2 py-1 bg-slate-50 border rounded-lg font-bold text-indigo-600 focus:outline-hidden"></div>
-                            <div><label class="block text-slate-400 font-bold mb-0.5">Meta Mensual ($)</label><input type="number" id="cfg-metam-${idx}" value="${metasMensualesDinamicas[g] ?? 1100}" onchange="updateAdviserInfo(${idx})" class="w-full px-2 py-1 bg-slate-50 border rounded-lg font-bold text-indigo-600 focus:outline-hidden"></div>
+                    <div class="p-3 bg-white border rounded-xl flex items-center justify-between text-xs">
+                        <span class="font-bold text-slate-800">${g}</span>
+                        <div class="flex items-center gap-2">
+                            <label class="text-slate-400">Meta:</label>
+                            <input type="number" id="cfg-metam-${idx}" value="${metasMensualesDinamicas[g] ?? 1100}" onchange="updateAdviserInfo(${idx})" class="w-20 px-2 py-0.5 border rounded-md font-bold text-indigo-600">
                         </div>
                     </div>`;
             });
         }
 
-        function addNewAdviserPrompt() {
-            const name = prompt("Ingrese el nombre de la nueva asesora:"); if (!name || name.trim() === "") return;
-            let cleanName = name.trim();
-            if (listadoGestores.includes(cleanName)) return;
-            listadoGestores.push(cleanName); metasDiariasDinamicas[cleanName] = 50; metasMensualesDinamicas[cleanName] = 1100;
-            saveAdvisersConfigToStorage();
-        }
-        function removeAdviserRecord(index) {
-            const targetName = listadoGestores[index];
-            if (confirm(`¿Eliminar a ${targetName}?`)) {
-                listadoGestores.splice(index, 1); delete metasDiariasDinamicas[targetName]; delete metasMensualesDinamicas[targetName];
-                saveAdvisersConfigToStorage();
-            }
-        }
         function updateAdviserInfo(index) {
-            const oldName = listadoGestores[index]; const newName = document.getElementById(`cfg-name-${index}`).value.trim();
-            if (newName === "") return;
-            if (oldName !== newName) {
-                listadoGestores[index] = newName;
-                delete metasDiariasDinamicas[oldName]; delete metasMensualesDinamicas[oldName];
-                mainLeadsRegistry.forEach(l => { if (l.gestor === oldName) l.gestor = newName; });
-            }
-            metasDiariasDinamicas[newName] = parseFloat(document.getElementById(`cfg-metad-${index}`).value) || 0;
-            metasMensualesDinamicas[newName] = parseFloat(document.getElementById(`cfg-metam-${index}`).value) || 0;
-            saveAdvisersConfigToStorage();
-        }
-        function saveAdvisersConfigToStorage() {
-            localStorage.setItem('relax_gestores_names', JSON.stringify(listadoGestores));
+            const name = listadoGestores[index];
+            metasMensualesDinamicas[name] = parseFloat(document.getElementById(`cfg-metam-${index}`).value) || 0;
             localStorage.setItem('relax_mm_dinamicas', JSON.stringify(metasMensualesDinamicas));
-            localStorage.setItem('relax_md_dinamicas', JSON.stringify(metasDiariasDinamicas));
-            buildDynamicButtonsFilters(); renderAdvisersSettingsList(); renderApplicationCore();
+            renderApplicationCore();
         }
 
         function setManagerFilter(m) { currentManagerFilter = m; buildDynamicButtonsFilters(); renderApplicationCore(); }
         function executeLiveSearch() { activeSearchQuery = document.getElementById('crm-search-bar').value.toLowerCase().trim(); renderApplicationCore(); }
-        function toggleTodayAlertsFilter() {
-            filterOnlyTodayAlerts = !filterOnlyTodayAlerts;
-            document.getElementById('btn-kpi-alerts').className = filterOnlyTodayAlerts ? "bg-fuchsia-600 p-4.5 rounded-xl border border-fuchsia-600 text-white cursor-pointer shadow-md" : "bg-fuchsia-50/70 p-4.5 rounded-xl border border-fuchsia-100 cursor-pointer text-fuchsia-700";
-            document.getElementById('kpi-filter-alerts-icon').className = filterOnlyTodayAlerts ? "fa-solid fa-filter-circle-xmark text-[10px]" : "fa-solid fa-filter text-[10px] opacity-70";
-            renderApplicationCore();
-        }
-        function togglePendingDebtFilter() {
-            filterOnlyPendingDebt = !filterOnlyPendingDebt;
-            document.getElementById('btn-kpi-sales').className = filterOnlyPendingDebt ? "bg-emerald-600 p-4.5 rounded-xl border border-emerald-600 text-white cursor-pointer shadow-md" : "bg-emerald-50/70 p-4.5 rounded-xl border border-emerald-100 cursor-pointer text-emerald-700";
-            document.getElementById('kpi-filter-debt-icon').className = filterOnlyPendingDebt ? "fa-solid fa-filter-circle-xmark text-[10px]" : "fa-solid fa-filter text-[10px] opacity-70";
-            renderApplicationCore();
-        }
-        function triggerMonthInteractiveFilter(monthIndex) { selectedMonthInteractiveFilter = (selectedMonthInteractiveFilter === (monthIndex + 1)) ? null : (monthIndex + 1); renderApplicationCore(); }
+        function triggerMonthInteractiveFilter(mNum) { selectedMonthInteractiveFilter = mNum; renderApplicationCore(); }
+        
         function switchMobileColumn(columnId) {
             currentMobileColumn = columnId;
-            ['frio', 'tibio', 'caliente', 'agenda', 'venta', 'postventa'].forEach(c => {
-                document.getElementById(`tab-${c}`).className = c === columnId ? "px-3 py-2 rounded-lg font-extrabold text-xs flex-shrink-0 bg-indigo-600 text-white shadow-xs" : "px-3 py-2 rounded-lg font-bold text-xs flex-shrink-0 bg-slate-100 text-slate-700";
+            internalPhasesConfig.forEach(p => {
+                document.getElementById(`tab-${p.id}`).className = p.id === columnId ? "px-3 py-2 rounded-lg font-extrabold text-xs flex-shrink-0 bg-indigo-600 text-white shadow-xs" : "px-3 py-2 rounded-lg font-bold text-xs flex-shrink-0 bg-slate-100 text-slate-700";
             });
             renderApplicationCore();
         }
 
         function openModal(mode, id = null) {
             document.getElementById('lead-modal').classList.remove('hidden');
-            currentModalAbonosList = []; currentModalBitacoraList = [];
             if (mode === 'create') {
-                document.getElementById('modal-title').innerText = "Ficha Técnica: Registrar Nuevo Lead";
                 document.getElementById('crm-form').reset(); document.getElementById('form-id').value = ""; document.getElementById('form-date').valueAsDate = new Date();
-                document.getElementById('form-touch').value = 1; document.getElementById('form-loss').value = "Ninguno";
+                currentModalAbonosList = []; currentModalBitacoraList = [];
             } else {
-                document.getElementById('modal-title').innerText = "Ficha Técnica: Detalles y Seguimiento";
                 const lead = mainLeadsRegistry.find(l => l.id === id);
                 if (lead) {
                     document.getElementById('form-id').value = lead.id; document.getElementById('form-name').value = lead.name; document.getElementById('form-phone').value = lead.phone; document.getElementById('form-phase').value = lead.phase; document.getElementById('form-value').value = lead.value; document.getElementById('form-date').value = lead.date; document.getElementById('form-gestor').value = lead.gestor; document.getElementById('form-loss').value = lead.loss || "Ninguno"; document.getElementById('form-touch').value = lead.touch || 1;
@@ -1141,22 +621,15 @@
 
         function renderModalAbonosList() {
             const tbody = document.getElementById('modal-abonos-list-rows'); tbody.innerHTML = "";
-            if (currentModalAbonosList.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-slate-400 font-medium italic">No hay abonos registrados</td></tr>`; return;
-            }
-            currentModalAbonosList.sort((a,b) => new Date(b.fecha) - new Date(a.fecha)).forEach((a, idx) => {
-                tbody.innerHTML += `<tr class="hover:bg-slate-50"><td class="p-2 text-left">${a.fecha}</td><td class="p-2 text-slate-500 font-semibold">${a.metodo}</td><td class="p-2 text-emerald-600 font-bold">$${parseFloat(a.monto).toFixed(2)}</td><td class="p-2"><button type="button" onclick="removeAbonoRecordFromModal(${idx})" class="text-rose-600"><i class="fa-solid fa-trash-can"></i></button></td></tr>`;
+            currentModalAbonosList.forEach((a, idx) => {
+                tbody.innerHTML += `<tr><td class="p-1.5 text-left">${a.fecha}</td><td>${a.metodo}</td><td class="text-emerald-600 font-bold">$${parseFloat(a.monto).toFixed(2)}</td><td><button type="button" onclick="removeAbono(${idx})" class="text-rose-600"><i class="fa-solid fa-trash-can"></i></button></td></tr>`;
             });
         }
         function addNewAbonoRecord() {
             const m = parseFloat(document.getElementById('new-abono-monto').value)||0; const f = document.getElementById('new-abono-fecha').value; const met = document.getElementById('new-abono-metodo').value;
-            if(m > 0 && f) {
-                currentModalAbonosList.push({ monto: m, fecha: f, metodo: met });
-                document.getElementById('new-abono-monto').value = ""; document.getElementById('new-abono-fecha').value = "";
-                renderModalAbonosList(); calcularFlujoAbonos();
-            }
+            if(m > 0 && f) { currentModalAbonosList.push({ monto: m, fecha: f, metodo: met }); renderModalAbonosList(); calcularFlujoAbonos(); }
         }
-        function removeAbonoRecordFromModal(idx) { currentModalAbonosList.splice(idx, 1); renderModalAbonosList(); calcularFlujoAbonos(); }
+        function removeAbono(idx) { currentModalAbonosList.splice(idx, 1); renderModalAbonosList(); calcularFlujoAbonos(); }
         function calcularFlujoAbonos() {
             let valTotal = parseFloat(document.getElementById('form-value').value) || 0;
             let totAbonado = currentModalAbonosList.reduce((sum, a) => sum + parseFloat(a.monto), 0);
@@ -1166,35 +639,27 @@
 
         function renderModalBitacoraList() {
             const tl = document.getElementById('modal-bitacora-timeline'); tl.innerHTML = "";
-            if (currentModalBitacoraList.length === 0) {
-                tl.innerHTML = `<div class="text-center text-slate-400 italic py-8">Historial de gestiones vacío.</div>`; return;
-            }
             currentModalBitacoraList.forEach(log => {
-                let badge = log.resultado === 'Cita Agendada' || log.resultado === 'Vendido' ? 'bg-emerald-100 text-emerald-800' : (log.resultado === 'Descartado' ? 'bg-rose-100 text-rose-800' : 'bg-slate-100 text-slate-700');
-                tl.innerHTML += `<div class="p-3 bg-white border border-slate-200/70 rounded-xl space-y-1"><div class="flex justify-between text-[9px] text-slate-400 border-b pb-0.5"><span>${log.asesora} | ${log.fecha}</span><span class="px-1.5 py-0.5 rounded-full ${badge} font-black uppercase">${log.resultado || 'Nota'}</span></div><p class="text-[10.5px] text-slate-700 font-medium mt-1">${log.nota}</p></div>`;
+                tl.innerHTML += `<div class="p-2 bg-white border rounded-lg text-[11px]"><span class="text-slate-400 block text-[9px]">${log.fecha} - ${log.asesora}</span><p class="text-slate-700 font-medium">${log.nota}</p></div>`;
             });
         }
         function registerNewLog() {
-            const txt = document.getElementById('new-log-desc').value.trim(); const res = document.getElementById('new-log-resultado').value; const gst = document.getElementById('form-gestor').value;
+            const txt = document.getElementById('new-log-desc').value.trim(); const gst = document.getElementById('form-gestor').value;
             if(txt === "") return;
-            currentModalBitacoraList.unshift({ fecha: new Date().toLocaleString(), asesora: gst, resultado: res, nota: txt });
-            document.getElementById('form-touch').value = (parseInt(document.getElementById('form-touch').value)||1) + 1;
-            if (res === 'Cita Agendada') document.getElementById('form-phase').value = 'agenda';
-            if (res === 'Vendido') document.getElementById('form-phase').value = 'venta';
-            if (res === 'Descartado') document.getElementById('form-loss').value = 'No le interesa';
+            currentModalBitacoraList.unshift({ fecha: new Date().toLocaleString(), asesora: gst, nota: txt });
             document.getElementById('new-log-desc').value = ""; renderModalBitacoraList();
         }
 
         async function handleFormSubmit(e) {
-            e.preventDefault(); const id = document.getElementById('form-id').value;
+            e.preventDefault();
             let payload = {
-                id: id ? parseInt(id) : Date.now(), name: document.getElementById('form-name').value.trim(), phone: document.getElementById('form-phone').value.trim(), phase: document.getElementById('form-phase').value, value: parseFloat(document.getElementById('form-value').value) || 0, date: document.getElementById('form-date').value, gestor: document.getElementById('form-gestor').value, loss: document.getElementById('form-loss').value, touch: parseInt(document.getElementById('form-touch').value) || 1, desc: "", abonos: [...currentModalAbonosList], bitacora: [...currentModalBitacoraList]
+                id: document.getElementById('form-id').value ? parseInt(document.getElementById('form-id').value) : Date.now(),
+                name: document.getElementById('form-name').value.trim(), phone: document.getElementById('form-phone').value.trim(),
+                phase: document.getElementById('form-phase').value, value: parseFloat(document.getElementById('form-value').value) || 0,
+                date: document.getElementById('form-date').value, gestor: document.getElementById('form-gestor').value,
+                loss: document.getElementById('form-loss').value, touch: parseInt(document.getElementById('form-touch').value) || 1,
+                desc: currentModalBitacoraList[0] ? currentModalBitacoraList[0].nota : "", abonos: [...currentModalAbonosList], bitacora: [...currentModalBitacoraList]
             };
-            const leftTxt = document.getElementById('new-log-desc').value.trim();
-            if(leftTxt !== "") {
-                payload.bitacora.unshift({ fecha: new Date().toLocaleString(), asesora: payload.gestor, resultado: "Nota", nota: leftTxt }); payload.touch++;
-            }
-            if (payload.bitacora.length > 0) payload.desc = payload.bitacora[0].nota;
             closeModal(); await saveLeadData(payload);
         }
 
@@ -1202,40 +667,20 @@
             const file = event.target.files[0]; if (!file) return;
             const reader = new FileReader();
             reader.onload = async function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result); const wb = XLSX.read(data, { type: 'array' });
-                    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-                    for(let row of rows) {
-                        let payload = {
-                            id: parseInt(row.id || row.crm_id || Date.now() + Math.floor(Math.random()*1000)), name: String(row.name || 'Paciente').trim(), phone: String(row.phone || '').trim(), phase: String(row.phase || 'frio').toLowerCase().trim(), value: parseFloat(row.value || 0)||0, date: String(row.date || '').trim(), loss: String(row.loss || 'Ninguno').trim(), gestor: String(row.gestor || listadoGestores[0]).trim(), touch: parseInt(row.touch || 1)||1, desc: String(row.desc || '').trim(), abonos: [], bitacora: []
-                        };
-                        if (parseFloat(row.a1)>0) payload.abonos.push({ monto: parseFloat(row.a1), fecha: payload.date, metodo: 'Abo 1' });
-                        if (parseFloat(row.a2)>0) payload.abonos.push({ monto: parseFloat(row.a2), fecha: payload.date, metodo: 'Abo 2' });
-                        if (payload.desc) payload.bitacora.push({ fecha: new Date().toLocaleString(), asesora: payload.gestor, resultado: 'Importado', nota: payload.desc });
-                        await saveLeadData(payload);
-                    }
-                    if (currentStorageMode === 'supabase') loadDataFromCloud(); else renderApplicationCore();
-                } catch(err) { console.error(err); }
+                const data = new Uint8Array(e.target.result); const wb = XLSX.read(data, { type: 'array' });
+                const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+                for(let row of rows) {
+                    let payload = {
+                        id: parseInt(row.id || row.crm_id || Date.now() + Math.floor(Math.random()*1000)), name: String(row.name || 'Paciente').trim(), phone: String(row.phone || '').trim(), phase: String(row.phase || 'frio').toLowerCase().trim(), value: parseFloat(row.value || 0)||0, date: String(row.date || '').trim(), loss: String(row.loss || 'Ninguno').trim(), gestor: String(row.gestor || listadoGestores[0]).trim(), touch: parseInt(row.touch || 1)||1, desc: String(row.desc || '').trim(), abonos: [], bitacora: []
+                    };
+                    if(row.desc) payload.bitacora.push({ fecha: new Date().toLocaleString(), asesora: payload.gestor, nota: row.desc });
+                    await saveLeadData(payload);
+                }
+                showToast("Datos importados.");
             }; reader.readAsArrayBuffer(file);
         }
 
-        function exportBackupExcel() {
-            const rows = mainLeadsRegistry.map(l => {
-                let a1 = l.abonos[0] ? parseFloat(l.abonos[0].monto)||0 : 0;
-                let a2 = l.l.abonos[1] ? parseFloat(l.abonos[1].monto)||0 : 0;
-                return { "ID": l.id, "Paciente": l.name, "WhatsApp": l.phone, "Estado": l.phase.toUpperCase(), "Valor": l.value, "Fecha": l.date, "Asesora": l.gestor, "Observaciones": l.desc, "Abo 1": a1, "Abo 2": a2 };
-            });
-            let ws = XLSX.utils.json_to_sheet(rows); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Leads");
-            XLSX.writeFile(wb, `Respaldo_RelaxTherapy_${new Date().toISOString().slice(0,10)}.xlsx`);
-        }
-
-        function confirmResetDB() {
-            if (confirm("¿Purgar todos los datos?") && prompt("Escriba 'BORRAR':") === 'BORRAR') resetDBCloud();
-        }
-        async function resetDBCloud() {
-            if(currentStorageMode === 'supabase' && supabaseClient) await supabaseClient.from('pacientes_crm').delete().neq('id', -1);
-            localStorage.removeItem('relax_leads_registry_local'); mainLeadsRegistry = []; renderApplicationCore();
-        }
+        function toggleConfigPanel() { document.getElementById('config-panel').classList.toggle('hidden'); }
     </script>
 </body>
 </html>
