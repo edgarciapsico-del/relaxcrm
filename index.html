@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM Cloud - Premium v27.2 Persistent Board</title>
+    <title>Relax Therapy CRM Cloud - Premium Accumulative v29.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -25,7 +25,6 @@
         .kanban-column.drag-over { background-color: rgba(79, 70, 229, 0.08) !important; border: 2px dashed var(--brand-primary) !important; }
         .lead-card { cursor: grab; transition: all 0.2s ease; }
         .lead-card:active { cursor: grabbing; }
-        .lead-card.dragging { opacity: 0.4; }
         .scrollbar-custom::-webkit-scrollbar { height: 8px; width: 6px; }
         .scrollbar-custom::-webkit-scrollbar-track { background: #f1f5f9; }
         .scrollbar-custom::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
@@ -46,22 +45,22 @@
                 <div>
                     <span class="font-extrabold text-slate-900 tracking-tight text-xl flex items-center gap-1.5">
                         RELAX THERAPY CRM
-                        <span class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-bold">v27.2 Core</span>
+                        <span class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-bold">v29.0 Premium</span>
                     </span>
                     <span id="sync-status" class="block text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider">
-                        <i class="fa-solid fa-circle-notch fa-spin"></i> Conectando...
+                        <i class="fa-solid fa-circle-notch fa-spin"></i> Inicializando Conexión...
                     </span>
                 </div>
             </div>
 
             <div class="flex flex-wrap items-center gap-2 text-xs">
-                <div id="storage-mode-badge" class="px-3 h-10 rounded-xl font-bold flex items-center gap-2 border bg-slate-50 text-slate-600 shadow-2xs">
-                    <i id="storage-icon" class="fa-solid fa-database"></i>
-                    <span id="storage-text">Detectando...</span>
+                <div id="storage-mode-badge" class="px-3 h-10 rounded-xl font-bold flex items-center gap-2 border bg-emerald-50 text-emerald-700 shadow-2xs">
+                    <i class="fa-solid fa-cloud"></i>
+                    <span>Nube Sincronizada Automatizada</span>
                 </div>
 
                 <button onclick="toggleConfigPanel()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 h-10 rounded-xl font-bold flex items-center gap-1.5 border transition-all">
-                    <i class="fa-solid fa-sliders text-indigo-600"></i> Configuración
+                    <i class="fa-solid fa-sliders text-indigo-600"></i> Metas Asesoras
                 </button>
                 
                 <div class="flex items-center gap-2 bg-slate-50 border px-3 h-10 rounded-xl border-slate-200 shadow-2xs">
@@ -70,11 +69,11 @@
                 </div>
                 
                 <button onclick="loadDataFromCloud()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 h-10 rounded-xl font-bold flex items-center gap-1.5 transition-all">
-                    <i class="fa-solid fa-arrows-rotate"></i> Sincronizar
+                    <i class="fa-solid fa-arrows-rotate"></i> Forzar Sincronización
                 </button>
                 
                 <button onclick="exportBackupExcel()" class="bg-slate-700 hover:bg-slate-800 text-white px-3.5 h-10 rounded-xl font-bold flex items-center gap-1.5 transition-all">
-                    <i class="fa-solid fa-file-arrow-down"></i> Exportar
+                    <i class="fa-solid fa-file-arrow-down"></i> Exportar Base Completa
                 </button>
                 
                 <button onclick="openModal('create')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 h-10 rounded-xl font-extrabold transition-all">
@@ -85,59 +84,46 @@
     </header>
 
     <section id="config-panel" class="max-w-[1780px] w-full mx-auto px-4 lg:px-8 mt-4 hidden animate-fade-in">
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
-            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b pb-4">
-                <div>
-                    <h3 class="text-base font-extrabold text-slate-900"><i class="fa-solid fa-user-gear text-indigo-600"></i> Parámetros e Infraestructura</h3>
-                    <p class="text-xs text-slate-500">Credenciales de Supabase y metas de Asesoras.</p>
-                </div>
-                <div class="flex items-center gap-2 bg-slate-100 p-1.5 rounded-xl border">
-                    <button onclick="changeDatabaseMode('local')" id="btn-mode-local" class="px-4 py-1.5 rounded-lg text-xs font-bold">Local</button>
-                    <button onclick="changeDatabaseMode('supabase')" id="btn-mode-supabase" class="px-4 py-1.5 rounded-lg text-xs font-bold">Supabase Nube</button>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="p-5 bg-slate-50 rounded-2xl border space-y-4">
-                    <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider">Credenciales</h4>
-                    <div class="space-y-3 text-xs">
-                        <div>
-                            <label class="block font-bold text-slate-600 mb-1">URL Supabase</label>
-                            <input type="text" id="db-setup-url" class="w-full px-3 py-2 border rounded-xl bg-white focus:outline-hidden">
-                        </div>
-                        <div>
-                            <label class="block font-bold text-slate-600 mb-1">Anon API Key</label>
-                            <input type="password" id="db-setup-key" class="w-full px-3 py-2 border rounded-xl bg-white focus:outline-hidden">
-                        </div>
-                        <button onclick="saveSupabaseSettings()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-bold w-full">Guardar y Conectar</button>
-                    </div>
-                </div>
-
-                <div class="lg:col-span-2 p-5 bg-slate-50 rounded-2xl border space-y-4">
-                    <div class="flex justify-between items-center border-b pb-2">
-                        <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider">Equipo de Asesoras</h4>
-                        <button onclick="addNewAdviserPrompt()" class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-lg text-xs font-bold border border-indigo-200">+ Agregar</button>
-                    </div>
-                    <div class="overflow-y-auto max-h-[170px] scrollbar-custom" id="advisers-config-list"></div>
-                </div>
-            </div>
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <h3 class="text-base font-extrabold text-slate-900"><i class="fa-solid fa-user-gear text-indigo-600"></i> Control Operativo de Presupuestos</h3>
+            <div class="overflow-y-auto max-h-[170px] scrollbar-custom" id="advisers-config-list"></div>
         </div>
     </section>
 
     <section class="max-w-[1780px] w-full mx-auto px-4 lg:px-8 mt-4">
         <div class="bg-white p-6 rounded-2xl border border-slate-200 space-y-6 shadow-xs">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div class="bg-slate-50 p-4 rounded-xl border"><span class="text-[10px] font-black text-slate-400 uppercase">Pipeline Activo</span><h3 id="kpi-pipeline" class="text-xl font-black mt-1">$0.00</h3></div>
-                <div onclick="togglePendingDebtFilter()" id="btn-kpi-sales" class="bg-emerald-50 p-4 rounded-xl border border-emerald-100 cursor-pointer"><span class="text-[10px] font-black text-emerald-600 uppercase">Cobrado Real</span><h3 id="kpi-sales" class="text-xl font-black text-emerald-700 mt-1">$0.00</h3></div>
-                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100"><span class="text-[10px] font-black text-blue-600 uppercase">Tasa Agendamiento</span><h3 id="kpi-scheduling-rate" class="text-xl font-black text-blue-700 mt-1">0%</h3></div>
-                <div class="bg-violet-50 p-4 rounded-xl border border-violet-100"><span class="text-[10px] font-black text-violet-600 uppercase">Tasa Cierre Real</span><h3 id="kpi-conversion" class="text-xl font-black text-violet-700 mt-1">0%</h3></div>
-                <div onclick="toggleTodayAlertsFilter()" id="btn-kpi-alerts" class="bg-fuchsia-50 p-4 rounded-xl border border-fuchsia-100 cursor-pointer"><span class="text-[10px] font-black text-fuchsia-600 uppercase">Gestiones Hoy</span><h3 id="kpi-alerts" class="text-xl font-black text-fuchsia-700 mt-1">0</h3></div>
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-2xs">
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Pipeline Activa Acumulada</span>
+                    <h3 id="kpi-pipeline" class="text-2xl font-black text-slate-900 mt-1">$0.00</h3>
+                    <p class="text-[10px] text-slate-400 font-bold mt-1">Valor de leads vivos en seguimiento</p>
+                </div>
+                <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100 shadow-2xs">
+                    <span class="text-[10px] font-black text-emerald-600 uppercase tracking-wider">Cobrado Real Mes</span>
+                    <h3 id="kpi-sales" class="text-2xl font-black text-emerald-700 mt-1">$0.00</h3>
+                    <p class="text-[10px] text-emerald-500 font-bold mt-1">Cobranzas efectivas realizadas</p>
+                </div>
+                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 shadow-2xs">
+                    <span class="text-[10px] font-black text-blue-600 uppercase tracking-wider">Tasa Agendamiento</span>
+                    <h3 id="kpi-scheduling-rate" class="text-2xl font-black text-blue-700 mt-1">0%</h3>
+                    <p id="sub-kpi-agendas" class="text-[10px] text-blue-500 font-bold mt-1">Citas agendadas totales</p>
+                </div>
+                <div class="bg-violet-50 p-4 rounded-xl border border-violet-100 shadow-2xs">
+                    <span class="text-[10px] font-black text-violet-600 uppercase tracking-wider">Efectividad de Venta</span>
+                    <h3 id="kpi-conversion" class="text-2xl font-black text-violet-700 mt-1">0%</h3>
+                    <p id="sub-kpi-cierres" class="text-[10px] text-violet-500 font-bold mt-1">Conversión comercial real</p>
+                </div>
+                <div class="bg-fuchsia-50 p-4 rounded-xl border border-fuchsia-100 shadow-2xs">
+                    <span class="text-[10px] font-black text-fuchsia-600 uppercase tracking-wider">Gestiones en Bitácora</span>
+                    <h3 id="kpi-alerts" class="text-2xl font-black text-fuchsia-700 mt-1">0</h3>
+                    <p class="text-[10px] text-fuchsia-500 font-bold mt-1">Interacciones guardadas hoy</p>
+                </div>
             </div>
 
             <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
                 <div class="flex items-center justify-between border-b pb-1.5">
-                    <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider">Historial Comercial Mensual</h4>
-                    <span class="text-[10px] text-indigo-600 font-bold uppercase">Los Leads de Seguimiento Persisten en Todos los Meses</span>
+                    <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider">Filtro Dinámico de Cobranzas por Mes</h4>
+                    <span class="text-[10px] text-indigo-600 font-bold uppercase">Haz clic en un mes para evaluar cobros y efectividad de asesoras</span>
                 </div>
                 <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-12 gap-3" id="months-grid-container"></div>
             </div>
@@ -147,11 +133,10 @@
                     <thead>
                         <tr class="bg-slate-800 text-white font-bold text-center">
                             <th class="p-3 text-left">Asesora</th>
-                            <th class="p-3">Contratado ($)</th>
-                            <th class="p-3">Cobrado Real ($)</th>
-                            <th class="p-3">Gestiones Hoy</th>
-                            <th class="p-3">Meta Mensual</th>
-                            <th class="p-3 w-60">Progreso</th>
+                            <th class="p-3">Contratado Total ($)</th>
+                            <th class="p-3 bg-emerald-900 text-emerald-100">Cobrado en Mes Seleccionado ($)</th>
+                            <th class="p-3">Meta Cobros Mensual</th>
+                            <th class="p-3 w-60">Progreso de Cobranza</th>
                         </tr>
                     </thead>
                     <tbody id="goals-table-body" class="text-center divide-y font-medium"></tbody>
@@ -165,7 +150,7 @@
             <div class="flex flex-wrap items-center gap-2" id="managers-buttons-box"></div>
             <div class="relative w-full md:w-96">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400"><i class="fa-solid fa-magnifying-glass text-xs"></i></span>
-                <input type="text" id="crm-search-bar" oninput="executeLiveSearch()" placeholder="Buscar por paciente, teléfono o notas..." class="w-full pl-9 pr-4 h-11 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:bg-white focus:border-indigo-500 transition-all">
+                <input type="text" id="crm-search-bar" oninput="executeLiveSearch()" placeholder="Buscar paciente por nombre o número..." class="w-full pl-9 pr-4 h-11 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:bg-white focus:border-indigo-500 transition-all">
             </div>
         </div>
     </section>
@@ -197,29 +182,29 @@
                     <div><label class="block font-bold mb-1">Estado Pipeline</label><select id="form-phase" class="w-full px-2 h-10 bg-white border rounded-xl font-bold"><option value="frio">❄️ Frío</option><option value="tibio">🔥 Tibio</option><option value="caliente">💥 Caliente</option><option value="agenda">📅 Agenda Cita</option><option value="venta">💰 Venta Cerrada</option><option value="postventa">🤝 Post Venta</option></select></div>
                     <div><label class="block font-bold mb-1">Valor Contrato ($)</label><input type="number" id="form-value" step="0.01" oninput="calcularFlujoAbonos()" class="w-full px-3 h-10 bg-white border rounded-xl font-extrabold text-indigo-600"></div>
                     <div><label class="block font-bold mb-1">Asesora</label><select id="form-gestor" class="w-full px-2 h-10 bg-white border rounded-xl font-semibold"></select></div>
-                    <div><label class="block font-bold mb-1">Descarte</label><select id="form-loss" class="w-full px-2 h-10 bg-white border rounded-xl font-bold text-rose-700"><option value="Ninguno">Ninguno (Activo)</option><option value="Fuera de la ciudad">Fuera de la ciudad</option><option value="No le interesa">No le interesa</option><option value="Precios">Precios elevados</option><option value="No responde">No responde</option></select></div>
+                    <div><label class="block font-bold mb-1">Descarte</label><select id="form-loss" class="w-full px-2 h-10 bg-white border rounded-xl font-bold text-rose-700"><option value="Ninguno">Ninguno (Activo)</option><option value="Fuera de la ciudad">Fuera de la ciudad</option><option value="No le interesa">No le interesa</option><option value="Precios">Precios elevados</option></select></div>
                 </div>
 
                 <div class="bg-slate-50 p-4 rounded-xl border space-y-3">
-                    <span class="block font-black text-slate-800 uppercase tracking-wider"><i class="fa-solid fa-wallet text-emerald-600"></i> Registro de Pagos / Abonos</span>
+                    <span class="block font-black text-slate-800 uppercase tracking-wider"><i class="fa-solid fa-wallet text-emerald-600"></i> Historial Colectado de Abonos (Cobranzas)</span>
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-2 bg-white p-3 rounded-xl border items-end">
                         <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Monto ($)</label><input type="number" id="new-abono-monto" step="0.01" class="w-full px-2 h-8 bg-slate-50 border rounded-md font-bold"></div>
-                        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Fecha</label><input type="date" id="new-abono-fecha" class="w-full px-2 h-8 bg-slate-50 border rounded-md"></div>
+                        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Fecha Cobro</label><input type="date" id="new-abono-fecha" class="w-full px-2 h-8 bg-slate-50 border rounded-md"></div>
                         <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Método</label><select id="new-abono-metodo" class="w-full px-2 h-8 bg-slate-50 border rounded-md"><option value="Efectivo">Efectivo</option><option value="Transferencia">Transferencia</option><option value="Tarjeta">Tarjeta de Crédito</option></select></div>
-                        <button type="button" onclick="addNewAbonoRecord()" class="bg-emerald-600 text-white h-8 rounded-md font-bold text-xs">+ Agregar</button>
+                        <button type="button" onclick="addNewAbonoRecord()" class="bg-emerald-600 text-white h-8 rounded-md font-bold text-xs">+ Registrar Cobro</button>
                     </div>
                     <div class="overflow-x-auto max-h-[120px] border rounded-lg bg-white">
-                        <table class="w-full text-[11px] text-left"><thead class="bg-slate-100 text-center font-bold"><tr><th class="p-2 text-left">Fecha</th><th class="p-2">Método</th><th class="p-2">Monto</th><th class="p-2 w-12"></th></tr></thead><tbody id="modal-abonos-list-rows" class="divide-y text-center font-semibold"></tbody></table>
+                        <table class="w-full text-[11px] text-left"><thead class="bg-slate-100 text-center font-bold"><tr><th class="p-2 text-left">Fecha Cobro</th><th class="p-2">Método</th><th class="p-2">Monto</th><th class="p-2 w-12"></th></tr></thead><tbody id="modal-abonos-list-rows" class="divide-y text-center font-semibold"></tbody></table>
                     </div>
                     <div class="grid grid-cols-2 gap-4 text-center font-bold">
-                        <div class="bg-emerald-50 p-2 rounded-lg text-emerald-800 text-[11px]">Total Cobrado: <strong id="modal-total-abonado">$0.00</strong></div>
+                        <div class="bg-emerald-50 p-2 rounded-lg text-emerald-800 text-[11px]">Total Colectado: <strong id="modal-total-abonado">$0.00</strong></div>
                         <div class="bg-rose-50 p-2 rounded-lg text-rose-800 text-[11px]">Saldo Pendiente: <strong id="modal-saldo-pendiente">$0.00</strong></div>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <div class="bg-slate-50 p-4 rounded-xl border space-y-2">
-                        <span class="block font-black text-slate-800 uppercase tracking-wider">Nueva Gestión Comercial</span>
+                        <span class="block font-black text-slate-800 uppercase tracking-wider">Añadir Gestión / Comentario</span>
                         <textarea id="new-log-desc" rows="3" placeholder="Añadir comentarios sobre la llamada o estado del paciente..." class="w-full p-2.5 bg-white border rounded-xl focus:outline-hidden"></textarea>
                         <div class="grid grid-cols-2 gap-2">
                             <select id="new-log-resultado" class="w-full h-9 bg-white border rounded-xl"><option value="Interesado">Interesado</option><option value="Llamar Luego">Llamar Luego</option><option value="No contestó">No contestó</option><option value="Cita Agendada">Cita Agendada</option><option value="Vendido">Vendido</option></select>
@@ -250,12 +235,9 @@
         const CURRENT_MONTH_NUM = liveClock.getMonth() + 1;
         
         let mainLeadsRegistry = [];
-        let currentStorageMode = 'local'; 
         let currentManagerFilter = 'all';
-        let filterOnlyTodayAlerts = false;
-        let filterOnlyPendingDebt = false; 
         let activeSearchQuery = "";
-        let selectedMonthInteractiveFilter = CURRENT_MONTH_NUM; // Por defecto el mes real actual
+        let selectedMonthInteractiveFilter = CURRENT_MONTH_NUM; 
         let currentMobileColumn = 'frio'; 
         
         let currentModalAbonosList = [];
@@ -263,8 +245,8 @@
         
         let listadoGestores = ["Brenda", "Joselyne", "Naty", "Fernando"];
         let metasMensualesDinamicas = { "Brenda": 1100, "Joselyne": 1100, "Naty": 1100, "Fernando": 0 };
-        let metasDiariasDinamicas = { "Brenda": 50, "Joselyne": 50, "Naty": 50, "Fernando": 0 };
         const monthsNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        
         const internalPhasesConfig = [
             { id: 'frio', name: 'Leads Frío', icon: 'fa-snowflake text-blue-400' },
             { id: 'tibio', name: 'Leads Tibio', icon: 'fa-fire text-amber-500' },
@@ -277,11 +259,10 @@
         window.onload = function() {
             renderStructureHTML();
             initPersonalizationConfig();
-            initStorageEngine();
+            initAutoSyncEngine();
         };
 
         function renderStructureHTML() {
-            // Render columnas del Kanban dinámicamente
             const boardRow = document.getElementById('kanban-board-row');
             boardRow.innerHTML = '';
             internalPhasesConfig.forEach(p => {
@@ -296,7 +277,6 @@
                     </div>`;
             });
 
-            // Render pestañas móviles dinámicamente
             const tabsRow = document.getElementById('mobile-tabs-row');
             tabsRow.innerHTML = '';
             internalPhasesConfig.forEach(p => {
@@ -313,76 +293,32 @@
             toast.className = `p-3.5 rounded-xl border text-xs font-bold shadow-md bg-white border-slate-200 flex items-center justify-between animate-fade-in`;
             toast.innerHTML = `<span class="text-slate-800">${message}</span>`;
             container.appendChild(toast);
-            setTimeout(() => { toast.remove(); }, 3500);
+            setTimeout(() => { toast.remove(); }, 3000);
         }
 
-        function initStorageEngine() {
-            const savedMode = localStorage.getItem('relax_storage_mode') || 'supabase';
-            currentStorageMode = savedMode;
-            
-            const urlSetup = localStorage.getItem('supabase_url') || DB_CLOUD_URL;
-            const keySetup = localStorage.getItem('supabase_key') || DB_CLOUD_KEY;
-            
-            document.getElementById('db-setup-url').value = urlSetup;
-            document.getElementById('db-setup-key').value = keySetup;
-            updateStorageBadges();
-
-            if (currentStorageMode === 'supabase') {
-                try {
-                    supabaseClient = window.supabase.createClient(urlSetup, keySetup);
-                    loadDataFromCloud();
-                } catch(e) { switchToLocalFallback(); }
-            } else {
-                loadDataFromLocalStorage();
-            }
-        }
-
-        function updateStorageBadges() {
-            const status = document.getElementById('sync-status');
-            const text = document.getElementById('storage-text');
-            if (currentStorageMode === 'supabase') {
-                text.innerText = "Base Nube (Online)";
-            } else {
-                text.innerText = "Modo Local (Offline)";
-                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Modo Offline`;
-            }
-        }
-
-        function changeDatabaseMode(mode) {
-            currentStorageMode = mode;
-            localStorage.setItem('relax_storage_mode', mode);
-            initStorageEngine();
-        }
-
-        function saveSupabaseSettings() {
-            localStorage.setItem('supabase_url', document.getElementById('db-setup-url').value.trim());
-            localStorage.setItem('supabase_key', document.getElementById('db-setup-key').value.trim());
+        function initAutoSyncEngine() {
+            localStorage.setItem('supabase_url', DB_CLOUD_URL);
+            localStorage.setItem('supabase_key', DB_CLOUD_KEY);
             localStorage.setItem('relax_storage_mode', 'supabase');
-            currentStorageMode = 'supabase';
-            initStorageEngine();
-        }
 
-        function switchToLocalFallback() {
-            currentStorageMode = 'local';
-            updateStorageBadges();
-            loadDataFromLocalStorage();
-        }
-
-        function loadDataFromLocalStorage() {
-            mainLeadsRegistry = JSON.parse(localStorage.getItem('relax_leads_registry_local')) || [];
-            renderApplicationCore();
+            try {
+                supabaseClient = window.supabase.createClient(DB_CLOUD_URL, DB_CLOUD_KEY);
+                loadDataFromCloud();
+            } catch(e) {
+                document.getElementById('sync-status').innerHTML = `⚠️ Error de conexión Cloud`;
+            }
         }
 
         async function loadDataFromCloud() {
             if(!supabaseClient) return;
+            document.getElementById('sync-status').innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-indigo-600"></i> Sincronizando...`;
             try {
                 let { data, error } = await supabaseClient.from('pacientes_crm').select('*');
                 if(error) throw error;
                 mainLeadsRegistry = data.map(item => parseRowToLead(item));
-                localStorage.setItem('relax_leads_registry_local', JSON.stringify(mainLeadsRegistry));
-                document.getElementById('sync-status').innerHTML = `<i class="fa-solid fa-circle-check"></i> Conectado (${mainLeadsRegistry.length} Leads)`;
+                document.getElementById('sync-status').innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> Base Sincronizada (${mainLeadsRegistry.length} Leads)`;
                 renderApplicationCore();
-            } catch(e) { switchToLocalFallback(); }
+            } catch(e) { console.error(e); }
         }
 
         function parseRowToLead(item) {
@@ -414,12 +350,10 @@
         async function saveLeadData(leadData) {
             let idx = mainLeadsRegistry.findIndex(l => l.id === leadData.id);
             if(idx !== -1) mainLeadsRegistry[idx] = leadData; else mainLeadsRegistry.push(leadData);
-            localStorage.setItem('relax_leads_registry_local', JSON.stringify(mainLeadsRegistry));
 
-            if (currentStorageMode === 'supabase' && supabaseClient) {
+            if (supabaseClient) {
                 try {
-                    const rowPayload = prepareLeadToRow(leadData);
-                    await supabaseClient.from('pacientes_crm').upsert([rowPayload], { onConflict: 'crm_id' });
+                    await supabaseClient.from('pacientes_crm').upsert([prepareLeadToRow(leadData)], { onConflict: 'crm_id' });
                 } catch(e) { console.error(e); }
             }
             renderApplicationCore();
@@ -442,64 +376,109 @@
         }
 
         function renderApplicationCore() {
-            let pipelineSum = 0, salesSum = 0, todayAlerts = 0;
-            let phaseCounts = { frio: 0, tibio: 0, caliente: 0, agenda: 0, venta: 0, postventa: 0 };
-            let gestoresSales = {}; let gestoresContracted = {};
+            let pipelineGlobalSum = 0; 
+            let cobradoMesFilterSum = 0; 
+            let todayAlertsCount = 0;
             
-            listadoGestores.forEach(g => { gestoresSales[g] = 0; gestoresContracted[g] = 0; });
-            let yearMonthsData = Array.from({ length: 12 }, () => ({ totalLeads: 0, totalCollected: 0 }));
+            let totalLeadsConteo = 0;
+            let totalAgendadosConteo = 0;
+            let totalVendidosConteo = 0;
+
+            let phaseCounts = { frio: 0, tibio: 0, caliente: 0, agenda: 0, venta: 0, postventa: 0 };
+            let gestoresSalesMes = {}; 
+            let gestoresContractedTotal = {};
+            
+            listadoGestores.forEach(g => { gestoresSalesMes[g] = 0; gestoresContractedTotal[g] = 0; });
+            
+            // Estructura para almacenar cobros reales de abonos distribuidos por mes
+            let colRealMesDistribution = Array.from({ length: 12 }, () => 0);
 
             internalPhasesConfig.forEach(p => document.getElementById(`col-${p.id}`).innerHTML = '');
 
+            // 1ra PASADA: Mapeo y distribución matemática sin mezclas
             mainLeadsRegistry.forEach(lead => {
                 let currentPhase = lead.phase;
                 let valContrato = lead.value || 0;
-                let totalAbonado = lead.abonos ? lead.abonos.reduce((sum, a) => sum + parseFloat(a.monto), 0) : 0;
-                let saldoPendiente = valContrato - totalAbonado;
                 
+                // Distribución de cobranza por la fecha real en que se hizo cada abono
+                if (lead.abonos) {
+                    lead.abonos.forEach(ab => {
+                        if (ab.fecha && ab.fecha.includes('-')) {
+                            let abMonth = parseInt(ab.fecha.split('-')[1]);
+                            if (abMonth >= 1 && abMonth <= 12) {
+                                colRealMesDistribution[abMonth - 1] += parseFloat(ab.monto) || 0;
+                            }
+                        }
+                    });
+                }
+
+                // Cálculo del cobrado específico para el lead dentro del mes seleccionado en el filtro superior
+                let totalCobradoEnMesSeleccionado = 0;
+                if (lead.abonos) {
+                    lead.abonos.forEach(ab => {
+                        if (ab.fecha && ab.fecha.includes('-')) {
+                            let abMonth = parseInt(ab.fecha.split('-')[1]);
+                            if (abMonth === selectedMonthInteractiveFilter) {
+                                totalCobradoEnMesSeleccionado += parseFloat(ab.monto) || 0;
+                            }
+                        }
+                    });
+                }
+
+                let totalAbonadoHistorico = lead.abonos ? lead.abonos.reduce((sum, a) => sum + parseFloat(a.monto), 0) : 0;
+                let saldoPendiente = valContrato - totalAbonadoHistorico;
+
+                // Determinación del mes de procedencia del lead
                 let leadMonth = CURRENT_MONTH_NUM;
                 if (lead.date && lead.date.includes('-')) {
-                    let parts = lead.date.split('-');
-                    leadMonth = parts[0].length === 4 ? parseInt(parts[1]) : parseInt(parts[1]);
+                    leadMonth = parseInt(lead.date.split('-')[1]);
                 }
 
-                if(leadMonth >= 1 && leadMonth <= 12) {
-                    yearMonthsData[leadMonth - 1].totalLeads++;
-                    yearMonthsData[leadMonth - 1].totalCollected += totalAbonado;
+                // PIPELINE ACTIVA ACUMULADA: Suma global de lo que está vivo en seguimiento
+                if (['frio', 'tibio', 'caliente', 'agenda'].includes(currentPhase)) {
+                    pipelineGlobalSum += valContrato;
                 }
 
-                // NUEVA LÓGICA DE PERSISTENCIA EXPLICADA POR EL USUARIO:
-                // Si el lead está en Frío, Tibio, Caliente o Agenda -> PASA DE LARGO E HISTÓRICO SIEMPRE VISIBLE.
-                // Si está en Venta o Postventa -> Sí se segmenta rigurosamente en el mes que se cobró/cerró.
-                let belongsToSelectedMonth = true;
-                if (currentPhase === 'venta' || currentPhase === 'postventa') {
-                    belongsToSelectedMonth = (leadMonth === selectedMonthInteractiveFilter);
-                }
+                if (currentPhase === 'agenda') totalAgendadosConteo++;
+                if (['venta', 'postventa'].includes(currentPhase)) totalVendidosConteo++;
+                totalLeadsConteo++;
 
-                if (leadMonth === selectedMonthInteractiveFilter && gestoresSales[lead.gestor] !== undefined) {
-                    gestoresSales[lead.gestor] += totalAbonado;
-                    gestoresContracted[lead.gestor] += valContrato;
+                // Lógica de Persistencia en Tablero Kanban
+                let belongsToView = true;
+                if (['venta', 'postventa'].includes(currentPhase)) {
+                    belongsToView = (leadMonth === selectedMonthInteractiveFilter);
                 }
 
                 let isToday = lead.bitacora && lead.bitacora.some(log => log.fecha.includes(new Date().toLocaleDateString()));
-                if (isToday) todayAlerts++;
+                if (isToday) todayAlertsCount++;
 
-                if (belongsToSelectedMonth && (currentManagerFilter === 'all' || lead.gestor === currentManagerFilter) &&
-                    (!filterOnlyTodayAlerts || isToday) && (!filterOnlyPendingDebt || saldoPendiente > 0.05) &&
+                // Acumuladores de la tabla de rendimiento basados en el mes seleccionado
+                if (gestoresSalesMes[lead.gestor] !== undefined) {
+                    gestoresSalesMes[lead.gestor] += totalCobradoEnMesSeleccionado;
+                    gestoresContractedTotal[lead.gestor] += valContrato;
+                }
+
+                if (belongsToView && (currentManagerFilter === 'all' || lead.gestor === currentManagerFilter) &&
                     (activeSearchQuery === "" || lead.name.toLowerCase().includes(activeSearchQuery) || lead.phone.includes(activeSearchQuery))) {
                     
-                    pipelineSum += valContrato; salesSum += totalAbonado; phaseCounts[currentPhase]++;
+                    phaseCounts[currentPhase]++;
+                    if (['venta', 'postventa'].includes(currentPhase)) {
+                        cobradoMesFilterSum += totalCobradoEnMesSeleccionado;
+                    } else {
+                        // Si está activo en el Kanban reflejamos sus cobros parciales si los hubiera
+                        cobradoMesFilterSum += totalCobradoEnMesSeleccionado;
+                    }
 
                     const card = document.createElement('div');
                     card.className = `lead-card p-3 rounded-xl border bg-white shadow-2xs space-y-2 hover:shadow-md ${currentMobileColumn !== currentPhase ? 'hidden lg:block' : ''}`;
                     card.innerHTML = `
                         <div class="flex justify-between font-bold">
                             <span onclick="openModal('edit', ${lead.id})" class="underline cursor-pointer text-indigo-600 font-extrabold">${lead.name}</span>
-                            <span class="text-[9px] bg-slate-100 px-1.5 py-0.5 rounded font-black uppercase">INT: ${lead.touch}</span>
+                            <span class="text-[9px] bg-slate-100 px-1.5 py-0.5 rounded font-black">INT: ${lead.touch}</span>
                         </div>
-                        <p class="text-[10px] text-slate-500 truncate">${lead.desc || 'Sin bitácora reciente'}</p>
+                        <p class="text-[10px] text-slate-500 truncate">${lead.desc || 'Sin comentarios recientes'}</p>
                         <div class="text-[10px] font-bold flex justify-between bg-slate-50 p-1.5 rounded-lg border">
-                            <span class="text-emerald-600">Cobrado: $${totalAbonado.toFixed(2)}</span>
+                            <span class="text-emerald-600">Cobrado: $${totalAbonadoHistorico.toFixed(2)}</span>
                             <span class="text-rose-600">Pend: $${saldoPendiente.toFixed(2)}</span>
                         </div>
                         <div class="flex justify-between items-center text-[10px] text-slate-400 font-bold pt-1 border-t">
@@ -511,29 +490,29 @@
                 }
             });
 
-            // Grid Mensual Interactivo
+            // 2da PASADA: Renderizado de componentes visuales con los datos limpios acumulados
             const mContainer = document.getElementById('months-grid-container'); mContainer.innerHTML = '';
-            yearMonthsData.forEach((mData, idx) => {
-                let activeClass = (selectedMonthInteractiveFilter === (idx + 1)) ? 'border-indigo-600 bg-indigo-50 font-black' : 'border-slate-200 bg-white';
+            monthsNames.forEach((mName, idx) => {
+                let activeClass = (selectedMonthInteractiveFilter === (idx + 1)) ? 'border-indigo-600 bg-indigo-50 font-black ring-2 ring-indigo-600/10' : 'border-slate-200 bg-white';
                 mContainer.innerHTML += `
                     <div onclick="triggerMonthInteractiveFilter(${idx + 1})" class="p-2 rounded-xl border text-center cursor-pointer transition-all ${activeClass}">
-                        <span class="block text-[10px] uppercase">${monthsNames[idx]}</span>
-                        <span class="block text-[11px] font-bold text-emerald-600">$${mData.totalCollected.toFixed(0)}</span>
+                        <span class="block text-[10px] font-bold uppercase text-slate-500">${mName}</span>
+                        <span class="block text-[11px] font-black text-emerald-600">$${colRealMesDistribution[idx].toFixed(0)}</span>
                     </div>`;
             });
 
-            // Tabla Asesoras
             const gBody = document.getElementById('goals-table-body'); gBody.innerHTML = '';
-            Object.keys(gestoresSales).forEach(g => {
-                let cobrado = gestoresSales[g] || 0; let contratado = gestoresContracted[g] || 0;
+            Object.keys(gestoresSalesMes).forEach(g => {
+                let cobradoEnMes = gestoresSalesMes[g] || 0; 
+                let contratadoTotal = gestoresContractedTotal[g] || 0;
                 let meta = metasMensualesDinamicas[g] || 1100;
-                let pct = meta > 0 ? Math.min(Math.round((cobrado / meta) * 100), 100) : 0;
+                let pct = meta > 0 ? Math.min(Math.round((cobradoEnMes / meta) * 100), 100) : 0;
+                
                 gBody.innerHTML += `
                     <tr class="border-b h-10 hover:bg-slate-50/50">
                         <td class="p-2 font-bold text-left pl-4">${g}</td>
-                        <td class="p-2 text-slate-500">$${contratado.toFixed(2)}</td>
-                        <td class="p-2 text-emerald-600 font-extrabold">$${cobrado.toFixed(2)}</td>
-                        <td class="p-2 text-fuchsia-600 font-bold">Activa</td>
+                        <td class="p-2 text-slate-500 font-medium">$${contratadoTotal.toFixed(2)}</td>
+                        <td class="p-2 text-emerald-600 font-black bg-emerald-50/30">$${cobradoEnMes.toFixed(2)}</td>
                         <td class="p-2 font-bold text-indigo-600">$${meta}</td>
                         <td class="p-2 text-left pl-2">
                             <div class="flex items-center gap-2">
@@ -544,10 +523,16 @@
                     </tr>`;
             });
 
-            document.getElementById('kpi-pipeline').innerText = `$${pipelineSum.toFixed(2)}`;
-            document.getElementById('kpi-sales').innerText = `$${salesSum.toFixed(2)}`;
-            document.getElementById('kpi-alerts').innerText = todayAlerts;
+            // Asignación final a los indicadores superiores (KPIs)
+            document.getElementById('kpi-pipeline').innerText = `$${pipelineGlobalSum.toFixed(2)}`;
+            document.getElementById('kpi-sales').innerText = `$${colRealMesDistribution[selectedMonthInteractiveFilter - 1].toFixed(2)}`;
+            document.getElementById('kpi-alerts').innerText = todayAlertsCount;
             
+            document.getElementById('kpi-scheduling-rate').innerText = `${totalLeadsConteo > 0 ? Math.round((totalAgendadosConteo / totalLeadsConteo) * 100) : 0}%`;
+            document.getElementById('sub-kpi-agendas').innerText = `${totalAgendadosConteo} Pacientes agendados en total`;
+            document.getElementById('kpi-conversion').innerText = `${totalLeadsConteo > 0 ? Math.round((totalVendidosConteo / totalLeadsConteo) * 100) : 0}%`;
+            document.getElementById('sub-kpi-cierres').innerText = `${totalVendidosConteo} Ventas efectivas registradas`;
+
             internalPhasesConfig.forEach(p => {
                 document.getElementById(`b-${p.id}`).innerText = phaseCounts[p.id];
                 if (document.getElementById(`badge-tab-${p.id}`)) document.getElementById(`badge-tab-${p.id}`).innerText = phaseCounts[p.id];
@@ -576,8 +561,8 @@
                     <div class="p-3 bg-white border rounded-xl flex items-center justify-between text-xs">
                         <span class="font-bold text-slate-800">${g}</span>
                         <div class="flex items-center gap-2">
-                            <label class="text-slate-400">Meta:</label>
-                            <input type="number" id="cfg-metam-${idx}" value="${metasMensualesDinamicas[g] ?? 1100}" onchange="updateAdviserInfo(${idx})" class="w-20 px-2 py-0.5 border rounded-md font-bold text-indigo-600">
+                            <label class="text-slate-400 font-bold">Meta Mensual ($):</label>
+                            <input type="number" id="cfg-metam-${idx}" value="${metasMensualesDinamicas[g] ?? 1100}" onchange="updateAdviserInfo(${idx})" class="w-24 px-2 py-0.5 border rounded-md font-bold text-indigo-600">
                         </div>
                     </div>`;
             });
@@ -586,7 +571,6 @@
         function updateAdviserInfo(index) {
             const name = listadoGestores[index];
             metasMensualesDinamicas[name] = parseFloat(document.getElementById(`cfg-metam-${index}`).value) || 0;
-            localStorage.setItem('relax_mm_dinamicas', JSON.stringify(metasMensualesDinamicas));
             renderApplicationCore();
         }
 
@@ -661,6 +645,7 @@
                 desc: currentModalBitacoraList[0] ? currentModalBitacoraList[0].nota : "", abonos: [...currentModalAbonosList], bitacora: [...currentModalBitacoraList]
             };
             closeModal(); await saveLeadData(payload);
+            showToast("Sincronizado con éxito.");
         }
 
         async function importDataEngine(event) {
@@ -676,8 +661,16 @@
                     if(row.desc) payload.bitacora.push({ fecha: new Date().toLocaleString(), asesora: payload.gestor, nota: row.desc });
                     await saveLeadData(payload);
                 }
-                showToast("Datos importados.");
+                showToast("Base cargada y vinculada.");
             }; reader.readAsArrayBuffer(file);
+        }
+
+        function exportBackupExcel() {
+            let outputRows = mainLeadsRegistry.map(l => {
+                return { id: l.id, name: l.name, phone: l.phone, phase: l.phase, value: l.value, date: l.date, loss: l.loss, gestor: l.gestor, touch: l.touch, desc: l.desc }
+            });
+            let ws = XLSX.utils.json_to_sheet(outputRows); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Backup");
+            XLSX.writeFile(wb, `RelaxTherapy_Completo_${new Date().toISOString().slice(0,10)}.xlsx`);
         }
 
         function toggleConfigPanel() { document.getElementById('config-panel').classList.toggle('hidden'); }
