@@ -7,11 +7,13 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM Cloud - v27.6 Final Máster</title>
+    <title>Relax Therapy CRM Cloud - v28.0 QA Final</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script src="https://unpkg.com/@supabase/supabase-js@2.39.8/dist/umd/supabase.js"></script>
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght=300;400;500;600;700;900&display=swap');
         body { font-family: 'Poppins', sans-serif; background-color: #f1f5f9; }
@@ -31,7 +33,7 @@
                 </div>
                 <div>
                     <span class="font-black text-slate-900 tracking-tight text-base sm:text-lg block leading-tight">RELAX THERAPY CRM</span>
-                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider">⏳ Sincronizando canal cloud...</span>
+                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider">⏳ Vinculando servicio cloud...</span>
                 </div>
             </div>
 
@@ -64,8 +66,8 @@
             <div class="flex items-center gap-2">
                 <i class="fa-solid fa-shield-halved text-emerald-600 text-sm shrink-0"></i>
                 <div>
-                    <strong class="text-slate-800 block">Autenticación Móvil Directa Activa</strong>
-                    <span class="text-slate-500 font-medium">Las llaves de Supabase se encuentran inyectadas fijamente en el código interno.</span>
+                    <strong class="text-slate-800 block">Autenticación Inyectada Fija v28</strong>
+                    <span class="text-slate-500 font-medium">Librería de datos Supabase migrada a espejo unpkg para evitar bloqueos de red corporativos o móviles.</span>
                 </div>
             </div>
         </div>
@@ -247,7 +249,6 @@
     </div>
 
     <script>
-        // CREDENCIALES FIJAS DE INFRAESTRUCTURA RELAX THERAPY
         const SUPABASE_PROJECT_URL = "https://eqhsgpwoehcryhmibfhn.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxaHNncHdvZWhjcnlobWliZmhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5NjQzMDAsImV4cCI6MjEwMjU0MDMwMH0.7a92b2-4c87-8143-2fed1056cc25";
 
@@ -276,6 +277,10 @@
 
         function initSupabaseEngine() {
             try {
+                if (typeof supabase === 'undefined') {
+                    setTimeout(initSupabaseEngine, 300);
+                    return;
+                }
                 supabaseClient = supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
                 loadDataFromCloud();
             } catch(e) {
@@ -311,7 +316,7 @@
                 }));
                 
                 status.className = "block text-[11px] font-bold text-emerald-600 uppercase tracking-wider";
-                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sincronizado Directo Master (${mainLeadsRegistry.length} Leads)`;
+                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sincronizado Directo (${mainLeadsRegistry.length} Leads)`;
                 renderApplicationCore();
             } catch(e) { 
                 console.error(e); 
@@ -332,130 +337,151 @@
             let yearMonthsData = Array.from({ length: 12 }, () => ({ totalLeads: 0, totalSalesLeads: 0, totalContracted: 0, totalCollected: 0 }));
             let selectedAuditMonth = parseInt(document.getElementById('audit-month-selector').value) || CURRENT_MONTH_NUM;
 
-            phases.forEach(p => document.getElementById(`col-${p}`).innerHTML = '');
+            phases.forEach(p => {
+                const colEl = document.getElementById(`col-${p}`);
+                if(colEl) colEl.innerHTML = '';
+            });
 
             mainLeadsRegistry.forEach(lead => {
-                let currentPhase = lead.phase;
-                if (!phases.includes(currentPhase)) currentPhase = 'frio';
+                try {
+                    let currentPhase = lead.phase;
+                    if (!phases.includes(currentPhase)) currentPhase = 'frio';
 
-                let valContrato = lead.value;
-                let totalAbonado = lead.a1 + lead.a2 + lead.a3 + lead.a4 + lead.a5;
-                let saldoPendiente = valContrato - totalAbonado;
-                
-                let leadDay = CURRENT_DAY_NUM; let leadMonth = CURRENT_MONTH_NUM; let leadYear = CURRENT_YEAR_NUM;
-                if (lead.date) {
-                    let parts = lead.date.split('-');
-                    if(parts.length === 3) {
-                        if(parts[0].length === 4) {
-                            leadYear = parseInt(parts[0]); leadMonth = parseInt(parts[1]); leadDay = parseInt(parts[2]);
-                        } else {
-                            leadDay = parseInt(parts[0]); leadMonth = parseInt(parts[1]); leadYear = parseInt(parts[2]);
+                    let valContrato = lead.value;
+                    let totalAbonado = lead.a1 + lead.a2 + lead.a3 + lead.a4 + lead.a5;
+                    let saldoPendiente = valContrato - totalAbonado;
+                    
+                    let leadDay = CURRENT_DAY_NUM; let leadMonth = CURRENT_MONTH_NUM; let leadYear = CURRENT_YEAR_NUM;
+                    if (lead.date && typeof lead.date === 'string' && lead.date.includes('-')) {
+                        let parts = lead.date.split('-');
+                        if(parts.length === 3) {
+                            if(parts[0].length === 4) {
+                                leadYear = parseInt(parts[0]) || CURRENT_YEAR_NUM; 
+                                leadMonth = parseInt(parts[1]) || CURRENT_MONTH_NUM; 
+                                leadDay = parseInt(parts[2]) || CURRENT_DAY_NUM;
+                            } else {
+                                leadDay = parseInt(parts[0]) || CURRENT_DAY_NUM; 
+                                leadMonth = parseInt(parts[1]) || CURRENT_MONTH_NUM; 
+                                leadYear = parseInt(parts[2]) || CURRENT_YEAR_NUM;
+                            }
                         }
                     }
-                }
 
-                if(leadMonth >= 1 && leadMonth <= 12) {
-                    yearMonthsData[leadMonth - 1].totalLeads++;
-                    if(currentPhase === 'venta' || currentPhase === 'postventa') {
-                        yearMonthsData[leadMonth - 1].totalSalesLeads++;
+                    if(leadMonth >= 1 && leadMonth <= 12) {
+                        yearMonthsData[leadMonth - 1].totalLeads++;
+                        if(currentPhase === 'venta' || currentPhase === 'postventa') {
+                            yearMonthsData[leadMonth - 1].totalSalesLeads++;
+                        }
+                        yearMonthsData[leadMonth - 1].totalContracted += valContrato;
+                        yearMonthsData[leadMonth - 1].totalCollected += totalAbonado;
                     }
-                    yearMonthsData[leadMonth - 1].totalContracted += valContrato;
-                    yearMonthsData[leadMonth - 1].totalCollected += totalAbonado;
-                }
 
-                let gName = lead.gestor;
-                let isToday = (leadDay === CURRENT_DAY_NUM && leadMonth === CURRENT_MONTH_NUM && leadYear === CURRENT_YEAR_NUM);
+                    let gName = lead.gestor;
+                    let isToday = (leadDay === CURRENT_DAY_NUM && leadMonth === CURRENT_MONTH_NUM && leadYear === CURRENT_YEAR_NUM);
 
-                if(leadMonth === selectedAuditMonth && gestoresSales[gName] !== undefined) {
-                    gestoresSales[gName] += totalAbonado; 
-                    gestoresContracted[gName] += valContrato; 
-                    gestoresMonthTotalCount[gName]++;
-                }
-                
-                if(isToday && gestoresTodayCount[gName] !== undefined) {
-                    gestoresTodayCount[gName]++;
-                }
-                if (isToday) todayAlerts++;
-
-                if ((selectedMonthInteractiveFilter === null || leadMonth === selectedMonthInteractiveFilter) &&
-                    (!filterOnlyTodayAlerts || isToday) && (!filterOnlyPendingDebt || saldoPendiente > 0.05) &&
-                    (activeSearchQuery === "" || lead.name.toLowerCase().includes(activeSearchQuery)) &&
-                    (currentManagerFilter === 'all' || lead.gestor === currentManagerFilter)) {
+                    if(leadMonth === selectedAuditMonth && gestoresSales[gName] !== undefined) {
+                        gestoresSales[gName] += totalAbonado; 
+                        gestoresContracted[gName] += valContrato; 
+                        gestoresMonthTotalCount[gName]++;
+                    }
                     
-                    totalLeadsBajoFiltro++;
-                    if (currentPhase === 'agenda') agendasContadasBajoFiltro++;
-                    if (currentPhase === 'venta' || currentPhase === 'postventa') ventasContadasBajoFiltro++;
+                    if(isToday && gestoresTodayCount[gName] !== undefined) {
+                        gestoresTodayCount[gName]++;
+                    }
+                    if (isToday) todayAlerts++;
 
-                    pipelineSum += valContrato; salesSum += totalAbonado; phaseCounts[currentPhase]++;
+                    if ((selectedMonthInteractiveFilter === null || leadMonth === selectedMonthInteractiveFilter) &&
+                        (!filterOnlyTodayAlerts || isToday) && (!filterOnlyPendingDebt || saldoPendiente > 0.05) &&
+                        (activeSearchQuery === "" || lead.name.toLowerCase().includes(activeSearchQuery)) &&
+                        (currentManagerFilter === 'all' || lead.gestor === currentManagerFilter)) {
+                        
+                        totalLeadsBajoFiltro++;
+                        if (currentPhase === 'agenda') agendasContadasBajoFiltro++;
+                        if (currentPhase === 'venta' || currentPhase === 'postventa') ventasContadasBajoFiltro++;
 
-                    let cleanDigits = lead.phone.replace(/[^0-9]/g, '');
-                    if (cleanDigits.startsWith('09') && cleanDigits.length === 10) cleanDigits = '593' + cleanDigits.substring(1);
+                        pipelineSum += valContrato; salesSum += totalAbonado; phaseCounts[currentPhase]++;
 
-                    const card = document.createElement('div');
-                    card.className = "p-3 rounded-xl border bg-white shadow-xs space-y-1 border-slate-200 hover:border-indigo-500 transition-all";
-                    card.innerHTML = `
-                        <div class="flex justify-between font-bold text-xs">
-                            <span onclick="openModal('edit', ${lead.id})" class="underline cursor-pointer text-indigo-600">${lead.name}</span>
-                            <span class="text-[9px] bg-indigo-50 text-indigo-700 px-1 rounded">Int: ${lead.touch}</span>
-                        </div>
-                        <p class="text-[10px] text-slate-500">${lead.desc || 'Sin observaciones'}</p>
-                        <div class="text-[10px] font-bold text-emerald-600 flex justify-between">
-                            <span>Cobrado: $${totalAbonado}</span>
-                            <span class="text-rose-600">Pend: $${saldoPendiente}</span>
-                        </div>
-                        <div class="pt-1"><a href="https://wa.me/${cleanDigits}" target="_blank" class="w-full flex items-center justify-center gap-1 bg-emerald-600 text-white text-[10px] font-bold py-1 rounded-lg"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a></div>`;
-                    
-                    document.getElementById(`col-${currentPhase}`).appendChild(card);
+                        let cleanDigits = lead.phone.replace(/[^0-9]/g, '');
+                        if (cleanDigits.startsWith('09') && cleanDigits.length === 10) cleanDigits = '593' + cleanDigits.substring(1);
+
+                        const card = document.createElement('div');
+                        card.className = "p-3 rounded-xl border bg-white shadow-xs space-y-1 border-slate-200 hover:border-indigo-500 transition-all";
+                        card.innerHTML = `
+                            <div class="flex justify-between font-bold text-xs">
+                                <span onclick="openModal('edit', ${lead.id})" class="underline cursor-pointer text-indigo-600">${lead.name}</span>
+                                <span class="text-[9px] bg-indigo-50 text-indigo-700 px-1 rounded">Int: ${lead.touch}</span>
+                            </div>
+                            <p class="text-[10px] text-slate-500">${lead.desc || 'Sin observaciones'}</p>
+                            <div class="text-[10px] font-bold text-emerald-600 flex justify-between">
+                                <span>Cobrado: $${totalAbonado}</span>
+                                <span class="text-rose-600">Pend: $${saldoPendiente}</span>
+                            </div>
+                            <div class="pt-1"><a href="https://wa.me/${cleanDigits}" target="_blank" class="w-full flex items-center justify-center gap-1 bg-emerald-600 text-white text-[10px] font-bold py-1 rounded-lg"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a></div>`;
+                        
+                        const colTarget = document.getElementById(`col-${currentPhase}`);
+                        if(colTarget) colTarget.appendChild(card);
+                    }
+                } catch(errLead) {
+                    console.error("Error omitido en lead individual: ", errLead);
                 }
             });
 
-            const mContainer = document.getElementById('months-grid-container'); mContainer.innerHTML = '';
-            yearMonthsData.forEach((mData, idx) => {
-                let isCurrentFilter = (selectedMonthInteractiveFilter === (idx + 1));
-                let borderStyle = isCurrentFilter ? 'border-indigo-600 bg-indigo-50/40 ring-2 ring-indigo-600/20' : 'border-slate-200 bg-white hover:border-slate-400';
-                let tasaCierreMes = mData.totalLeads > 0 ? Math.round((mData.totalSalesLeads / mData.totalLeads) * 100) : 0;
+            const mContainer = document.getElementById('months-grid-container'); 
+            if(mContainer) {
+                mContainer.innerHTML = '';
+                yearMonthsData.forEach((mData, idx) => {
+                    let isCurrentFilter = (selectedMonthInteractiveFilter === (idx + 1));
+                    let borderStyle = isCurrentFilter ? 'border-indigo-600 bg-indigo-50/40 ring-2 ring-indigo-600/20' : 'border-slate-200 bg-white hover:border-slate-400';
+                    let tasaCierreMes = mData.totalLeads > 0 ? Math.round((mData.totalSalesLeads / mData.totalLeads) * 100) : 0;
 
-                mContainer.innerHTML += `
-                    <div onclick="triggerMonthInteractiveFilter(${idx})" class="p-2.5 rounded-xl border text-center shadow-2xs cursor-pointer transition-all ${borderStyle}">
-                        <span class="block font-black text-slate-700 border-b pb-1 mb-1.5 text-[11px] uppercase">${monthsNames[idx]}</span>
-                        <div class="text-left text-[10px] text-slate-500 space-y-0.5">
-                            <div class="flex justify-between"><span>Atendidos:</span> <strong class="text-slate-700">${mData.totalLeads}</strong></div>
-                            <div class="flex justify-between font-bold text-violet-600"><span>% Cierre Real:</span> <strong>${tasaCierreMes}%</strong></div>
-                            <div class="flex justify-between font-bold text-emerald-600"><span>Ventas:</span> <strong>$${mData.totalCollected.toFixed(2)}</strong></div>
-                        </div>
-                    </div>`;
-            });
+                    mContainer.innerHTML += `
+                        <div onclick="triggerMonthInteractiveFilter(${idx})" class="p-2.5 rounded-xl border text-center shadow-2xs cursor-pointer transition-all ${borderStyle}">
+                            <span class="block font-black text-slate-700 border-b pb-1 mb-1.5 text-[11px] uppercase">${monthsNames[idx]}</span>
+                            <div class="text-left text-[10px] text-slate-500 space-y-0.5">
+                                <div class="flex justify-between"><span>Atendidos:</span> <strong class="text-slate-700">${mData.totalLeads}</strong></div>
+                                <div class="flex justify-between font-bold text-violet-600"><span>% Cierre Real:</span> <strong>${tasaCierreMes}%</strong></div>
+                                <div class="flex justify-between font-bold text-emerald-600"><span>Ventas:</span> <strong>$${mData.totalCollected.toFixed(2)}</strong></div>
+                            </div>
+                        </div>`;
+                });
+            }
 
-            const gBody = document.getElementById('goals-table-body'); gBody.innerHTML = '';
-            Object.keys(gestoresSales).forEach(g => {
-                let isF = (g === 'Fernando');
-                let totCobradoMes = gestoresSales[g] || 0;
-                let totContratadoMes = gestoresContracted[g] || 0;
-                let hoyGestiones = gestoresTodayCount[g] || 0;
-                let acumuladoMesLeads = gestoresMonthTotalCount[g] || 0;
-                let metaMensualBase = metasMensualesDinamicas[g] ?? 1100;
-                let metaDiariaBase = metasDiariasDinamicas[g] ?? 50;
-                let pctAvance = metaMensualBase > 0 ? Math.min(Math.round((totCobradoMes / metaMensualBase) * 100), 100) : 0;
+            const gBody = document.getElementById('goals-table-body'); 
+            if(gBody) {
+                gBody.innerHTML = '';
+                Object.keys(gestoresSales).forEach(g => {
+                    let isF = (g === 'Fernando');
+                    let totCobradoMes = gestoresSales[g] || 0;
+                    let totContratadoMes = gestoresContracted[g] || 0;
+                    let hoyGestiones = gestoresTodayCount[g] || 0;
+                    let acumuladoMesLeads = gestoresMonthTotalCount[g] || 0;
+                    let metaMensualBase = metasMensualesDinamicas[g] ?? 1100;
+                    let metaDiariaBase = metasDiariasDinamicas[g] ?? 50;
+                    let pctAvance = metaMensualBase > 0 ? Math.min(Math.round((totCobradoMes / metaMensualBase) * 100), 100) : 0;
 
-                gBody.innerHTML += `
-                    <tr class="border-b h-11 hover:bg-slate-50/80 text-center">
-                        <td class="p-2 font-bold text-slate-700 text-left pl-4">${g}</td>
-                        <td class="p-2 font-semibold text-slate-500">$${totContratadoMes.toFixed(2)}</td>
-                        <td class="p-2 font-black text-emerald-600">$${totCobradoMes.toFixed(2)}</td>
-                        <td class="p-2 font-black text-fuchsia-700 bg-fuchsia-50/30">${isF ? '-' : `${hoyGestiones} gestiones`}</td>
-                        <td class="p-2 font-semibold text-slate-700">${isF ? '-' : `${acumuladoMesLeads} Leads`}</td>
-                        <td class="p-2 font-bold text-blue-600">${isF ? '-' : `$${metaDiariaBase.toFixed(2)}`}</td>
-                        <td class="p-2 font-bold text-indigo-600">$${metaMensualBase.toFixed(2)}</td>
-                        <td class="p-2">
-                            ${isF ? '-' : `<div class="w-full bg-slate-200 rounded-full h-2.5"><div class="bg-indigo-600 h-2.5 rounded-full" style="width: ${pctAvance}%"></div></div><span>${pctAvance}%</span>`}
-                        </td>
-                    </tr>`;
-            });
+                    gBody.innerHTML += `
+                        <tr class="border-b h-11 hover:bg-slate-50/80 text-center">
+                            <td class="p-2 font-bold text-slate-700 text-left pl-4">${g}</td>
+                            <td class="p-2 font-semibold text-slate-500">$${totContratadoMes.toFixed(2)}</td>
+                            <td class="p-2 font-black text-emerald-600">$${totCobradoMes.toFixed(2)}</td>
+                            <td class="p-2 font-black text-fuchsia-700 bg-fuchsia-50/30">${isF ? '-' : `${hoyGestiones} gestiones`}</td>
+                            <td class="p-2 font-semibold text-slate-700">${isF ? '-' : `${acumuladoMesLeads} Leads`}</td>
+                            <td class="p-2 font-bold text-blue-600">${isF ? '-' : `$${metaDiariaBase.toFixed(2)}`}</td>
+                            <td class="p-2 font-bold text-indigo-600">$${metaMensualBase.toFixed(2)}</td>
+                            <td class="p-2">
+                                ${isF ? '-' : `<div class="w-full bg-slate-200 rounded-full h-2.5"><div class="bg-indigo-600 h-2.5 rounded-full" style="width: ${pctAvance}%"></div></div><span>${pctAvance}%</span>`}
+                            </td>
+                        </tr>`;
+                });
+            }
 
             document.getElementById('kpi-pipeline').innerText = `$${pipelineSum.toFixed(2)}`;
             document.getElementById('kpi-sales').innerText = `$${salesSum.toFixed(2)}`;
             document.getElementById('kpi-alerts').innerText = todayAlerts;
-            phases.forEach(p => document.getElementById(`b-${p}`).innerText = phaseCounts[p]);
+            phases.forEach(p => {
+                const bEl = document.getElementById(`b-${p}`);
+                if(bEl) bEl.innerText = phaseCounts[p];
+            });
             document.getElementById('kpi-scheduling-rate').innerText = `${totalLeadsBajoFiltro > 0 ? Math.round((agendasContadasBajoFiltro / totalLeadsBajoFiltro) * 100) : 0}%`;
             document.getElementById('kpi-conversion').innerText = `${totalLeadsBajoFiltro > 0 ? Math.round((ventasContadasBajoFiltro / totalLeadsBajoFiltro) * 100) : 0}%`;
         }
@@ -469,21 +495,28 @@
             if(savedMD) { metasDiariasDinamicas = JSON.parse(savedMD); }
 
             const selectAudit = document.getElementById('audit-month-selector');
-            selectAudit.innerHTML = "";
-            monthsNames.forEach((m, idx) => { 
-                let opt = document.createElement('option'); opt.value = idx + 1; opt.innerText = m; 
-                if(idx + 1 === CURRENT_MONTH_NUM) opt.selected = true; 
-                selectAudit.appendChild(opt); 
-            });
+            if(selectAudit) {
+                selectAudit.innerHTML = "";
+                monthsNames.forEach((m, idx) => { 
+                    let opt = document.createElement('option'); opt.value = idx + 1; opt.innerText = m; 
+                    if(idx + 1 === CURRENT_MONTH_NUM) opt.selected = true; 
+                    selectAudit.appendChild(opt); 
+                });
+            }
             buildDynamicButtonsFilters();
         }
 
         function buildDynamicButtonsFilters() {
             const box = document.getElementById('managers-buttons-box'); 
-            box.innerHTML = `<button onclick="setManagerFilter('all')" class="px-3 py-1 bg-slate-100 rounded-lg text-xs font-bold">Todas</button>`;
-            listadoGestores.forEach(g => { box.innerHTML += `<button onclick="setManagerFilter('${g}')" class="px-3 py-1 bg-slate-100 rounded-lg ml-1 text-xs font-bold">${g}</button>`; });
-            const selectForm = document.getElementById('form-gestor'); selectForm.innerHTML = "";
-            listadoGestores.forEach(g => { let opt = document.createElement('option'); opt.value = g; opt.innerText = g; selectForm.appendChild(opt); });
+            if(box) {
+                box.innerHTML = `<button onclick="setManagerFilter('all')" class="px-3 py-1 bg-slate-100 rounded-lg text-xs font-bold">Todas</button>`;
+                listadoGestores.forEach(g => { box.innerHTML += `<button onclick="setManagerFilter('${g}')" class="px-3 py-1 bg-slate-100 rounded-lg ml-1 text-xs font-bold">${g}</button>`; });
+            }
+            const selectForm = document.getElementById('form-gestor'); 
+            if(selectForm) {
+                selectForm.innerHTML = "";
+                listadoGestores.forEach(g => { let opt = document.createElement('option'); opt.value = g; opt.innerText = g; selectForm.appendChild(opt); });
+            }
         }
 
         async function handleFormSubmit(e) {
