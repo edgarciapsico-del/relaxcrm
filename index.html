@@ -7,12 +7,12 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM Cloud - v28.0 QA Final</title>
+    <title>Relax Therapy CRM Cloud - v28.5 QA Production</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     
-    <script src="https://unpkg.com/@supabase/supabase-js@2.39.8/dist/umd/supabase.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.js"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght=300;400;500;600;700;900&display=swap');
@@ -33,7 +33,7 @@
                 </div>
                 <div>
                     <span class="font-black text-slate-900 tracking-tight text-base sm:text-lg block leading-tight">RELAX THERAPY CRM</span>
-                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider">⏳ Vinculando servicio cloud...</span>
+                    <span id="sync-status" class="block text-[11px] font-bold text-amber-600 uppercase tracking-wider">⏳ Inicializando enlace cloud...</span>
                 </div>
             </div>
 
@@ -66,8 +66,8 @@
             <div class="flex items-center gap-2">
                 <i class="fa-solid fa-shield-halved text-emerald-600 text-sm shrink-0"></i>
                 <div>
-                    <strong class="text-slate-800 block">Autenticación Inyectada Fija v28</strong>
-                    <span class="text-slate-500 font-medium">Librería de datos Supabase migrada a espejo unpkg para evitar bloqueos de red corporativos o móviles.</span>
+                    <strong class="text-slate-800 block">Autenticación de Producción Blindada v28.5</strong>
+                    <span class="text-slate-500 font-medium">Resolución del espacio de nombres del objeto global de Supabase certificada para laptops y celulares.</span>
                 </div>
             </div>
         </div>
@@ -277,15 +277,16 @@
 
         function initSupabaseEngine() {
             try {
-                if (typeof supabase === 'undefined') {
-                    setTimeout(initSupabaseEngine, 300);
+                // Validación del objeto raíz e inicialización desestructurada obligatoria UMD
+                if (typeof supabase === 'undefined' || !supabase.supabase) {
+                    setTimeout(initSupabaseEngine, 200);
                     return;
                 }
-                supabaseClient = supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+                supabaseClient = supabase.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
                 loadDataFromCloud();
             } catch(e) {
-                console.error(e);
-                document.getElementById('sync-status').innerText = "⚠️ Error de tokens";
+                console.error("Falla crítica en inicialización: ", e);
+                document.getElementById('sync-status').innerText = "⚠️ Error de espacio de nombres";
             }
         }
 
@@ -316,7 +317,7 @@
                 }));
                 
                 status.className = "block text-[11px] font-bold text-emerald-600 uppercase tracking-wider";
-                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sincronizado Directo (${mainLeadsRegistry.length} Leads)`;
+                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sincronizado Directo Master (${mainLeadsRegistry.length} Leads)`;
                 renderApplicationCore();
             } catch(e) { 
                 console.error(e); 
