@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM - Cloud Stable v30.0</title>
+    <title>Relax Therapy CRM Cloud - Anti-Shift Premium v31.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -26,6 +26,8 @@
 </head>
 <body class="min-h-screen flex flex-col antialiased text-slate-800">
 
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full"></div>
+
     <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
         <div class="max-w-[1780px] mx-auto px-4 h-20 flex flex-col md:flex-row items-center justify-between gap-4 py-2">
             <div class="flex items-center gap-3">
@@ -35,7 +37,7 @@
                 <div>
                     <span class="font-extrabold text-slate-900 tracking-tight text-xl flex items-center gap-1.5">
                         RELAX THERAPY CRM
-                        <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">v30.0 Protegido</span>
+                        <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">v31.0 Auto-Alineado</span>
                     </span>
                     <span id="sync-status" class="block text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider"> Conectando...</span>
                 </div>
@@ -86,7 +88,7 @@
                             <th class="p-3 text-left">Asesora</th>
                             <th class="p-3">Contratado Total ($)</th>
                             <th class="p-3 bg-emerald-900 text-emerald-100">Cobrado en Mes ($)</th>
-                            <th class="p-3">Meta Fija</th>
+                            <th class="p-3">Meta Cobros</th>
                             <th class="p-3 w-60">Progreso</th>
                         </tr>
                     </thead>
@@ -99,7 +101,7 @@
     <section class="max-w-[1780px] w-full mx-auto px-4 mt-4">
         <div class="bg-white px-5 py-3 rounded-2xl border border-slate-200 flex justify-between items-center gap-4">
             <div class="flex items-center gap-2" id="managers-buttons-box"></div>
-            <input type="text" id="crm-search-bar" oninput="executeLiveSearch()" placeholder="Buscar paciente..." class="w-full md:w-96 p-2.5 text-xs bg-slate-50 border rounded-xl focus:outline-hidden">
+            <input type="text" id="crm-search-bar" oninput="executeLiveSearch()" placeholder="Buscar paciente por nombre o teléfono..." class="w-full md:w-96 p-2.5 text-xs bg-slate-50 border rounded-xl focus:outline-hidden">
         </div>
     </section>
 
@@ -220,8 +222,8 @@
             tabsRow.innerHTML = '';
             internalPhasesConfig.forEach(p => {
                 tabsRow.innerHTML += `
-                    <button onclick="switchMobileColumn('${p.id}')" id="tab-${p.id}" class="px-3 py-2 rounded-lg font-bold text-xs flex-shrink-0 bg-slate-100 text-slate-700">
-                        ${p.name.split(' ')[1] || p.name} <span id="badge-tab-${p.id}">0</span>
+                    <button onclick="switchMobileColumn('${p.id}')" id="tab-${p.id}" class="px-3 py-2 rounded-lg font-bold text-xs flex-shrink-0 bg-slate-100 text-slate-700 mr-1">
+                        ${p.name.split(' ')[1] || p.name} <span id="badge-tab-${p.id}" class="bg-white px-1 rounded-md text-[10px]">0</span>
                     </button>`;
             });
         }
@@ -238,30 +240,57 @@
 
         async function loadDataFromCloud() {
             if(!supabaseClient) return;
-            document.getElementById('sync-status').innerText = " Sincronizando...";
+            document.getElementById('sync-status').innerText = " Sincronizando Base de Datos...";
             try {
                 let { data, error } = await supabaseClient.from('pacientes_crm').select('*');
                 if(error) throw error;
                 mainLeadsRegistry = data.map(item => parseRowToLead(item));
-                document.getElementById('sync-status').innerText = ` Conectado con Servidor (${mainLeadsRegistry.length} Leads)`;
+                document.getElementById('sync-status').innerText = ` Conectado con Servidor Nube (${mainLeadsRegistry.length} Leads)`;
                 renderApplicationCore();
             } catch(e) { console.error(e); }
         }
 
         function parseRowToLead(item) {
+            let realName = String(item.name || '').trim();
+            let realPhone = String(item.phone || '').trim();
+            let realPhase = String(item.phase || 'frio').toLowerCase().trim();
+            let realValue = parseFloat(item.value) || 0;
+            let realDate = item.date ? String(item.date).trim() : '';
+            let realLoss = item.loss || 'Ninguno';
+            let realGestor = item.gestor || 'Brenda';
+
+            // DETECTOR DE FILAS DESALINEADAS EN BASE DE DATOS VIEJA
+            if (realPhase.startsWith('593') || realPhase.replace(/[^0-9]/g, '').length > 7) {
+                realName = String(item.phone || '').trim();
+                realPhone = String(item.phase || '').trim();
+                realPhase = String(item.value || 'frio').toLowerCase().trim();
+                realValue = parseFloat(item.date) || 0;
+                realDate = String(item.loss || '').trim();
+                realLoss = String(item.gestor || 'Ninguno').trim();
+                realGestor = String(item.a1 || 'Brenda').trim();
+            }
+
             let lead = {
-                id: parseInt(item.crm_id || item.id), name: String(item.name || ''), phone: String(item.phone || ''), 
-                phase: String(item.phase || 'frio').toLowerCase().trim(), value: parseFloat(item.value) || 0, 
-                date: item.date ? String(item.date).trim() : '', loss: item.loss || 'Ninguno', gestor: item.gestor || 'Brenda',
+                id: parseInt(item.crm_id || item.id), name: realName, phone: realPhone, 
+                phase: realPhase, value: realValue, date: realDate, loss: realLoss, gestor: realGestor,
                 touch: parseInt(item.touch) || 1, desc: '', abonos: [], bitacora: []
             };
+
             let obsVal = item.observaciones || item.desc || '';
             if (obsVal.trim().startsWith('{')) {
                 try {
                     let parsed = JSON.parse(obsVal);
                     lead.desc = parsed.desc || ''; lead.abonos = parsed.abonos || []; lead.bitacora = parsed.bitacora || [];
                 } catch (e) { lead.desc = obsVal; }
-            } else { lead.desc = obsVal; }
+            } else { 
+                lead.desc = obsVal; 
+                // Migrar abonos planos si no vienen en JSON estructurado
+                if (parseFloat(item.a1) > 0) lead.abonos.push({ monto: parseFloat(item.a1), fecha: lead.date, metodo: 'Abono 1' });
+                if (parseFloat(item.a2) > 0) lead.abonos.push({ monto: parseFloat(item.a2), fecha: lead.date, metodo: 'Abono 2' });
+                if (parseFloat(item.a3) > 0) lead.abonos.push({ monto: parseFloat(item.a3), fecha: lead.date, metodo: 'Abono 3' });
+                if (parseFloat(item.a4) > 0) lead.abonos.push({ monto: parseFloat(item.a4), fecha: lead.date, metodo: 'Abono 4' });
+                if (parseFloat(item.a5) > 0) lead.abonos.push({ monto: parseFloat(item.a5), fecha: lead.date, metodo: 'Abono 5' });
+            }
             return lead;
         }
 
@@ -307,9 +336,7 @@
                     lead.abonos.forEach(ab => {
                         if (ab.fecha && ab.fecha.includes('-')) {
                             let abMonth = parseInt(ab.fecha.split('-')[1]);
-                            if (abMonth >= 1 && abMonth <= 12) {
-                                colRealMesDistribution[abMonth - 1] += parseFloat(ab.monto) || 0;
-                            }
+                            if (abMonth >= 1 && abMonth <= 12) colRealMesDistribution[abMonth - 1] += parseFloat(ab.monto) || 0;
                         }
                     });
                 }
@@ -319,9 +346,7 @@
                     lead.abonos.forEach(ab => {
                         if (ab.fecha && ab.fecha.includes('-')) {
                             let abMonth = parseInt(ab.fecha.split('-')[1]);
-                            if (abMonth === selectedMonthInteractiveFilter) {
-                                totalCobradoEnMesSeleccionado += parseFloat(ab.monto) || 0;
-                            }
+                            if (abMonth === selectedMonthInteractiveFilter) totalCobradoEnMesSeleccionado += parseFloat(ab.monto) || 0;
                         }
                     });
                 }
@@ -334,10 +359,7 @@
                     leadMonth = parseInt(lead.date.split('-')[1]);
                 }
 
-                if (['frio', 'tibio', 'caliente', 'agenda'].includes(currentPhase)) {
-                    pipelineGlobalSum += valContrato;
-                }
-
+                if (['frio', 'tibio', 'caliente', 'agenda'].includes(currentPhase)) pipelineGlobalSum += valContrato;
                 if (currentPhase === 'agenda') totalAgendadosConteo++;
                 if (['venta', 'postventa'].includes(currentPhase)) totalVendidosConteo++;
                 totalLeadsConteo++;
@@ -353,7 +375,7 @@
                 }
 
                 if (belongsToView && (currentManagerFilter === 'all' || lead.gestor === currentManagerFilter) &&
-                    (activeSearchQuery === "" || lead.name.toLowerCase().includes(activeSearchQuery))) {
+                    (activeSearchQuery === "" || lead.name.toLowerCase().includes(activeSearchQuery) || lead.phone.includes(activeSearchQuery))) {
                     
                     phaseCounts[currentPhase]++;
 
@@ -361,16 +383,16 @@
                     card.className = `lead-card p-3 rounded-xl border bg-white shadow-2xs space-y-2 hover:shadow-md ${currentMobileColumn !== currentPhase ? 'hidden lg:block' : ''}`;
                     card.innerHTML = `
                         <div class="flex justify-between font-bold">
-                            <span onclick="openModal('edit', ${lead.id})" class="underline cursor-pointer text-indigo-600 font-extrabold">${lead.name}</span>
+                            <span onclick="openModal('edit', ${lead.id})" class="underline cursor-pointer text-indigo-600 font-extrabold text-[13px]">${lead.name}</span>
                             <span class="text-[9px] bg-slate-100 px-1.5 py-0.5 rounded">INT: ${lead.touch}</span>
                         </div>
-                        <p class="text-[10px] text-slate-500 truncate">${lead.desc || 'Sin comentarios'}</p>
+                        <p class="text-[11px] text-slate-500 font-medium">${lead.desc || 'Sin novedades'}</p>
                         <div class="text-[10px] font-bold flex justify-between bg-slate-50 p-1.5 rounded-lg border">
                             <span class="text-emerald-600">Cobrado: $${totalAbonadoHistorico.toFixed(2)}</span>
                             <span class="text-rose-600">Pend: $${saldoPendiente.toFixed(2)}</span>
                         </div>
                         <div class="flex justify-between items-center text-[10px] text-slate-400 font-bold pt-1 border-t">
-                            <span class="uppercase text-[9px]">${lead.gestor}</span>
+                            <span class="uppercase text-[9px] font-black">${lead.gestor}</span>
                             <a href="https://wa.me/${lead.phone.replace(/[^0-9]/g, '')}" target="_blank" class="bg-emerald-600 text-white px-2 py-0.5 rounded text-[9px] font-black">WhatsApp</a>
                         </div>`;
                     
@@ -384,10 +406,10 @@
             if (mContainer) {
                 mContainer.innerHTML = '';
                 monthsNames.forEach((mName, idx) => {
-                    let activeClass = (selectedMonthInteractiveFilter === (idx + 1)) ? 'border-indigo-600 bg-indigo-50 font-black' : 'border-slate-200 bg-white';
+                    let activeClass = (selectedMonthInteractiveFilter === (idx + 1)) ? 'border-indigo-600 bg-indigo-50 font-black ring-2 ring-indigo-500/10' : 'border-slate-200 bg-white';
                     mContainer.innerHTML += `
                         <div onclick="triggerMonthInteractiveFilter(${idx + 1})" class="p-2 rounded-xl border text-center cursor-pointer text-xs ${activeClass}">
-                            <span class="block uppercase text-slate-500 text-[10px]">${mName}</span>
+                            <span class="block uppercase text-slate-500 text-[9px] font-bold">${mName}</span>
                             <span class="block font-black text-emerald-600">$${colRealMesDistribution[idx].toFixed(0)}</span>
                         </div>`;
                 });
@@ -479,7 +501,6 @@
         function calcularFlujoAbonos() {
             let valTotal = parseFloat(document.getElementById('form-value').value) || 0;
             let totAbonado = currentModalAbonosList.reduce((sum, a) => sum + parseFloat(a.monto), 0);
-            document.getElementById('modal-total-abonado').innerText = `$${totAbonado.toFixed(2)}`;
             document.getElementById('modal-saldo-pendiente').innerText = `$${(valTotal - totAbonado).toFixed(2)}`;
         }
 
@@ -490,8 +511,7 @@
             });
         }
         function registerNewLog() {
-            const txt = document.getElementById('new-log-desc').value.trim();
-            if(txt === "") return;
+            const txt = document.getElementById('new-log-desc').value.trim(); if(txt === "") return;
             currentModalBitacoraList.unshift({ fecha: new Date().toLocaleString(), nota: txt });
             document.getElementById('new-log-desc').value = ""; renderModalBitacoraList();
         }
@@ -516,11 +536,45 @@
                 const data = new Uint8Array(e.target.result); const wb = XLSX.read(data, { type: 'array' });
                 const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
                 for(let row of rows) {
+                    let realId = parseInt(row.id || row.crm_id || Date.now() + Math.floor(Math.random()*1000));
+                    let realName = String(row.name || 'Paciente').trim();
+                    let realPhone = String(row.phone || '').trim();
+                    let realPhase = String(row.phase || 'frio').toLowerCase().trim();
+                    let realValue = parseFloat(row.value) || 0;
+                    let realDate = String(row.date || '').trim();
+                    let realLoss = String(row.loss || 'Ninguno').trim();
+                    let realGestor = String(row.gestor || 'Brenda').trim();
+                    let realTouch = parseInt(row.touch) || 1;
+                    let realDesc = String(row.desc || '').trim();
+                    let abonosArray = [];
+
+                    // AUTO-CORRECTOR DINÁMICO CONTRA DESPLAZAMIENTOS DE EXCEL
+                    if (realPhase.startsWith('593') || realPhase.replace(/[^0-9]/g, '').length > 7) {
+                        realName = String(row.phone || '').trim();
+                        realPhone = String(row.phase || '').trim();
+                        realPhase = String(row.value || 'frio').toLowerCase().trim();
+                        realValue = parseFloat(row.date) || 0;
+                        realDate = String(row.loss || '').trim();
+                        realLoss = String(row.gestor || 'Ninguno').trim();
+                        realGestor = String(row.a1 || 'Brenda').trim();
+                        
+                        if (parseFloat(row.a2) > 0) abonosArray.push({ monto: parseFloat(row.a2), fecha: realDate, metodo: 'Abono 1' });
+                        if (parseFloat(row.a3) > 0) abonosArray.push({ monto: parseFloat(row.a3), fecha: realDate, metodo: 'Abono 2' });
+                        if (parseFloat(row.a4) > 0) abonosArray.push({ monto: parseFloat(row.a4), fecha: realDate, metodo: 'Abono 3' });
+                    } else {
+                        if (parseFloat(row.a1) > 0) abonosArray.push({ monto: parseFloat(row.a1), fecha: realDate, metodo: 'Abono 1' });
+                        if (parseFloat(row.a2) > 0) abonosArray.push({ monto: parseFloat(row.a2), fecha: realDate, metodo: 'Abono 2' });
+                        if (parseFloat(row.a3) > 0) abonosArray.push({ monto: parseFloat(row.a3), fecha: realDate, metodo: 'Abono 3' });
+                    }
+
                     let payload = {
-                        id: parseInt(row.id || row.crm_id || Date.now() + Math.floor(Math.random()*1000)), name: String(row.name || 'Paciente').trim(), phone: String(row.phone || '').trim(), phase: String(row.phase || 'frio').toLowerCase().trim(), value: parseFloat(row.value || 0)||0, date: String(row.date || '').trim(), loss: String(row.loss || 'Ninguno').trim(), gestor: String(row.gestor || listadoGestores[0]).trim(), touch: parseInt(row.touch || 1)||1, desc: String(row.desc || '').trim(), abonos: [], bitacora: []
+                        id: realId, name: realName, phone: realPhone, phase: realPhase, value: realValue,
+                        date: realDate, loss: realLoss, gestor: realGestor, touch: realTouch, desc: realDesc,
+                        abonos: abonosArray, bitacora: realDesc ? [{ fecha: new Date().toLocaleString(), nota: realDesc }] : []
                     };
                     await saveLeadData(payload);
                 }
+                showToast("Base de datos importada y corregida al 100%");
             }; reader.readAsArrayBuffer(file);
         }
 
@@ -529,9 +583,8 @@
                 return { id: l.id, name: l.name, phone: l.phone, phase: l.phase, value: l.value, date: l.date, loss: l.loss, gestor: l.gestor, touch: l.touch, desc: l.desc }
             });
             let ws = XLSX.utils.json_to_sheet(outputRows); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Backup");
-            XLSX.writeFile(wb, `RelaxTherapy_CRM_v30.xlsx`);
+            XLSX.writeFile(wb, `RelaxTherapy_CRM_v31.xlsx`);
         }
-        function toggleConfigPanel() { document.getElementById('config-panel').classList.toggle('hidden'); }
     </script>
 </body>
 </html>
