@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM Cloud - v26.9 Mobile Responsive</title>
+    <title>Relax Therapy CRM Cloud - v27.0 Auto-Connect</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -31,7 +31,7 @@
                 </div>
                 <div>
                     <span class="font-black text-slate-900 tracking-tight text-base sm:text-lg block leading-tight">RELAX THERAPY CRM</span>
-                    <span id="sync-status" class="block text-[11px] font-bold text-amber-600 uppercase tracking-wider">⏳ Inicializando enlace cloud...</span>
+                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider">⏳ Verificando credenciales...</span>
                 </div>
             </div>
 
@@ -60,18 +60,17 @@
     </header>
 
     <section class="max-w-[1750px] w-full mx-auto px-4 lg:px-8 mt-4">
-        <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 text-xs">
+        <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 text-xs shadow-2xs">
             <div class="flex items-center gap-2">
-                <i class="fa-solid fa-key text-amber-600 text-sm shrink-0"></i>
+                <i class="fa-solid fa-shield-halved text-emerald-600 text-sm shrink-0"></i>
                 <div>
-                    <strong class="text-amber-900 block">Llaves de Conexión Comercial Supabase</strong>
-                    <span class="text-amber-700 font-medium">Actualiza las llaves aquí si la base cambia o falla la conexión móvil.</span>
+                    <strong class="text-slate-800 block">Autenticación Móvil Directa Activa</strong>
+                    <span class="text-slate-500 font-medium">Las llaves se cargan de forma transparente en el teléfono sin requerir ingreso de claves resumidas.</span>
                 </div>
             </div>
-            <div class="flex flex-col sm:flex-row items-center gap-2 w-full xl:w-auto">
-                <input type="text" id="db-url" placeholder="Supabase Project URL" class="w-full sm:w-64 px-3 h-9 bg-white border border-amber-300 rounded-lg font-mono text-[11px] focus:outline-hidden">
-                <input type="password" id="db-key" placeholder="Supabase Anon Key" class="w-full sm:w-64 px-3 h-9 bg-white border border-amber-300 rounded-lg font-mono text-[11px] focus:outline-hidden">
-                <button onclick="saveConnectionCredentials()" class="w-full sm:w-auto bg-amber-600 hover:bg-amber-700 text-white font-bold h-9 px-4 rounded-lg transition-all whitespace-nowrap">Actualizar Enlace</button>
+            <div class="flex flex-col sm:flex-row items-center gap-2 w-full xl:w-auto hidden">
+                <input type="text" id="db-url" class="hidden">
+                <input type="password" id="db-key" class="hidden">
             </div>
         </div>
     </section>
@@ -252,8 +251,9 @@
     </div>
 
     <script>
-        const DEFAULT_URL = "https://eqhsgpwoehcryhmibfhn.supabase.co";
-        const DEFAULT_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxaHNncHdvZWhjcnlobWliZmhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5NjQzMDAsImV4cCI6MjEwMjU0MDMwMH0.7a92b2-4c87-8143-2fed1056cc25";
+        // CONFIGURACIÓN INDESTRUCTIBLE DIRECTA
+        const SUPABASE_PROJECT_URL = "https://eqhsgpwoehcryhmibfhn.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxaHNncHdvZWhjcnlobWliZmhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5NjQzMDAsImV4cCI6MjEwMjU0MDMwMH0.7a92b2-4c87-8143-2fed1056cc25";
 
         let supabaseClient = null;
         const liveClock = new Date();
@@ -279,29 +279,14 @@
         };
 
         function initSupabaseEngine() {
-            let activeUrl = localStorage.getItem('relax_supabase_url') || DEFAULT_URL;
-            let activeKey = localStorage.getItem('relax_supabase_key') || DEFAULT_KEY;
-            
-            document.getElementById('db-url').value = activeUrl;
-            document.getElementById('db-key').value = activeKey;
-            
             try {
-                supabaseClient = supabase.createClient(activeUrl, activeKey);
+                // Forzado de conexión directa automática sin almacenamiento local intermedio
+                supabaseClient = supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
                 loadDataFromCloud();
             } catch(e) {
                 console.error(e);
-                document.getElementById('sync-status').innerText = "⚠️ Error de credenciales";
+                document.getElementById('sync-status').innerText = "⚠️ Error de tokens";
             }
-        }
-
-        function saveConnectionCredentials() {
-            let u = document.getElementById('db-url').value.trim();
-            let k = document.getElementById('db-key').value.trim();
-            if(!u || !k) { alert("Inserte credenciales válidas."); return; }
-            localStorage.setItem('relax_supabase_url', u);
-            localStorage.setItem('relax_supabase_key', k);
-            alert("Enlace Guardado con Éxito.");
-            location.reload();
         }
 
         async function loadDataFromCloud() {
@@ -331,12 +316,12 @@
                 }));
                 
                 status.className = "block text-[11px] font-bold text-emerald-600 uppercase tracking-wider";
-                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sincronizado (${mainLeadsRegistry.length} Leads)`;
+                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sincronizado Súper Móvil (${mainLeadsRegistry.length} Leads)`;
                 renderApplicationCore();
             } catch(e) { 
                 console.error(e); 
                 status.className = "block text-[11px] font-bold text-rose-600 uppercase tracking-wider";
-                status.innerHTML = `⚠️ Token Expirado o Error de Red Cloud`;
+                status.innerHTML = `⚠️ Error de red comercial cloud`;
             }
         }
 
