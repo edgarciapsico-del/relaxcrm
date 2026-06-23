@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM Cloud - Premium v29.2 Final Stable</title>
+    <title>Relax Therapy CRM - Cloud Stable v30.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -15,127 +15,79 @@
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
-        
-        :root {
-            --brand-primary: #4f46e5;
-            --bg-main: #f8fafc;
-        }
+        :root { --brand-primary: #4f46e5; --bg-main: #f8fafc; }
         body { font-family: 'Outfit', sans-serif; background-color: var(--bg-main); }
-        .kanban-column { min-width: 310px; max-width: 360px; transition: all 0.2s ease; }
-        .kanban-column.drag-over { background-color: rgba(79, 70, 229, 0.08) !important; border: 2px dashed var(--brand-primary) !important; }
+        .kanban-column { min-width: 310px; max-width: 360px; flex-shrink: 0; }
         .lead-card { cursor: grab; transition: all 0.2s ease; }
         .scrollbar-custom::-webkit-scrollbar { height: 8px; width: 6px; }
         .scrollbar-custom::-webkit-scrollbar-track { background: #f1f5f9; }
         .scrollbar-custom::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
-        @keyframes slideIn { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .animate-fade-in { animation: slideIn 0.25s ease forwards; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased text-slate-800">
 
-    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full"></div>
-
     <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
-        <div class="max-w-[1780px] mx-auto px-4 lg:px-8 h-20 flex flex-col md:flex-row items-center justify-between gap-4 py-2">
+        <div class="max-w-[1780px] mx-auto px-4 h-20 flex flex-col md:flex-row items-center justify-between gap-4 py-2">
             <div class="flex items-center gap-3">
-                <div class="w-11 h-11 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-600/25">
-                    <i class="fa-solid fa-cloud text-xl animate-pulse"></i>
+                <div class="w-11 h-11 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                    <i class="fa-solid fa-cloud text-xl"></i>
                 </div>
                 <div>
                     <span class="font-extrabold text-slate-900 tracking-tight text-xl flex items-center gap-1.5">
                         RELAX THERAPY CRM
-                        <span class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-bold">v29.2 Stable</span>
+                        <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">v30.0 Protegido</span>
                     </span>
-                    <span id="sync-status" class="block text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider">
-                        <i class="fa-solid fa-circle-notch fa-spin"></i> Conectando al servidor...
-                    </span>
+                    <span id="sync-status" class="block text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider"> Conectando...</span>
                 </div>
             </div>
 
             <div class="flex flex-wrap items-center gap-2 text-xs">
-                <div class="px-3 h-10 rounded-xl font-bold flex items-center gap-2 border bg-emerald-50 text-emerald-700 shadow-2xs">
-                    <i class="fa-solid fa-cloud"></i>
-                    <span>Nube Conectada</span>
-                </div>
-
-                <button onclick="toggleConfigPanel()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 h-10 rounded-xl font-bold flex items-center gap-1.5 border transition-all">
-                    <i class="fa-solid fa-sliders text-indigo-600"></i> Metas Asesoras
-                </button>
-                
-                <div class="flex items-center gap-2 bg-slate-50 border px-3 h-10 rounded-xl border-slate-200 shadow-2xs">
+                <div class="flex items-center gap-2 bg-slate-50 border px-3 h-10 rounded-xl">
                     <i class="fa-solid fa-file-excel text-emerald-600 font-bold text-sm"></i>
                     <input type="file" id="file-uploader" accept=".xlsx,.xls,.csv" onchange="importDataEngine(event)" class="w-40 text-slate-600 text-[11px] cursor-pointer focus:outline-hidden">
                 </div>
-                
-                <button onclick="loadDataFromCloud()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 h-10 rounded-xl font-bold flex items-center gap-1.5 transition-all">
-                    <i class="fa-solid fa-arrows-rotate"></i> Sincronizar
-                </button>
-                
-                <button onclick="exportBackupExcel()" class="bg-slate-700 hover:bg-slate-800 text-white px-3.5 h-10 rounded-xl font-bold flex items-center gap-1.5 transition-all">
-                    <i class="fa-solid fa-file-arrow-down"></i> Exportar Excel
-                </button>
-                
-                <button onclick="openModal('create')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 h-10 rounded-xl font-extrabold transition-all">
-                    <i class="fa-solid fa-plus mr-1"></i> Registrar Lead
-                </button>
+                <button onclick="loadDataFromCloud()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 h-10 rounded-xl font-bold transition-all">Sincronizar</button>
+                <button onclick="exportBackupExcel()" class="bg-slate-700 hover:bg-slate-800 text-white px-3.5 h-10 rounded-xl font-bold transition-all">Exportar Excel</button>
+                <button onclick="openModal('create')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 h-10 rounded-xl font-extrabold transition-all">+ Registrar Lead</button>
             </div>
         </div>
     </header>
 
-    <section id="config-panel" class="max-w-[1780px] w-full mx-auto px-4 lg:px-8 mt-4 hidden animate-fade-in">
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-            <h3 class="text-base font-extrabold text-slate-900"><i class="fa-solid fa-user-gear text-indigo-600"></i> Control Operativo de Presupuestos</h3>
-            <div class="overflow-y-auto max-h-[170px] scrollbar-custom" id="advisers-config-list"></div>
-        </div>
-    </section>
-
-    <section class="max-w-[1780px] w-full mx-auto px-4 lg:px-8 mt-4">
+    <section class="max-w-[1780px] w-full mx-auto px-4 mt-4">
         <div class="bg-white p-6 rounded-2xl border border-slate-200 space-y-6 shadow-xs">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Pipeline Activa Acumulada</span>
+                    <span class="text-[10px] font-black text-slate-400 uppercase">Pipeline Activa Acumulada</span>
                     <h3 id="kpi-pipeline" class="text-2xl font-black text-slate-900 mt-1">$0.00</h3>
-                    <p class="text-[10px] text-slate-400 font-bold mt-1">Valor de leads en seguimiento</p>
                 </div>
                 <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
-                    <span class="text-[10px] font-black text-emerald-600 uppercase tracking-wider">Cobrado Real Mes</span>
+                    <span class="text-[10px] font-black text-emerald-600 uppercase">Cobrado Real Mes</span>
                     <h3 id="kpi-sales" class="text-2xl font-black text-emerald-700 mt-1">$0.00</h3>
-                    <p class="text-[10px] text-emerald-500 font-bold mt-1">Cobranzas efectivas realizadas</p>
                 </div>
                 <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
-                    <span class="text-[10px] font-black text-blue-600 uppercase tracking-wider">Tasa Agendamiento</span>
+                    <span class="text-[10px] font-black text-blue-600 uppercase">Tasa Agendamiento</span>
                     <h3 id="kpi-scheduling-rate" class="text-2xl font-black text-blue-700 mt-1">0%</h3>
-                    <p id="sub-kpi-agendas" class="text-[10px] text-blue-500 font-bold mt-1">Citas agendadas totales</p>
                 </div>
                 <div class="bg-violet-50 p-4 rounded-xl border border-violet-100">
-                    <span class="text-[10px] font-black text-violet-600 uppercase tracking-wider">Efectividad de Venta</span>
+                    <span class="text-[10px] font-black text-violet-600 uppercase">Efectividad de Venta</span>
                     <h3 id="kpi-conversion" class="text-2xl font-black text-violet-700 mt-1">0%</h3>
-                    <p id="sub-kpi-cierres" class="text-[10px] text-violet-500 font-bold mt-1">Conversión comercial real</p>
-                </div>
-                <div class="bg-fuchsia-50 p-4 rounded-xl border border-fuchsia-100">
-                    <span class="text-[10px] font-black text-fuchsia-600 uppercase tracking-wider">Gestiones en Bitácora</span>
-                    <h3 id="kpi-alerts" class="text-2xl font-black text-fuchsia-700 mt-1">0</h3>
-                    <p class="text-[10px] text-fuchsia-500 font-bold mt-1">Interacciones guardadas hoy</p>
                 </div>
             </div>
 
             <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
-                <div class="flex items-center justify-between border-b pb-1.5">
-                    <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider">Filtro Dinámico de Cobranzas por Mes</h4>
-                    <span class="text-[10px] text-indigo-600 font-bold uppercase">Haz clic en un mes para evaluar cobros y efectividad de asesoras</span>
-                </div>
+                <span class="text-xs font-black text-slate-700 uppercase">Filtro de Cobranzas por Mes</span>
                 <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-12 gap-3" id="months-grid-container"></div>
             </div>
 
             <div class="overflow-x-auto rounded-xl border">
-                <table class="w-full text-left border-collapse bg-white text-xs">
+                <table class="w-full text-xs text-left bg-white border-collapse">
                     <thead>
                         <tr class="bg-slate-800 text-white font-bold text-center">
                             <th class="p-3 text-left">Asesora</th>
                             <th class="p-3">Contratado Total ($)</th>
-                            <th class="p-3 bg-emerald-900 text-emerald-100">Cobrado en Mes Seleccionado ($)</th>
-                            <th class="p-3">Meta Cobros Mensual</th>
-                            <th class="p-3 w-60">Progreso de Cobranza</th>
+                            <th class="p-3 bg-emerald-900 text-emerald-100">Cobrado en Mes ($)</th>
+                            <th class="p-3">Meta Fija</th>
+                            <th class="p-3 w-60">Progreso</th>
                         </tr>
                     </thead>
                     <tbody id="goals-table-body" class="text-center divide-y font-medium"></tbody>
@@ -144,13 +96,10 @@
         </div>
     </section>
 
-    <section class="max-w-[1780px] w-full mx-auto px-4 lg:px-8 mt-4">
-        <div class="bg-white px-5 py-3 rounded-2xl border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div class="flex flex-wrap items-center gap-2" id="managers-buttons-box"></div>
-            <div class="relative w-full md:w-96">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400"><i class="fa-solid fa-magnifying-glass text-xs"></i></span>
-                <input type="text" id="crm-search-bar" oninput="executeLiveSearch()" placeholder="Buscar paciente por nombre o número..." class="w-full pl-9 pr-4 h-11 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:bg-white focus:border-indigo-500 transition-all">
-            </div>
+    <section class="max-w-[1780px] w-full mx-auto px-4 mt-4">
+        <div class="bg-white px-5 py-3 rounded-2xl border border-slate-200 flex justify-between items-center gap-4">
+            <div class="flex items-center gap-2" id="managers-buttons-box"></div>
+            <input type="text" id="crm-search-bar" oninput="executeLiveSearch()" placeholder="Buscar paciente..." class="w-full md:w-96 p-2.5 text-xs bg-slate-50 border rounded-xl focus:outline-hidden">
         </div>
     </section>
 
@@ -158,68 +107,60 @@
         <div class="bg-white p-2 rounded-xl border flex overflow-x-auto gap-1 scrollbar-custom" id="mobile-tabs-row"></div>
     </section>
 
-    <main class="flex-1 max-w-[1780px] w-full mx-auto px-4 lg:px-8 py-4 overflow-x-auto">
+    <main class="flex-1 max-w-[1780px] w-full mx-auto px-4 py-4 overflow-x-auto">
         <div class="flex gap-4 pb-6 items-start scrollbar-custom" id="kanban-board-row"></div>
     </main>
 
-    <div id="lead-modal" class="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-50 flex items-center justify-center hidden">
-        <div class="bg-white rounded-2xl w-full max-w-4xl p-6 shadow-2xl border mx-4 max-h-[92vh] overflow-y-auto scrollbar-custom animate-fade-in">
+    <div id="lead-modal" class="fixed inset-0 bg-slate-950/50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl w-full max-w-4xl p-6 border mx-4 max-h-[92vh] overflow-y-auto scrollbar-custom">
             <div class="flex items-center justify-between mb-4 border-b pb-2">
-                <h3 id="modal-title" class="text-sm font-black uppercase text-slate-800">Ficha del Paciente</h3>
+                <h3 class="text-sm font-bold uppercase">Ficha del Paciente</h3>
                 <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             
             <form id="crm-form" onsubmit="handleFormSubmit(event)" class="space-y-4 text-xs">
                 <input type="hidden" id="form-id">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div><label class="block font-bold text-slate-500 mb-1">Nombre Completo</label><input type="text" id="form-name" required class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-medium focus:outline-hidden"></div>
-                    <div><label class="block font-bold text-slate-500 mb-1">WhatsApp</label><input type="text" id="form-phone" required class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-medium focus:outline-hidden"></div>
-                    <div><label class="block font-bold text-slate-500 mb-1">Fecha Registro</label><input type="date" id="form-date" required class="w-full px-3 h-10 bg-slate-50 border rounded-xl font-medium focus:outline-hidden"></div>
+                    <div><label class="block font-bold text-slate-500 mb-1">Nombre</label><input type="text" id="form-name" required class="w-full px-3 h-10 bg-slate-50 border rounded-xl focus:outline-hidden"></div>
+                    <div><label class="block font-bold text-slate-500 mb-1">WhatsApp</label><input type="text" id="form-phone" required class="w-full px-3 h-10 bg-slate-50 border rounded-xl focus:outline-hidden"></div>
+                    <div><label class="block font-bold text-slate-500 mb-1">Fecha Registro</label><input type="date" id="form-date" required class="w-full px-3 h-10 bg-slate-50 border rounded-xl focus:outline-hidden"></div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-indigo-50/40 p-4 rounded-xl border">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-xl border">
                     <div><label class="block font-bold mb-1">Estado Pipeline</label><select id="form-phase" class="w-full px-2 h-10 bg-white border rounded-xl font-bold"><option value="frio">❄️ Frío</option><option value="tibio">🔥 Tibio</option><option value="caliente">💥 Caliente</option><option value="agenda">📅 Agenda Cita</option><option value="venta">💰 Venta Cerrada</option><option value="postventa">🤝 Post Venta</option></select></div>
-                    <div><label class="block font-bold mb-1">Valor Contrato ($)</label><input type="number" id="form-value" step="0.01" oninput="calcularFlujoAbonos()" class="w-full px-3 h-10 bg-white border rounded-xl font-extrabold text-indigo-600"></div>
+                    <div><label class="block font-bold mb-1">Valor Contrato ($)</label><input type="number" id="form-value" step="0.01" class="w-full px-3 h-10 bg-white border rounded-xl font-bold"></div>
                     <div><label class="block font-bold mb-1">Asesora</label><select id="form-gestor" class="w-full px-2 h-10 bg-white border rounded-xl font-semibold"></select></div>
-                    <div><label class="block font-bold mb-1">Descarte</label><select id="form-loss" class="w-full px-2 h-10 bg-white border rounded-xl font-bold text-rose-700"><option value="Ninguno">Ninguno (Activo)</option><option value="Fuera de la ciudad">Fuera de la ciudad</option><option value="No le interesa">No le interesa</option><option value="Precios">Precios elevados</option></select></div>
+                    <div><label class="block font-bold mb-1">Descarte</label><select id="form-loss" class="w-full px-2 h-10 bg-white border rounded-xl"><option value="Ninguno">Ninguno</option><option value="No responde">No responde</option><option value="No le interesa">No le interesa</option></select></div>
                 </div>
 
                 <div class="bg-slate-50 p-4 rounded-xl border space-y-3">
-                    <span class="block font-black text-slate-800 uppercase tracking-wider"><i class="fa-solid fa-wallet text-emerald-600"></i> Historial Colectado de Abonos (Cobranzas)</span>
+                    <span class="block font-bold text-slate-700 uppercase">Historial de Cobranzas (Abonos)</span>
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-2 bg-white p-3 rounded-xl border items-end">
-                        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Monto ($)</label><input type="number" id="new-abono-monto" step="0.01" class="w-full px-2 h-8 bg-slate-50 border rounded-md font-bold"></div>
-                        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Fecha Cobro</label><input type="date" id="new-abono-fecha" class="w-full px-2 h-8 bg-slate-50 border rounded-md"></div>
-                        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Método</label><select id="new-abono-metodo" class="w-full px-2 h-8 bg-slate-50 border rounded-md"><option value="Efectivo">Efectivo</option><option value="Transferencia">Transferencia</option><option value="Tarjeta">Tarjeta de Crédito</option></select></div>
-                        <button type="button" onclick="addNewAbonoRecord()" class="bg-emerald-600 text-white h-8 rounded-md font-bold text-xs">+ Registrar Cobro</button>
+                        <div><label class="block text-[10px] font-bold">Monto ($)</label><input type="number" id="new-abono-monto" step="0.01" class="w-full px-2 h-8 bg-slate-50 border rounded-md"></div>
+                        <div><label class="block text-[10px] font-bold">Fecha Cobro</label><input type="date" id="new-abono-fecha" class="w-full px-2 h-8 bg-slate-50 border rounded-md"></div>
+                        <div><label class="block text-[10px] font-bold">Método</label><select id="new-abono-metodo" class="w-full px-2 h-8 bg-slate-50 border rounded-md"><option value="Transferencia">Transferencia</option><option value="Efectivo">Efectivo</option></select></div>
+                        <button type="button" onclick="addNewAbonoRecord()" class="bg-emerald-600 text-white h-8 rounded-md font-bold text-xs">+ Registrar Pago</button>
                     </div>
                     <div class="overflow-x-auto max-h-[120px] border rounded-lg bg-white">
-                        <table class="w-full text-[11px] text-left"><thead class="bg-slate-100 text-center font-bold"><tr><th class="p-2 text-left">Fecha Cobro</th><th class="p-2">Método</th><th class="p-2">Monto</th><th class="p-2 w-12"></th></tr></thead><tbody id="modal-abonos-list-rows" class="divide-y text-center font-semibold"></tbody></table>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4 text-center font-bold">
-                        <div class="bg-emerald-50 p-2 rounded-lg text-emerald-800 text-[11px]">Total Colectado: <strong id="modal-total-abonado">$0.00</strong></div>
-                        <div class="bg-rose-50 p-2 rounded-lg text-rose-800 text-[11px]">Saldo Pendiente: <strong id="modal-saldo-pendiente">$0.00</strong></div>
+                        <table class="w-full text-[11px] text-left"><thead class="bg-slate-100 text-center font-bold"><tr><th class="p-2">Fecha</th><th class="p-2">Método</th><th class="p-2">Monto</th><th class="p-2"></th></tr></thead><tbody id="modal-abonos-list-rows" class="divide-y text-center"></tbody></table>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <div class="bg-slate-50 p-4 rounded-xl border space-y-2">
-                        <span class="block font-black text-slate-800 uppercase tracking-wider">Añadir Gestión / Comentario</span>
-                        <textarea id="new-log-desc" rows="3" placeholder="Añadir comentarios sobre la llamada o estado del paciente..." class="w-full p-2.5 bg-white border rounded-xl focus:outline-hidden"></textarea>
-                        <div class="grid grid-cols-2 gap-2">
-                            <select id="new-log-resultado" class="w-full h-9 bg-white border rounded-xl"><option value="Interesado">Interesado</option><option value="Llamar Luego">Llamar Luego</option><option value="No contestó">No contestó</option><option value="Cita Agendada">Cita Agendada</option><option value="Vendido">Vendido</option></select>
-                            <div class="flex items-center gap-2"><input type="number" id="form-touch" value="1" class="w-16 h-9 bg-white border rounded-xl text-center font-bold"><span class="text-[10px] text-slate-400 font-bold">Contactos</span></div>
-                        </div>
-                        <button type="button" onclick="registerNewLog()" class="w-full bg-indigo-600 text-white h-9 rounded-xl font-bold">Registrar Gestión</button>
+                        <span class="block font-bold text-slate-700 uppercase">Nueva Gestión</span>
+                        <textarea id="new-log-desc" rows="3" class="w-full p-2 bg-white border rounded-xl focus:outline-hidden"></textarea>
+                        <button type="button" onclick="registerNewLog()" class="w-full bg-indigo-600 text-white h-9 rounded-xl font-bold">Guardar Nota</button>
                     </div>
-                    <div class="bg-slate-50 p-4 rounded-xl border flex flex-col h-[230px]">
-                        <span class="block font-black text-slate-800 uppercase tracking-wider mb-2">Bitácora de Contactos</span>
-                        <div class="flex-1 overflow-y-auto space-y-2.5 pr-1 scrollbar-custom" id="modal-bitacora-timeline"></div>
+                    <div class="bg-slate-50 p-4 rounded-xl border flex flex-col h-[200px]">
+                        <span class="block font-bold text-slate-700 uppercase mb-2">Bitácora</span>
+                        <div class="flex-1 overflow-y-auto space-y-2 pr-1 scrollbar-custom" id="modal-bitacora-timeline"></div>
                     </div>
                 </div>
 
                 <div class="pt-3 flex justify-end gap-2 border-t">
                     <button type="button" onclick="closeModal()" class="font-bold text-slate-500 px-4">Cancelar</button>
-                    <button type="submit" class="px-6 h-11 bg-indigo-600 text-white font-extrabold rounded-xl shadow-md">Guardar Cambios</button>
+                    <button type="submit" class="px-6 h-11 bg-indigo-600 text-white font-extrabold rounded-xl shadow-md">Guardar Todo</button>
                 </div>
             </form>
         </div>
@@ -262,37 +203,27 @@
         };
 
         function renderStructureHTML() {
-            const boardRow = document.getElementById('kanban-board-row');
+            const boardRow = document.getElementById('kanban-board-row'); if(!boardRow) return;
             boardRow.innerHTML = '';
             internalPhasesConfig.forEach(p => {
                 boardRow.innerHTML += `
-                    <div id="column-container-${p.id}" class="kanban-column bg-slate-100 p-3.5 rounded-2xl flex flex-col flex-shrink-0 min-h-[550px] border border-slate-200"
-                         ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event, '${p.id}')" ondragleave="handleDragLeave(event, '${p.id}')" ondrop="handleDrop(event, '${p.id}')">
-                        <div class="flex items-center justify-between mb-3 px-1 font-extrabold text-xs uppercase text-slate-600">
-                            <span class="flex items-center gap-1.5"><i class="fa-solid ${p.icon}"></i> ${p.name}</span>
-                            <span id="b-${p.id}" class="bg-white text-slate-600 px-2 py-0.5 rounded-md border shadow-2xs">0</span>
+                    <div id="column-container-${p.id}" class="kanban-column bg-slate-100 p-3.5 rounded-2xl flex flex-col min-h-[500px] border border-slate-200">
+                        <div class="flex items-center justify-between mb-3 font-extrabold text-xs uppercase text-slate-600">
+                            <span><i class="fa-solid ${p.icon}"></i> ${p.name}</span>
+                            <span id="b-${p.id}" class="bg-white text-slate-600 px-2 py-0.5 rounded-md border">0</span>
                         </div>
-                        <div id="col-${p.id}" class="space-y-3 flex-grow overflow-y-auto max-h-[580px] scrollbar-custom pb-4"></div>
+                        <div id="col-${p.id}" class="space-y-3 flex-grow overflow-y-auto max-h-[550px] scrollbar-custom pb-4"></div>
                     </div>`;
             });
 
-            const tabsRow = document.getElementById('mobile-tabs-row');
+            const tabsRow = document.getElementById('mobile-tabs-row'); if(!tabsRow) return;
             tabsRow.innerHTML = '';
             internalPhasesConfig.forEach(p => {
                 tabsRow.innerHTML += `
-                    <button onclick="switchMobileColumn('${p.id}')" id="tab-${p.id}" class="px-3 py-2 rounded-lg font-bold text-xs flex-shrink-0 bg-slate-100 text-slate-700 flex items-center gap-1">
-                        ${p.name.split(' ')[1] || p.name} <span id="badge-tab-${p.id}" class="bg-white px-1.5 py-0.5 rounded-full text-[9px] border">0</span>
+                    <button onclick="switchMobileColumn('${p.id}')" id="tab-${p.id}" class="px-3 py-2 rounded-lg font-bold text-xs flex-shrink-0 bg-slate-100 text-slate-700">
+                        ${p.name.split(' ')[1] || p.name} <span id="badge-tab-${p.id}">0</span>
                     </button>`;
             });
-        }
-
-        function showToast(message) {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `p-3.5 rounded-xl border text-xs font-bold shadow-md bg-white border-slate-200 flex items-center justify-between animate-fade-in`;
-            toast.innerHTML = `<span class="text-slate-800">${message}</span>`;
-            container.appendChild(toast);
-            setTimeout(() => { toast.remove(); }, 3000);
         }
 
         function initAutoSyncEngine() {
@@ -302,19 +233,17 @@
             try {
                 supabaseClient = window.supabase.createClient(DB_CLOUD_URL, DB_CLOUD_KEY);
                 loadDataFromCloud();
-            } catch(e) {
-                document.getElementById('sync-status').innerHTML = `⚠️ Fallo de Conexión`;
-            }
+            } catch(e) { console.error(e); }
         }
 
         async function loadDataFromCloud() {
             if(!supabaseClient) return;
-            document.getElementById('sync-status').innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-indigo-600"></i> Sincronizando...`;
+            document.getElementById('sync-status').innerText = " Sincronizando...";
             try {
                 let { data, error } = await supabaseClient.from('pacientes_crm').select('*');
                 if(error) throw error;
                 mainLeadsRegistry = data.map(item => parseRowToLead(item));
-                document.getElementById('sync-status').innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> Conectado con Servidor (${mainLeadsRegistry.length} Leads)`;
+                document.getElementById('sync-status').innerText = ` Conectado con Servidor (${mainLeadsRegistry.length} Leads)`;
                 renderApplicationCore();
             } catch(e) { console.error(e); }
         }
@@ -356,39 +285,18 @@
             renderApplicationCore();
         }
 
-        function handleDragStart(e, id) { e.dataTransfer.setData("text/plain", id); }
-        function handleDragOver(e) { e.preventDefault(); }
-        function handleDragEnter(e, columnId) { document.getElementById(`column-container-${columnId}`).classList.add('drag-over'); }
-        function handleDragLeave(e, columnId) { document.getElementById(`column-container-${columnId}`).classList.remove('drag-over'); }
-        async function handleDrop(e, targetPhase) {
-            e.preventDefault();
-            document.getElementById(`column-container-${targetPhase}`).classList.remove('drag-over');
-            const id = e.dataTransfer.getData("text/plain"); if (!id) return;
-            const lead = mainLeadsRegistry.find(l => l.id === parseInt(id));
-            if (lead && lead.phase !== targetPhase) {
-                lead.phase = targetPhase;
-                lead.bitacora.unshift({ fecha: new Date().toLocaleString(), asesora: "Sistema", nota: `Movido a [${targetPhase.toUpperCase()}]` });
-                await saveLeadData(lead);
-            }
-        }
-
         function renderApplicationCore() {
             let pipelineGlobalSum = 0; 
-            let todayAlertsCount = 0;
-            let totalLeadsConteo = 0;
-            let totalAgendadosConteo = 0;
-            let totalVendidosConteo = 0;
-
+            let totalLeadsConteo = 0; let totalAgendadosConteo = 0; let totalVendidosConteo = 0;
             let phaseCounts = { frio: 0, tibio: 0, caliente: 0, agenda: 0, venta: 0, postventa: 0 };
-            let gestoresSalesMes = {}; 
-            let gestoresContractedTotal = {};
             
+            let gestoresSalesMes = {}; let gestoresContractedTotal = {};
             listadoGestores.forEach(g => { gestoresSalesMes[g] = 0; gestoresContractedTotal[g] = 0; });
+            
             let colRealMesDistribution = Array.from({ length: 12 }, () => 0);
 
             internalPhasesConfig.forEach(p => {
-                const element = document.getElementById(`col-${p.id}`);
-                if (element) element.innerHTML = '';
+                const el = document.getElementById(`col-${p.id}`); if(el) el.innerHTML = '';
             });
 
             mainLeadsRegistry.forEach(lead => {
@@ -439,16 +347,13 @@
                     belongsToView = (leadMonth === selectedMonthInteractiveFilter);
                 }
 
-                let isToday = lead.bitacora && lead.bitacora.some(log => log.fecha && log.fecha.includes(new Date().toLocaleDateString()));
-                if (isToday) todayAlertsCount++;
-
                 if (gestoresSalesMes[lead.gestor] !== undefined) {
                     gestoresSalesMes[lead.gestor] += totalCobradoEnMesSeleccionado;
                     gestoresContractedTotal[lead.gestor] += valContrato;
                 }
 
                 if (belongsToView && (currentManagerFilter === 'all' || lead.gestor === currentManagerFilter) &&
-                    (activeSearchQuery === "" || lead.name.toLowerCase().includes(activeSearchQuery) || lead.phone.includes(activeSearchQuery))) {
+                    (activeSearchQuery === "" || lead.name.toLowerCase().includes(activeSearchQuery))) {
                     
                     phaseCounts[currentPhase]++;
 
@@ -457,15 +362,15 @@
                     card.innerHTML = `
                         <div class="flex justify-between font-bold">
                             <span onclick="openModal('edit', ${lead.id})" class="underline cursor-pointer text-indigo-600 font-extrabold">${lead.name}</span>
-                            <span class="text-[9px] bg-slate-100 px-1.5 py-0.5 rounded font-black">INT: ${lead.touch}</span>
+                            <span class="text-[9px] bg-slate-100 px-1.5 py-0.5 rounded">INT: ${lead.touch}</span>
                         </div>
-                        <p class="text-[10px] text-slate-500 truncate">${lead.desc || 'Sin comentarios recientes'}</p>
+                        <p class="text-[10px] text-slate-500 truncate">${lead.desc || 'Sin comentarios'}</p>
                         <div class="text-[10px] font-bold flex justify-between bg-slate-50 p-1.5 rounded-lg border">
                             <span class="text-emerald-600">Cobrado: $${totalAbonadoHistorico.toFixed(2)}</span>
                             <span class="text-rose-600">Pend: $${saldoPendiente.toFixed(2)}</span>
                         </div>
                         <div class="flex justify-between items-center text-[10px] text-slate-400 font-bold pt-1 border-t">
-                            <span class="uppercase text-[9px]"><i class="fa-solid fa-circle-user text-slate-300"></i> ${lead.gestor}</span>
+                            <span class="uppercase text-[9px]">${lead.gestor}</span>
                             <a href="https://wa.me/${lead.phone.replace(/[^0-9]/g, '')}" target="_blank" class="bg-emerald-600 text-white px-2 py-0.5 rounded text-[9px] font-black">WhatsApp</a>
                         </div>`;
                     
@@ -474,19 +379,21 @@
                 }
             });
 
+            // Pintar Grid Mensual
             const mContainer = document.getElementById('months-grid-container'); 
             if (mContainer) {
                 mContainer.innerHTML = '';
                 monthsNames.forEach((mName, idx) => {
-                    let activeClass = (selectedMonthInteractiveFilter === (idx + 1)) ? 'border-indigo-600 bg-indigo-50 font-black ring-2 ring-indigo-600/10' : 'border-slate-200 bg-white';
+                    let activeClass = (selectedMonthInteractiveFilter === (idx + 1)) ? 'border-indigo-600 bg-indigo-50 font-black' : 'border-slate-200 bg-white';
                     mContainer.innerHTML += `
-                        <div onclick="triggerMonthInteractiveFilter(${idx + 1})" class="p-2 rounded-xl border text-center cursor-pointer transition-all ${activeClass}">
-                            <span class="block text-[10px] font-bold uppercase text-slate-500">${mName}</span>
-                            <span class="block text-[11px] font-black text-emerald-600">$${colRealMesDistribution[idx].toFixed(0)}</span>
+                        <div onclick="triggerMonthInteractiveFilter(${idx + 1})" class="p-2 rounded-xl border text-center cursor-pointer text-xs ${activeClass}">
+                            <span class="block uppercase text-slate-500 text-[10px]">${mName}</span>
+                            <span class="block font-black text-emerald-600">$${colRealMesDistribution[idx].toFixed(0)}</span>
                         </div>`;
                 });
             }
 
+            // Pintar Tabla Asesoras
             const gBody = document.getElementById('goals-table-body'); 
             if (gBody) {
                 gBody.innerHTML = '';
@@ -499,7 +406,7 @@
                     gBody.innerHTML += `
                         <tr class="border-b h-10 hover:bg-slate-50/50">
                             <td class="p-2 font-bold text-left pl-4">${g}</td>
-                            <td class="p-2 text-slate-500 font-medium">$${contratadoTotal.toFixed(2)}</td>
+                            <td class="p-2 text-slate-500">$${contratadoTotal.toFixed(2)}</td>
                             <td class="p-2 text-emerald-600 font-black bg-emerald-50/30">$${cobradoEnMes.toFixed(2)}</td>
                             <td class="p-2 font-bold text-indigo-600">$${meta}</td>
                             <td class="p-2 text-left pl-2">
@@ -514,12 +421,9 @@
 
             document.getElementById('kpi-pipeline').innerText = `$${pipelineGlobalSum.toFixed(2)}`;
             document.getElementById('kpi-sales').innerText = `$${colRealMesDistribution[selectedMonthInteractiveFilter - 1].toFixed(2)}`;
-            document.getElementById('kpi-alerts').innerText = todayAlertsCount;
             
             document.getElementById('kpi-scheduling-rate').innerText = `${totalLeadsConteo > 0 ? Math.round((totalAgendadosConteo / totalLeadsConteo) * 100) : 0}%`;
-            document.getElementById('sub-kpi-agendas').innerText = `${totalAgendadosConteo} Pacientes agendados`;
             document.getElementById('kpi-conversion').innerText = `${totalLeadsConteo > 0 ? Math.round((totalVendidosConteo / totalLeadsConteo) * 100) : 0}%`;
-            document.getElementById('sub-kpi-cierres').innerText = `${totalVendidosConteo} Ventas registradas`;
 
             internalPhasesConfig.forEach(p => {
                 if (document.getElementById(`b-${p.id}`)) document.getElementById(`b-${p.id}`).innerText = phaseCounts[p.id];
@@ -528,55 +432,21 @@
         }
 
         function initPersonalizationConfig() {
-            buildDynamicButtonsFilters();
-            renderAdvisersSettingsList();
-        }
-
-        function buildDynamicButtonsFilters() {
-            const box = document.getElementById('managers-buttons-box'); if (!box) return;
+            const box = document.getElementById('managers-buttons-box'); if(!box) return;
             box.innerHTML = `<button onclick="setManagerFilter('all')" class="px-3 py-1.5 rounded-lg border text-xs font-bold ${currentManagerFilter === 'all' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'}">Todas</button>`;
             listadoGestores.forEach(g => { 
                 box.innerHTML += `<button onclick="setManagerFilter('${g}')" class="px-3 py-1.5 rounded-lg border text-xs font-bold ${currentManagerFilter === g ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'}">${g}</button>`; 
             });
-            const selectForm = document.getElementById('form-gestor'); if (!selectForm) return;
-            selectForm.innerHTML = "";
-            listadoGestores.forEach(g => { selectForm.innerHTML += `<option value="${g}">${g}</option>`; });
+            const selectForm = document.getElementById('form-gestor'); if (selectForm) {
+                selectForm.innerHTML = "";
+                listadoGestores.forEach(g => { selectForm.innerHTML += `<option value="${g}">${g}</option>`; });
+            }
         }
 
-        function renderAdvisersSettingsList() {
-            const container = document.getElementById('advisers-config-list'); if (!container) return;
-            container.innerHTML = "";
-            listadoGestores.forEach((g, idx) => {
-                container.innerHTML += `
-                    <div class="p-3 bg-white border rounded-xl flex items-center justify-between text-xs">
-                        <span class="font-bold text-slate-800">${g}</span>
-                        <div class="flex items-center gap-2">
-                            <label class="text-slate-400 font-bold">Meta Mensual ($):</label>
-                            <input type="number" id="cfg-metam-${idx}" value="${metasMensualesDinamicas[g] ?? 1100}" onchange="updateAdviserInfo(${idx})" class="w-24 px-2 py-0.5 border rounded-md font-bold text-indigo-600">
-                        </div>
-                    </div>`;
-            });
-        }
-
-        function updateAdviserInfo(index) {
-            const name = listadoGestores[index];
-            metasMensualesDinamicas[name] = parseFloat(document.getElementById(`cfg-metam-${index}`).value) || 0;
-            renderApplicationCore();
-        }
-
-        function setManagerFilter(m) { currentManagerFilter = m; buildDynamicButtonsFilters(); renderApplicationCore(); }
+        function setManagerFilter(m) { currentManagerFilter = m; initPersonalizationConfig(); renderApplicationCore(); }
         function executeLiveSearch() { activeSearchQuery = document.getElementById('crm-search-bar').value.toLowerCase().trim(); renderApplicationCore(); }
         function triggerMonthInteractiveFilter(mNum) { selectedMonthInteractiveFilter = mNum; renderApplicationCore(); }
-        
-        function switchMobileColumn(columnId) {
-            currentMobileColumn = columnId;
-            internalPhasesConfig.forEach(p => {
-                if (document.getElementById(`tab-${p.id}`)) {
-                    document.getElementById(`tab-${p.id}`).className = p.id === columnId ? "px-3 py-2 rounded-lg font-extrabold text-xs flex-shrink-0 bg-indigo-600 text-white shadow-xs" : "px-3 py-2 rounded-lg font-bold text-xs flex-shrink-0 bg-slate-100 text-slate-700";
-                }
-            });
-            renderApplicationCore();
-        }
+        function switchMobileColumn(columnId) { currentMobileColumn = columnId; renderApplicationCore(); }
 
         function openModal(mode, id = null) {
             document.getElementById('lead-modal').classList.remove('hidden');
@@ -586,7 +456,7 @@
             } else {
                 const lead = mainLeadsRegistry.find(l => l.id === id);
                 if (lead) {
-                    document.getElementById('form-id').value = lead.id; document.getElementById('form-name').value = lead.name; document.getElementById('form-phone').value = lead.phone; document.getElementById('form-phase').value = lead.phase; document.getElementById('form-value').value = lead.value; document.getElementById('form-date').value = lead.date; document.getElementById('form-gestor').value = lead.gestor; document.getElementById('form-loss').value = lead.loss || "Ninguno"; document.getElementById('form-touch').value = lead.touch || 1;
+                    document.getElementById('form-id').value = lead.id; document.getElementById('form-name').value = lead.name; document.getElementById('form-phone').value = lead.phone; document.getElementById('form-phase').value = lead.phase; document.getElementById('form-value').value = lead.value; document.getElementById('form-date').value = lead.date; document.getElementById('form-gestor').value = lead.gestor; document.getElementById('form-loss').value = lead.loss || "Ninguno";
                     currentModalAbonosList = lead.abonos ? [...lead.abonos] : [];
                     currentModalBitacoraList = lead.bitacora ? [...lead.bitacora] : [];
                 }
@@ -598,7 +468,7 @@
         function renderModalAbonosList() {
             const tbody = document.getElementById('modal-abonos-list-rows'); tbody.innerHTML = "";
             currentModalAbonosList.forEach((a, idx) => {
-                tbody.innerHTML += `<tr><td class="p-1.5 text-left">${a.fecha}</td><td>${a.metodo}</td><td class="text-emerald-600 font-bold">$${parseFloat(a.monto).toFixed(2)}</td><td><button type="button" onclick="removeAbono(${idx})" class="text-rose-600"><i class="fa-solid fa-trash-can"></i></button></td></tr>`;
+                tbody.innerHTML += `<tr><td>${a.fecha}</td><td>${a.metodo}</td><td class="text-emerald-600 font-bold">$${parseFloat(a.monto).toFixed(2)}</td><td><button type="button" onclick="removeAbono(${idx})" class="text-rose-600"><i class="fa-solid fa-trash-can"></i></button></td></tr>`;
             });
         }
         function addNewAbonoRecord() {
@@ -616,13 +486,13 @@
         function renderModalBitacoraList() {
             const tl = document.getElementById('modal-bitacora-timeline'); tl.innerHTML = "";
             currentModalBitacoraList.forEach(log => {
-                tl.innerHTML += `<div class="p-2 bg-white border rounded-lg text-[11px]"><span class="text-slate-400 block text-[9px]">${log.fecha} - ${log.asesora}</span><p class="text-slate-700 font-medium">${log.nota}</p></div>`;
+                tl.innerHTML += `<div class="p-2 bg-white border rounded-lg text-[11px]"><span class="text-slate-400 block text-[9px]">${log.fecha}</span><p class="text-slate-700 font-medium">${log.nota}</p></div>`;
             });
         }
         function registerNewLog() {
-            const txt = document.getElementById('new-log-desc').value.trim(); const gst = document.getElementById('form-gestor').value;
+            const txt = document.getElementById('new-log-desc').value.trim();
             if(txt === "") return;
-            currentModalBitacoraList.unshift({ fecha: new Date().toLocaleString(), asesora: gst, nota: txt });
+            currentModalBitacoraList.unshift({ fecha: new Date().toLocaleString(), nota: txt });
             document.getElementById('new-log-desc').value = ""; renderModalBitacoraList();
         }
 
@@ -637,7 +507,6 @@
                 desc: currentModalBitacoraList[0] ? currentModalBitacoraList[0].nota : "", abonos: [...currentModalAbonosList], bitacora: [...currentModalBitacoraList]
             };
             closeModal(); await saveLeadData(payload);
-            showToast("Sincronizado con éxito.");
         }
 
         async function importDataEngine(event) {
@@ -650,10 +519,8 @@
                     let payload = {
                         id: parseInt(row.id || row.crm_id || Date.now() + Math.floor(Math.random()*1000)), name: String(row.name || 'Paciente').trim(), phone: String(row.phone || '').trim(), phase: String(row.phase || 'frio').toLowerCase().trim(), value: parseFloat(row.value || 0)||0, date: String(row.date || '').trim(), loss: String(row.loss || 'Ninguno').trim(), gestor: String(row.gestor || listadoGestores[0]).trim(), touch: parseInt(row.touch || 1)||1, desc: String(row.desc || '').trim(), abonos: [], bitacora: []
                     };
-                    if(row.desc) payload.bitacora.push({ fecha: new Date().toLocaleString(), asesora: payload.gestor, nota: row.desc });
                     await saveLeadData(payload);
                 }
-                showToast("Base cargada y vinculada.");
             }; reader.readAsArrayBuffer(file);
         }
 
@@ -662,9 +529,8 @@
                 return { id: l.id, name: l.name, phone: l.phone, phase: l.phase, value: l.value, date: l.date, loss: l.loss, gestor: l.gestor, touch: l.touch, desc: l.desc }
             });
             let ws = XLSX.utils.json_to_sheet(outputRows); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Backup");
-            XLSX.writeFile(wb, `RelaxTherapy_Completo_${new Date().toISOString().slice(0,10)}.xlsx`);
+            XLSX.writeFile(wb, `RelaxTherapy_CRM_v30.xlsx`);
         }
-
         function toggleConfigPanel() { document.getElementById('config-panel').classList.toggle('hidden'); }
     </script>
 </body>
