@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM Cloud - v27.0 Auto-Connect</title>
+    <title>Relax Therapy CRM Cloud - v27.6 Final Máster</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -31,7 +31,7 @@
                 </div>
                 <div>
                     <span class="font-black text-slate-900 tracking-tight text-base sm:text-lg block leading-tight">RELAX THERAPY CRM</span>
-                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider">⏳ Verificando credenciales...</span>
+                    <span id="sync-status" class="block text-[11px] font-bold text-emerald-600 uppercase tracking-wider">⏳ Sincronizando canal cloud...</span>
                 </div>
             </div>
 
@@ -65,12 +65,8 @@
                 <i class="fa-solid fa-shield-halved text-emerald-600 text-sm shrink-0"></i>
                 <div>
                     <strong class="text-slate-800 block">Autenticación Móvil Directa Activa</strong>
-                    <span class="text-slate-500 font-medium">Las llaves se cargan de forma transparente en el teléfono sin requerir ingreso de claves resumidas.</span>
+                    <span class="text-slate-500 font-medium">Las llaves de Supabase se encuentran inyectadas fijamente en el código interno.</span>
                 </div>
-            </div>
-            <div class="flex flex-col sm:flex-row items-center gap-2 w-full xl:w-auto hidden">
-                <input type="text" id="db-url" class="hidden">
-                <input type="password" id="db-key" class="hidden">
             </div>
         </div>
     </section>
@@ -251,7 +247,7 @@
     </div>
 
     <script>
-        // CONFIGURACIÓN INDESTRUCTIBLE DIRECTA
+        // CREDENCIALES FIJAS DE INFRAESTRUCTURA RELAX THERAPY
         const SUPABASE_PROJECT_URL = "https://eqhsgpwoehcryhmibfhn.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxaHNncHdvZWhjcnlobWliZmhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5NjQzMDAsImV4cCI6MjEwMjU0MDMwMH0.7a92b2-4c87-8143-2fed1056cc25";
 
@@ -280,7 +276,6 @@
 
         function initSupabaseEngine() {
             try {
-                // Forzado de conexión directa automática sin almacenamiento local intermedio
                 supabaseClient = supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
                 loadDataFromCloud();
             } catch(e) {
@@ -316,7 +311,7 @@
                 }));
                 
                 status.className = "block text-[11px] font-bold text-emerald-600 uppercase tracking-wider";
-                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sincronizado Súper Móvil (${mainLeadsRegistry.length} Leads)`;
+                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sincronizado Directo Master (${mainLeadsRegistry.length} Leads)`;
                 renderApplicationCore();
             } catch(e) { 
                 console.error(e); 
