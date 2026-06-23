@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM Cloud - Premium Fixed v29.1</title>
+    <title>Relax Therapy CRM Cloud - Premium v29.2 Final Stable</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -24,7 +24,6 @@
         .kanban-column { min-width: 310px; max-width: 360px; transition: all 0.2s ease; }
         .kanban-column.drag-over { background-color: rgba(79, 70, 229, 0.08) !important; border: 2px dashed var(--brand-primary) !important; }
         .lead-card { cursor: grab; transition: all 0.2s ease; }
-        .lead-card:active { cursor: grabbing; }
         .scrollbar-custom::-webkit-scrollbar { height: 8px; width: 6px; }
         .scrollbar-custom::-webkit-scrollbar-track { background: #f1f5f9; }
         .scrollbar-custom::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
@@ -45,18 +44,18 @@
                 <div>
                     <span class="font-extrabold text-slate-900 tracking-tight text-xl flex items-center gap-1.5">
                         RELAX THERAPY CRM
-                        <span class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-bold">v29.1 Stable</span>
+                        <span class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-bold">v29.2 Stable</span>
                     </span>
                     <span id="sync-status" class="block text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider">
-                        <i class="fa-solid fa-circle-notch fa-spin"></i> Inicializando Conexión...
+                        <i class="fa-solid fa-circle-notch fa-spin"></i> Conectando al servidor...
                     </span>
                 </div>
             </div>
 
             <div class="flex flex-wrap items-center gap-2 text-xs">
-                <div id="storage-mode-badge" class="px-3 h-10 rounded-xl font-bold flex items-center gap-2 border bg-emerald-50 text-emerald-700 shadow-2xs">
+                <div class="px-3 h-10 rounded-xl font-bold flex items-center gap-2 border bg-emerald-50 text-emerald-700 shadow-2xs">
                     <i class="fa-solid fa-cloud"></i>
-                    <span>Nube Sincronizada</span>
+                    <span>Nube Conectada</span>
                 </div>
 
                 <button onclick="toggleConfigPanel()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 h-10 rounded-xl font-bold flex items-center gap-1.5 border transition-all">
@@ -69,11 +68,11 @@
                 </div>
                 
                 <button onclick="loadDataFromCloud()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 h-10 rounded-xl font-bold flex items-center gap-1.5 transition-all">
-                    <i class="fa-solid fa-arrows-rotate"></i> Forzar Sincronización
+                    <i class="fa-solid fa-arrows-rotate"></i> Sincronizar
                 </button>
                 
                 <button onclick="exportBackupExcel()" class="bg-slate-700 hover:bg-slate-800 text-white px-3.5 h-10 rounded-xl font-bold flex items-center gap-1.5 transition-all">
-                    <i class="fa-solid fa-file-arrow-down"></i> Exportar Base Completa
+                    <i class="fa-solid fa-file-arrow-down"></i> Exportar Excel
                 </button>
                 
                 <button onclick="openModal('create')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 h-10 rounded-xl font-extrabold transition-all">
@@ -93,27 +92,27 @@
     <section class="max-w-[1780px] w-full mx-auto px-4 lg:px-8 mt-4">
         <div class="bg-white p-6 rounded-2xl border border-slate-200 space-y-6 shadow-xs">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-2xs">
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
                     <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Pipeline Activa Acumulada</span>
                     <h3 id="kpi-pipeline" class="text-2xl font-black text-slate-900 mt-1">$0.00</h3>
-                    <p class="text-[10px] text-slate-400 font-bold mt-1">Valor de leads vivos en seguimiento</p>
+                    <p class="text-[10px] text-slate-400 font-bold mt-1">Valor de leads en seguimiento</p>
                 </div>
-                <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100 shadow-2xs">
+                <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
                     <span class="text-[10px] font-black text-emerald-600 uppercase tracking-wider">Cobrado Real Mes</span>
                     <h3 id="kpi-sales" class="text-2xl font-black text-emerald-700 mt-1">$0.00</h3>
                     <p class="text-[10px] text-emerald-500 font-bold mt-1">Cobranzas efectivas realizadas</p>
                 </div>
-                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 shadow-2xs">
+                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
                     <span class="text-[10px] font-black text-blue-600 uppercase tracking-wider">Tasa Agendamiento</span>
                     <h3 id="kpi-scheduling-rate" class="text-2xl font-black text-blue-700 mt-1">0%</h3>
                     <p id="sub-kpi-agendas" class="text-[10px] text-blue-500 font-bold mt-1">Citas agendadas totales</p>
                 </div>
-                <div class="bg-violet-50 p-4 rounded-xl border border-violet-100 shadow-2xs">
+                <div class="bg-violet-50 p-4 rounded-xl border border-violet-100">
                     <span class="text-[10px] font-black text-violet-600 uppercase tracking-wider">Efectividad de Venta</span>
                     <h3 id="kpi-conversion" class="text-2xl font-black text-violet-700 mt-1">0%</h3>
                     <p id="sub-kpi-cierres" class="text-[10px] text-violet-500 font-bold mt-1">Conversión comercial real</p>
                 </div>
-                <div class="bg-fuchsia-50 p-4 rounded-xl border border-fuchsia-100 shadow-2xs">
+                <div class="bg-fuchsia-50 p-4 rounded-xl border border-fuchsia-100">
                     <span class="text-[10px] font-black text-fuchsia-600 uppercase tracking-wider">Gestiones en Bitácora</span>
                     <h3 id="kpi-alerts" class="text-2xl font-black text-fuchsia-700 mt-1">0</h3>
                     <p class="text-[10px] text-fuchsia-500 font-bold mt-1">Interacciones guardadas hoy</p>
@@ -300,12 +299,11 @@
             localStorage.setItem('supabase_url', DB_CLOUD_URL);
             localStorage.setItem('supabase_key', DB_CLOUD_KEY);
             localStorage.setItem('relax_storage_mode', 'supabase');
-
             try {
                 supabaseClient = window.supabase.createClient(DB_CLOUD_URL, DB_CLOUD_KEY);
                 loadDataFromCloud();
             } catch(e) {
-                document.getElementById('sync-status').innerHTML = `⚠️ Error Cloud`;
+                document.getElementById('sync-status').innerHTML = `⚠️ Fallo de Conexión`;
             }
         }
 
@@ -316,7 +314,7 @@
                 let { data, error } = await supabaseClient.from('pacientes_crm').select('*');
                 if(error) throw error;
                 mainLeadsRegistry = data.map(item => parseRowToLead(item));
-                document.getElementById('sync-status').innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> Base Sincronizada (${mainLeadsRegistry.length} Leads)`;
+                document.getElementById('sync-status').innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> Conectado con Servidor (${mainLeadsRegistry.length} Leads)`;
                 renderApplicationCore();
             } catch(e) { console.error(e); }
         }
@@ -350,7 +348,6 @@
         async function saveLeadData(leadData) {
             let idx = mainLeadsRegistry.findIndex(l => l.id === leadData.id);
             if(idx !== -1) mainLeadsRegistry[idx] = leadData; else mainLeadsRegistry.push(leadData);
-
             if (supabaseClient) {
                 try {
                     await supabaseClient.from('pacientes_crm').upsert([prepareLeadToRow(leadData)], { onConflict: 'crm_id' });
@@ -378,7 +375,6 @@
         function renderApplicationCore() {
             let pipelineGlobalSum = 0; 
             let todayAlertsCount = 0;
-            
             let totalLeadsConteo = 0;
             let totalAgendadosConteo = 0;
             let totalVendidosConteo = 0;
@@ -388,16 +384,18 @@
             let gestoresContractedTotal = {};
             
             listadoGestores.forEach(g => { gestoresSalesMes[g] = 0; gestoresContractedTotal[g] = 0; });
-            
             let colRealMesDistribution = Array.from({ length: 12 }, () => 0);
 
-            internalPhasesConfig.forEach(p => document.getElementById(`col-${p.id}`).innerHTML = '');
+            internalPhasesConfig.forEach(p => {
+                const element = document.getElementById(`col-${p.id}`);
+                if (element) element.innerHTML = '';
+            });
 
             mainLeadsRegistry.forEach(lead => {
                 let currentPhase = lead.phase;
                 let valContrato = lead.value || 0;
                 
-                if (lead.abonos) {
+                if (lead.abonos && Array.isArray(lead.abonos)) {
                     lead.abonos.forEach(ab => {
                         if (ab.fecha && ab.fecha.includes('-')) {
                             let abMonth = parseInt(ab.fecha.split('-')[1]);
@@ -409,7 +407,7 @@
                 }
 
                 let totalCobradoEnMesSeleccionado = 0;
-                if (lead.abonos) {
+                if (lead.abonos && Array.isArray(lead.abonos)) {
                     lead.abonos.forEach(ab => {
                         if (ab.fecha && ab.fecha.includes('-')) {
                             let abMonth = parseInt(ab.fecha.split('-')[1]);
@@ -420,7 +418,7 @@
                     });
                 }
 
-                let totalAbonadoHistorico = lead.abonos ? lead.abonos.reduce((sum, a) => sum + parseFloat(a.monto), 0) : 0;
+                let totalAbonadoHistorico = (lead.abonos && Array.isArray(lead.abonos)) ? lead.abonos.reduce((sum, a) => sum + (parseFloat(a.monto) || 0), 0) : 0;
                 let saldoPendiente = valContrato - totalAbonadoHistorico;
 
                 let leadMonth = CURRENT_MONTH_NUM;
@@ -441,7 +439,7 @@
                     belongsToView = (leadMonth === selectedMonthInteractiveFilter);
                 }
 
-                let isToday = lead.bitacora && lead.bitacora.some(log => log.fecha.includes(new Date().toLocaleDateString()));
+                let isToday = lead.bitacora && lead.bitacora.some(log => log.fecha && log.fecha.includes(new Date().toLocaleDateString()));
                 if (isToday) todayAlertsCount++;
 
                 if (gestoresSalesMes[lead.gestor] !== undefined) {
@@ -471,53 +469,60 @@
                             <a href="https://wa.me/${lead.phone.replace(/[^0-9]/g, '')}" target="_blank" class="bg-emerald-600 text-white px-2 py-0.5 rounded text-[9px] font-black">WhatsApp</a>
                         </div>`;
                     
-                    document.getElementById(`col-${currentPhase}`).appendChild(card);
+                    const containerCol = document.getElementById(`col-${currentPhase}`);
+                    if (containerCol) containerCol.appendChild(card);
                 }
             });
 
-            const mContainer = document.getElementById('months-grid-container'); mContainer.innerHTML = '';
-            monthsNames.forEach((mName, idx) => {
-                let activeClass = (selectedMonthInteractiveFilter === (idx + 1)) ? 'border-indigo-600 bg-indigo-50 font-black ring-2 ring-indigo-600/10' : 'border-slate-200 bg-white';
-                mContainer.innerHTML += `
-                    <div onclick="triggerMonthInteractiveFilter(${idx + 1})" class="p-2 rounded-xl border text-center cursor-pointer transition-all ${activeClass}">
-                        <span class="block text-[10px] font-bold uppercase text-slate-500">${mName}</span>
-                        <span class="block text-[11px] font-black text-emerald-600">$${colRealMesDistribution[idx].toFixed(0)}</span>
-                    </div>`;
-            });
+            const mContainer = document.getElementById('months-grid-container'); 
+            if (mContainer) {
+                mContainer.innerHTML = '';
+                monthsNames.forEach((mName, idx) => {
+                    let activeClass = (selectedMonthInteractiveFilter === (idx + 1)) ? 'border-indigo-600 bg-indigo-50 font-black ring-2 ring-indigo-600/10' : 'border-slate-200 bg-white';
+                    mContainer.innerHTML += `
+                        <div onclick="triggerMonthInteractiveFilter(${idx + 1})" class="p-2 rounded-xl border text-center cursor-pointer transition-all ${activeClass}">
+                            <span class="block text-[10px] font-bold uppercase text-slate-500">${mName}</span>
+                            <span class="block text-[11px] font-black text-emerald-600">$${colRealMesDistribution[idx].toFixed(0)}</span>
+                        </div>`;
+                });
+            }
 
-            const gBody = document.getElementById('goals-table-body'); gBody.innerHTML = '';
-            Object.keys(gestoresSalesMes).forEach(g => {
-                let cobradoEnMes = gestoresSalesMes[g] || 0; 
-                let contratadoTotal = gestoresContractedTotal[g] || 0;
-                let meta = metasMensualesDinamicas[g] || 1100;
-                let pct = meta > 0 ? Math.min(Math.round((cobradoEnMes / meta) * 100), 100) : 0;
-                
-                gBody.innerHTML += `
-                    <tr class="border-b h-10 hover:bg-slate-50/50">
-                        <td class="p-2 font-bold text-left pl-4">${g}</td>
-                        <td class="p-2 text-slate-500 font-medium">$${contratadoTotal.toFixed(2)}</td>
-                        <td class="p-2 text-emerald-600 font-black bg-emerald-50/30">$${cobradoEnMes.toFixed(2)}</td>
-                        <td class="p-2 font-bold text-indigo-600">$${meta}</td>
-                        <td class="p-2 text-left pl-2">
-                            <div class="flex items-center gap-2">
-                                <div class="w-full bg-slate-200 rounded-full h-1.5"><div class="bg-emerald-600 h-1.5 rounded-full" style="width: ${pct}%"></div></div>
-                                <span class="font-bold text-[11px]">${pct}%</span>
-                            </div>
-                        </td>
-                    </tr>`;
-            });
+            const gBody = document.getElementById('goals-table-body'); 
+            if (gBody) {
+                gBody.innerHTML = '';
+                Object.keys(gestoresSalesMes).forEach(g => {
+                    let cobradoEnMes = gestoresSalesMes[g] || 0; 
+                    let contratadoTotal = gestoresContractedTotal[g] || 0;
+                    let meta = metasMensualesDinamicas[g] || 1100;
+                    let pct = meta > 0 ? Math.min(Math.round((cobradoEnMes / meta) * 100), 100) : 0;
+                    
+                    gBody.innerHTML += `
+                        <tr class="border-b h-10 hover:bg-slate-50/50">
+                            <td class="p-2 font-bold text-left pl-4">${g}</td>
+                            <td class="p-2 text-slate-500 font-medium">$${contratadoTotal.toFixed(2)}</td>
+                            <td class="p-2 text-emerald-600 font-black bg-emerald-50/30">$${cobradoEnMes.toFixed(2)}</td>
+                            <td class="p-2 font-bold text-indigo-600">$${meta}</td>
+                            <td class="p-2 text-left pl-2">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-full bg-slate-200 rounded-full h-1.5"><div class="bg-emerald-600 h-1.5 rounded-full" style="width: ${pct}%"></div></div>
+                                    <span class="font-bold text-[11px]">${pct}%</span>
+                                </div>
+                            </td>
+                        </tr>`;
+                });
+            }
 
             document.getElementById('kpi-pipeline').innerText = `$${pipelineGlobalSum.toFixed(2)}`;
             document.getElementById('kpi-sales').innerText = `$${colRealMesDistribution[selectedMonthInteractiveFilter - 1].toFixed(2)}`;
             document.getElementById('kpi-alerts').innerText = todayAlertsCount;
             
             document.getElementById('kpi-scheduling-rate').innerText = `${totalLeadsConteo > 0 ? Math.round((totalAgendadosConteo / totalLeadsConteo) * 100) : 0}%`;
-            document.getElementById('sub-kpi-agendas').innerText = `${totalAgendadosConteo} Pacientes agendados en total`;
+            document.getElementById('sub-kpi-agendas').innerText = `${totalAgendadosConteo} Pacientes agendados`;
             document.getElementById('kpi-conversion').innerText = `${totalLeadsConteo > 0 ? Math.round((totalVendidosConteo / totalLeadsConteo) * 100) : 0}%`;
-            document.getElementById('sub-kpi-cierres').innerText = `${totalVendidosConteo} Ventas efectivas registradas`;
+            document.getElementById('sub-kpi-cierres').innerText = `${totalVendidosConteo} Ventas registradas`;
 
             internalPhasesConfig.forEach(p => {
-                document.getElementById(`b-${p.id}`).innerText = phaseCounts[p.id];
+                if (document.getElementById(`b-${p.id}`)) document.getElementById(`b-${p.id}`).innerText = phaseCounts[p.id];
                 if (document.getElementById(`badge-tab-${p.id}`)) document.getElementById(`badge-tab-${p.id}`).innerText = phaseCounts[p.id];
             });
         }
@@ -528,17 +533,19 @@
         }
 
         function buildDynamicButtonsFilters() {
-            const box = document.getElementById('managers-buttons-box');
+            const box = document.getElementById('managers-buttons-box'); if (!box) return;
             box.innerHTML = `<button onclick="setManagerFilter('all')" class="px-3 py-1.5 rounded-lg border text-xs font-bold ${currentManagerFilter === 'all' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'}">Todas</button>`;
             listadoGestores.forEach(g => { 
                 box.innerHTML += `<button onclick="setManagerFilter('${g}')" class="px-3 py-1.5 rounded-lg border text-xs font-bold ${currentManagerFilter === g ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'}">${g}</button>`; 
             });
-            const selectForm = document.getElementById('form-gestor'); selectForm.innerHTML = "";
+            const selectForm = document.getElementById('form-gestor'); if (!selectForm) return;
+            selectForm.innerHTML = "";
             listadoGestores.forEach(g => { selectForm.innerHTML += `<option value="${g}">${g}</option>`; });
         }
 
         function renderAdvisersSettingsList() {
-            const container = document.getElementById('advisers-config-list'); container.innerHTML = "";
+            const container = document.getElementById('advisers-config-list'); if (!container) return;
+            container.innerHTML = "";
             listadoGestores.forEach((g, idx) => {
                 container.innerHTML += `
                     <div class="p-3 bg-white border rounded-xl flex items-center justify-between text-xs">
@@ -564,7 +571,9 @@
         function switchMobileColumn(columnId) {
             currentMobileColumn = columnId;
             internalPhasesConfig.forEach(p => {
-                document.getElementById(`tab-${p.id}`).className = p.id === columnId ? "px-3 py-2 rounded-lg font-extrabold text-xs flex-shrink-0 bg-indigo-600 text-white shadow-xs" : "px-3 py-2 rounded-lg font-bold text-xs flex-shrink-0 bg-slate-100 text-slate-700";
+                if (document.getElementById(`tab-${p.id}`)) {
+                    document.getElementById(`tab-${p.id}`).className = p.id === columnId ? "px-3 py-2 rounded-lg font-extrabold text-xs flex-shrink-0 bg-indigo-600 text-white shadow-xs" : "px-3 py-2 rounded-lg font-bold text-xs flex-shrink-0 bg-slate-100 text-slate-700";
+                }
             });
             renderApplicationCore();
         }
