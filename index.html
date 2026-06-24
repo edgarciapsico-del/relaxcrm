@@ -513,6 +513,15 @@
         let metasDiariasDinamicas = { "Brenda": 50, "Joselyne": 50, "Naty": 50, "Fernando": 0 };
         const monthsNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
+        // =========================================================
+        // ESCUDO ANTI-NaN (NUEVA FUNCIÓN DE SEGURIDAD)
+        // =========================================================
+        function safeNum(val) {
+            if (val === null || val === undefined || val === '') return 0;
+            let parsed = parseFloat(val);
+            return isNaN(parsed) ? 0 : parsed;
+        }
+
         window.onload = function() {
             initPersonalizationConfig();
             initStorageEngine();
@@ -637,6 +646,9 @@
             }
         }
 
+        // =================================================
+        // APLICANDO ESCUDO AL PARSEAR DATOS DESDE LA NUBE
+        // =================================================
         function parseRowToLead(item) {
             let nameVal = String(item.name || item.nombre || '');
             let phaseVal = String(item.phase || item.estado || 'frio').toLowerCase().trim();
@@ -656,11 +668,11 @@
                 name: nameVal, 
                 phone: phoneVal, 
                 phase: phaseVal,
-                value: parseFloat(item.value || item.valor) || 0, 
+                value: safeNum(item.value || item.valor), 
                 date: item.date || item.fecha || new Date().toISOString().slice(0,10), 
                 loss: item.loss || item.descarte || 'Ninguno', 
                 gestor: item.gestor || item.asesora || 'Brenda',
-                touch: parseInt(item.touch || item.intentos) || 1,
+                touch: safeNum(item.touch || item.intentos) || 1,
                 desc: String(item.desc || item.observaciones || ''), 
                 abonos: [],
                 bitacora: []
@@ -678,7 +690,7 @@
 
             if (lead.abonos.length === 0) {
                 ['a1', 'a2', 'a3', 'a4', 'a5'].forEach((col, idx) => {
-                    let amt = parseFloat(item[col]) || 0;
+                    let amt = safeNum(item[col]);
                     if (amt > 0) lead.abonos.push({ monto: amt, fecha: lead.date, metodo: `Abono ${idx+1}` });
                 });
             }
@@ -686,33 +698,41 @@
             return lead;
         }
 
+        // =================================================
+        // APLICANDO ESCUDO ANTES DE ENVIAR A LA NUBE
+        // =================================================
         function prepareLeadToRow(leadData) {
             let abos = [0,0,0,0,0];
-            leadData.abonos.forEach((a, idx) => { if(idx < 5) abos[idx] = parseFloat(a.monto) || 0; });
+            
+            // Verificamos que el arreglo de abonos exista y lo limpiamos
+            if (leadData.abonos && Array.isArray(leadData.abonos)) {
+                leadData.abonos.forEach((a, idx) => { 
+                    if(idx < 5) abos[idx] = safeNum(a.monto); 
+                });
+            }
+
             return {
-                id: leadData.id,
-                name: leadData.name, 
-                phone: leadData.phone, 
-                phase: leadData.phase,
-                value: parseFloat(leadData.value) || 0, 
-                date: leadData.date, 
-                loss: leadData.loss,
-                gestor: leadData.gestor, 
+                id: safeNum(leadData.id) || new Date().getTime(),
+                name: String(leadData.name || '').trim(), 
+                phone: String(leadData.phone || '').trim(), 
+                phase: String(leadData.phase || 'frio').trim(),
+                value: safeNum(leadData.value), 
+                date: String(leadData.date || ''), 
+                loss: String(leadData.loss || 'Ninguno'),
+                gestor: String(leadData.gestor || 'Brenda'), 
                 a1: abos[0], a2: abos[1], a3: abos[2], a4: abos[3], a5: abos[4], 
-                touch: parseInt(leadData.touch) || 1, 
+                touch: safeNum(leadData.touch) || 1, 
                 desc: JSON.stringify({ desc: leadData.desc, abonos: leadData.abonos, bitacora: leadData.bitacora })
             };
         }
 
         async function saveLeadData(leadData, notify = true) {
-            // 1. Guardar local siempre
             let idx = mainLeadsRegistry.findIndex(l => l.id === leadData.id);
             if(idx !== -1) mainLeadsRegistry[idx] = leadData;
             else mainLeadsRegistry.push(leadData);
             
             localStorage.setItem('relax_leads_registry_local', JSON.stringify(mainLeadsRegistry));
 
-            // 2. Guardar en Nube con CONTROL ESTRICTO DE ERRORES
             if (currentStorageMode === 'supabase' && supabaseClient) {
                 try {
                     const rowPayload = prepareLeadToRow(leadData);
@@ -721,7 +741,7 @@
                         .select('id')
                         .eq('id', leadData.id);
 
-                    if (checkErr) throw checkErr; // Lanza error si falla el SELECT
+                    if (checkErr) throw checkErr; 
 
                     let dbError;
                     if (checkExist && checkExist.length > 0) {
@@ -732,18 +752,13 @@
                         dbError = error;
                     }
 
-                    // VALIDACIÓN CRUCIAL: Verificamos si hubo un error real al insertar/actualizar
                     if (dbError) throw dbError;
 
                     if(notify) showToast("Guardado seguro en la nube exitoso.");
                     updateStorageBadges(true);
                 } catch(e) {
                     console.error("ERROR AL GUARDAR EN NUBE:", e);
-                    // Avisamos al usuario con un Alert nativo para que QA pueda ver qué falló sin abrir la consola
                     alert(`⚠️ ERROR EN LA NUBE: ${e.message || 'La base de datos rechazó la entrada'}\n\nEl dato SÍ se guardó en este dispositivo, pero NO subió a internet. Solución: Cierra esta alerta, presiona el botón 'Sincronizar' e inténtalo de nuevo.`);
-                    
-                    // IMPORTANTE: Ya NO ejecutamos switchToLocalFallback() aquí.
-                    // No queremos que el sistema se desconecte permanentemente por un solo error.
                 }
             }
             renderApplicationCore();
@@ -779,13 +794,14 @@
             }
         }
 
+        // =================================================
+        // APLICANDO ESCUDO AL LEER DEL FORMULARIO
+        // =================================================
         async function autoSaveCurrentModal(notify = false) {
             if (!document.getElementById('form-name').value) return; 
 
-            let modalId = parseInt(document.getElementById('form-id').value);
-            // Generación de ID Seguro para nuevos leads
-            if (isNaN(modalId)) {
-                // Supabase int id seguro
+            let modalId = safeNum(document.getElementById('form-id').value);
+            if (modalId === 0) {
                 modalId = Math.floor(Math.random() * 900000) + 100000;
             }
             document.getElementById('form-id').value = modalId; 
@@ -795,12 +811,14 @@
                 name: document.getElementById('form-name').value,
                 phone: document.getElementById('form-phone').value,
                 phase: document.getElementById('form-phase').value,
-                value: parseFloat(document.getElementById('form-value').value) || 0,
+                value: safeNum(document.getElementById('form-value').value),
                 date: document.getElementById('form-date').value,
                 gestor: document.getElementById('form-gestor').value,
                 loss: document.getElementById('form-loss').value,
-                touch: parseInt(document.getElementById('form-touch').value) || 1,
-                abonos: [...currentModalAbonosList], bitacora: [...currentModalBitacoraList], desc: ""
+                touch: safeNum(document.getElementById('form-touch').value) || 1,
+                abonos: [...currentModalAbonosList], 
+                bitacora: [...currentModalBitacoraList], 
+                desc: ""
             };
             if(payload.bitacora.length > 0) payload.desc = payload.bitacora[0].nota;
             
@@ -865,8 +883,8 @@
                 let currentPhase = lead.phase;
                 if (!phases.includes(currentPhase)) currentPhase = 'frio';
 
-                let valContrato = lead.value || 0;
-                let totalAbonado = lead.abonos ? lead.abonos.reduce((sum, a) => sum + parseFloat(a.monto), 0) : 0;
+                let valContrato = safeNum(lead.value);
+                let totalAbonado = lead.abonos ? lead.abonos.reduce((sum, a) => sum + safeNum(a.monto), 0) : 0;
                 let saldoPendiente = valContrato - totalAbonado;
                 
                 let leadMonth = CURRENT_MONTH_NUM;
@@ -1074,7 +1092,6 @@
                 document.getElementById('form-id').value = "";
                 if(deleteBtn) deleteBtn.classList.add('hidden'); 
                 currentModalAbonosList = []; currentModalBitacoraList = [];
-                // Set today's date by default
                 document.getElementById('form-date').value = new Date().toISOString().slice(0, 10);
             } else {
                 if(deleteBtn) deleteBtn.classList.remove('hidden'); 
@@ -1105,8 +1122,11 @@
             });
         }
 
+        // =================================================
+        // APLICANDO ESCUDO AL NUEVO ABONO Y CÁLCULOS
+        // =================================================
         async function addNewAbonoRecord() {
-            const amt = parseFloat(document.getElementById('new-abono-monto').value) || 0;
+            const amt = safeNum(document.getElementById('new-abono-monto').value);
             const date = document.getElementById('new-abono-fecha').value;
             const met = document.getElementById('new-abono-metodo').value;
             
@@ -1134,8 +1154,8 @@
             const saldoPendienteEl = document.getElementById('modal-saldo-pendiente');
             if(!valInput || !totalAbonadoEl || !saldoPendienteEl) return;
             
-            let val = parseFloat(valInput.value) || 0;
-            let paid = currentModalAbonosList.reduce((s, a) => s + a.monto, 0);
+            let val = safeNum(valInput.value);
+            let paid = currentModalAbonosList.reduce((s, a) => s + safeNum(a.monto), 0);
             totalAbonadoEl.innerText = `$${paid}`;
             saldoPendienteEl.innerText = `$${val - paid}`;
         }
