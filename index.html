@@ -501,7 +501,7 @@
     </div>
 
     <script>
-        // CONFIGURACIÓN E INDICE GLOBAL PREVENTIVO SST TERMINOLOGY SYNCED
+        // CONFIGURACIÓN CORREGIDA A HTTPS EXCLUSIVO PARA REMOVER BLOQUEO MIXTO DE GITHUB
         const DB_CLOUD_URL = "https://eqhsgpwoehcryhmibfhn.supabase.co";
         const DB_CLOUD_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxaHNncHdvZWhjcnlobWliZmhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5NjQzMDAsImV4cCI6MjEwMjU0MDMwMH0.7a92b2-4c87-8143-2fed1056cc25";
 
@@ -518,7 +518,7 @@
         let filterOnlyPendingDebt = false; 
         let activeSearchQuery = "";
         let selectedMonthInteractiveFilter = null; 
-        let currentMobileColumn = 'frio'; // Kanban mobile phase active state
+        let currentMobileColumn = 'frio';
         
         let currentModalAbonosList = [];
         let currentModalBitacoraList = [];
@@ -634,6 +634,11 @@
                 if(error) throw error;
                 mainLeadsRegistry = data.map(item => parseRowToLead(item));
                 localStorage.setItem('relax_leads_registry_local', JSON.stringify(mainLeadsRegistry));
+                
+                const status = document.getElementById('sync-status');
+                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sincronizado`;
+                status.className = "block text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider";
+                
                 renderApplicationCore();
                 showToast("Sincronizado con la nube.");
             } catch(e) {
@@ -705,7 +710,6 @@
             };
         }
 
-        // CONTROL DE CONECTIVIDAD TOTAL SIN DEPENDER DE LLAVE PRIMARIA EXPLICITA EN CLOUD
         async function saveLeadData(leadData) {
             let idx = mainLeadsRegistry.findIndex(l => l.id === leadData.id);
             if(idx !== -1) mainLeadsRegistry[idx] = leadData;
@@ -716,8 +720,6 @@
             if (currentStorageMode === 'supabase' && supabaseClient) {
                 try {
                     const rowPayload = prepareLeadToRow(leadData);
-                    
-                    // Verificar robustamente existencia previa antes de procesar inserción o reemplazo
                     let { data: checkExist, error: checkErr } = await supabaseClient
                         .from('pacientes_crm')
                         .select('crm_id')
@@ -754,7 +756,6 @@
             }
         }
 
-        // MEJORA: INTERMITENCIA DE COLUMNAS PARA FORMATO MÓVIL SÚPER NITIDO
         function switchMobileColumn(columnId) {
             currentMobileColumn = columnId;
             const columns = ['frio', 'tibio', 'caliente', 'agenda', 'venta', 'postventa'];
@@ -769,7 +770,6 @@
             renderApplicationCore();
         }
 
-        // RENDER CENTRAL OPERATIVO
         function renderApplicationCore() {
             const phases = ['frio', 'tibio', 'caliente', 'agenda', 'venta', 'postventa'];
             let pipelineSum = 0, salesSum = 0, todayAlerts = 0;
@@ -782,7 +782,6 @@
             let yearMonthsData = Array.from({ length: 12 }, () => ({ totalLeads: 0, totalSalesLeads: 0, totalContracted: 0, totalCollected: 0 }));
             let selectedAuditMonth = parseInt(document.getElementById('audit-month-selector').value) || CURRENT_MONTH_NUM;
 
-            // Limpieza y manejo responsivo ocultando las columnas inactivas en móviles
             phases.forEach(p => {
                 const colContainer = document.getElementById(`column-container-${p}`);
                 document.getElementById(`col-${p}`).innerHTML = '';
@@ -862,7 +861,6 @@
                 }
             });
 
-            // HISTORIAL MENSUAL BAR
             const mContainer = document.getElementById('months-grid-container'); 
             mContainer.innerHTML = '';
             yearMonthsData.forEach((mData, idx) => {
@@ -876,7 +874,6 @@
                     </div>`;
             });
 
-            // TABLA DE RENDIMIENTO
             const gBody = document.getElementById('goals-table-body'); 
             gBody.innerHTML = '';
             Object.keys(gestoresSales).forEach(g => {
