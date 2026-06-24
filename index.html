@@ -25,16 +25,9 @@
             --bg-main: #f8fafc;
         }
 
-        body { 
-            font-family: 'Outfit', sans-serif; 
-            background-color: var(--bg-main); 
-        }
+        body { font-family: 'Outfit', sans-serif; background-color: var(--bg-main); }
 
-        .kanban-column { 
-            min-width: 310px; 
-            max-width: 360px; 
-            transition: all 0.2s ease;
-        }
+        .kanban-column { min-width: 310px; max-width: 360px; transition: all 0.2s ease; }
         
         .kanban-column.drag-over {
             background-color: rgba(79, 70, 229, 0.08) !important;
@@ -42,18 +35,9 @@
             transform: scale(1.02);
         }
 
-        .lead-card {
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: grab;
-        }
-        
+        .lead-card { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); cursor: grab; }
         .lead-card:active { cursor: grabbing; }
-
-        .lead-card.dragging {
-            opacity: 0.4;
-            transform: scale(0.95);
-            border: 2px dashed var(--brand-primary);
-        }
+        .lead-card.dragging { opacity: 0.4; transform: scale(0.95); border: 2px dashed var(--brand-primary); }
 
         .scrollbar-custom::-webkit-scrollbar { height: 8px; width: 6px; }
         .scrollbar-custom::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 8px; }
@@ -634,21 +618,19 @@
             renderApplicationCore();
         }
 
-        // SOLUCIÓN AL BUG DE DUPLICADOS: Descarga ESTRICTA desde la nube.
         async function loadDataFromCloud() {
             if(!supabaseClient) return;
             try {
                 let { data, error } = await supabaseClient.from('pacientes_crm').select('*');
                 if(error) throw error;
                 
-                // Convertimos la base de la nube y REEMPLAZAMOS la local para matar los fantasmas duplicados.
                 mainLeadsRegistry = data.map(item => parseRowToLead(item));
                 
                 localStorage.setItem('relax_leads_registry_local', JSON.stringify(mainLeadsRegistry));
                 
                 updateStorageBadges(true);
                 renderApplicationCore();
-                showToast("Sincronización exacta completada. Duplicados fantasma limpiados.");
+                showToast("Sincronización exacta completada.");
             } catch(e) {
                 console.error("Error cargando desde Supabase:", e);
                 switchToLocalFallback();
@@ -732,7 +714,6 @@
             if (currentStorageMode === 'supabase' && supabaseClient) {
                 try {
                     const rowPayload = prepareLeadToRow(leadData);
-                    
                     let { data: checkExist, error: checkErr } = await supabaseClient
                         .from('pacientes_crm')
                         .select('id')
@@ -756,7 +737,6 @@
             renderApplicationCore();
         }
 
-        // NUEVA FUNCIÓN PARA ELIMINAR REGISTROS DE RAIZ (NUBE Y LOCAL)
         async function deleteCurrentLead() {
             const leadId = parseInt(document.getElementById('form-id').value);
             if(isNaN(leadId) || !leadId) return;
@@ -764,11 +744,9 @@
             const isConfirmed = confirm("⚠️ ATENCIÓN: ¿Estás totalmente seguro de eliminar este paciente?\n\nEsta acción borrará el registro de la nube y desaparecerá de todos los dispositivos conectados de manera permanente.");
             
             if(isConfirmed) {
-                // 1. Borrar de la memoria local
                 mainLeadsRegistry = mainLeadsRegistry.filter(l => l.id !== leadId);
                 localStorage.setItem('relax_leads_registry_local', JSON.stringify(mainLeadsRegistry));
                 
-                // 2. Ejecutar borrado nuclear en la nube Supabase
                 if (currentStorageMode === 'supabase' && supabaseClient) {
                     try {
                         const { error } = await supabaseClient
@@ -857,7 +835,8 @@
 
             phases.forEach(p => {
                 const colContainer = document.getElementById(`column-container-${p}`);
-                document.getElementById(`col-${p}`).innerHTML = '';
+                const colContent = document.getElementById(`col-${p}`);
+                if(colContent) colContent.innerHTML = '';
                 if (window.innerWidth < 1024) {
                     if (p === currentMobileColumn) colContainer.style.display = 'flex';
                     else colContainer.style.display = 'none';
@@ -930,60 +909,73 @@
                             <a href="https://wa.me/${lead.phone.replace(/[^0-9]/g, '')}" target="_blank" class="bg-emerald-600 text-white px-2 py-0.5 rounded text-[9px] font-black">WhatsApp</a>
                         </div>`;
                     
-                    document.getElementById(`col-${currentPhase}`).appendChild(card);
+                    const colEl = document.getElementById(`col-${currentPhase}`);
+                    if(colEl) colEl.appendChild(card);
                 }
             });
 
             const mContainer = document.getElementById('months-grid-container'); 
-            mContainer.innerHTML = '';
-            yearMonthsData.forEach((mData, idx) => {
-                mContainer.innerHTML += `
-                    <div onclick="triggerMonthInteractiveFilter(${idx})" class="p-2.5 rounded-xl border text-center bg-white cursor-pointer hover:border-indigo-400">
-                        <span class="block font-black text-slate-700 text-[10px] uppercase border-b pb-1 mb-1">${monthsNames[idx]}</span>
-                        <div class="text-left text-[9px] text-slate-500 space-y-0.5">
-                            <div class="flex justify-between"><span>Leads:</span> <strong class="text-slate-700">${mData.totalLeads}</strong></div>
-                            <div class="flex justify-between font-bold text-emerald-600"><span>Cobrado:</span> <strong>$${mData.totalCollected.toFixed(0)}</strong></div>
-                        </div>
-                    </div>`;
-            });
+            if(mContainer) {
+                mContainer.innerHTML = '';
+                yearMonthsData.forEach((mData, idx) => {
+                    mContainer.innerHTML += `
+                        <div onclick="triggerMonthInteractiveFilter(${idx})" class="p-2.5 rounded-xl border text-center bg-white cursor-pointer hover:border-indigo-400">
+                            <span class="block font-black text-slate-700 text-[10px] uppercase border-b pb-1 mb-1">${monthsNames[idx]}</span>
+                            <div class="text-left text-[9px] text-slate-500 space-y-0.5">
+                                <div class="flex justify-between"><span>Leads:</span> <strong class="text-slate-700">${mData.totalLeads}</strong></div>
+                                <div class="flex justify-between font-bold text-emerald-600"><span>Cobrado:</span> <strong>$${mData.totalCollected.toFixed(0)}</strong></div>
+                            </div>
+                        </div>`;
+                });
+            }
 
             const gBody = document.getElementById('goals-table-body'); 
-            gBody.innerHTML = '';
-            Object.keys(gestoresSales).forEach(g => {
-                let totCobradoMes = gestoresSales[g] || 0;
-                let totContratadoMes = gestoresContracted[g] || 0;
-                let hoyGestiones = gestoresTodayCount[g] || 0;
-                let acumuladoMesLeads = gestoresMonthTotalCount[g] || 0;
-                let metaMensualBase = metasMensualesDinamicas[g] || 0;
-                let metaDiariaBase = metasDiariasDinamicas[g] || 0;
-                let pctAvance = metaMensualBase > 0 ? Math.min(Math.round((totCobradoMes / metaMensualBase) * 100), 100) : 0;
+            if(gBody) {
+                gBody.innerHTML = '';
+                Object.keys(gestoresSales).forEach(g => {
+                    let totCobradoMes = gestoresSales[g] || 0;
+                    let totContratadoMes = gestoresContracted[g] || 0;
+                    let hoyGestiones = gestoresTodayCount[g] || 0;
+                    let acumuladoMesLeads = gestoresMonthTotalCount[g] || 0;
+                    let metaMensualBase = metasMensualesDinamicas[g] || 0;
+                    let metaDiariaBase = metasDiariasDinamicas[g] || 0;
+                    let pctAvance = metaMensualBase > 0 ? Math.min(Math.round((totCobradoMes / metaMensualBase) * 100), 100) : 0;
 
-                gBody.innerHTML += `
-                    <tr class="border-b h-12 hover:bg-slate-50/50">
-                        <td class="p-2.5 font-extrabold text-slate-800 text-left pl-4">${g}</td>
-                        <td class="p-2.5 font-bold text-slate-500">$${totContratadoMes.toFixed(0)}</td>
-                        <td class="p-2.5 font-extrabold text-emerald-600">$${totCobradoMes.toFixed(0)}</td>
-                        <td class="p-2.5 font-extrabold text-fuchsia-700">${hoyGestiones}</td>
-                        <td class="p-2.5 font-bold text-slate-700">${acumuladoMesLeads}</td>
-                        <td class="p-2.5 font-bold text-blue-600">$${metaDiariaBase}</td>
-                        <td class="p-2.5 font-bold text-indigo-600">$${metaMensualBase}</td>
-                        <td class="p-2.5">
-                            <div class="flex items-center gap-2">
-                                <div class="w-full bg-slate-200 rounded-full h-2">
-                                    <div class="bg-indigo-600 h-2 rounded-full" style="width: ${pctAvance}%"></div>
+                    gBody.innerHTML += `
+                        <tr class="border-b h-12 hover:bg-slate-50/50">
+                            <td class="p-2.5 font-extrabold text-slate-800 text-left pl-4">${g}</td>
+                            <td class="p-2.5 font-bold text-slate-500">$${totContratadoMes.toFixed(0)}</td>
+                            <td class="p-2.5 font-extrabold text-emerald-600">$${totCobradoMes.toFixed(0)}</td>
+                            <td class="p-2.5 font-extrabold text-fuchsia-700">${hoyGestiones}</td>
+                            <td class="p-2.5 font-bold text-slate-700">${acumuladoMesLeads}</td>
+                            <td class="p-2.5 font-bold text-blue-600">$${metaDiariaBase}</td>
+                            <td class="p-2.5 font-bold text-indigo-600">$${metaMensualBase}</td>
+                            <td class="p-2.5">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-full bg-slate-200 rounded-full h-2">
+                                        <div class="bg-indigo-600 h-2 rounded-full" style="width: ${pctAvance}%"></div>
+                                    </div>
+                                    <span class="font-extrabold text-slate-600">${pctAvance}%</span>
                                 </div>
-                                <span class="font-extrabold text-slate-600">${pctAvance}%</span>
-                            </div>
-                        </td>
-                    </tr>`;
-            });
+                            </td>
+                        </tr>`;
+                });
+            }
 
-            document.getElementById('kpi-pipeline').innerText = `$${pipelineSum.toFixed(2)}`;
-            document.getElementById('kpi-sales').innerText = `$${salesSum.toFixed(2)}`;
-            document.getElementById('kpi-alerts').innerText = todayAlerts;
-            phases.forEach(p => document.getElementById(`b-${p}`).innerText = phaseCounts[p]);
-            document.getElementById('kpi-scheduling-rate').innerText = `${totalLeadsBajoFiltro > 0 ? Math.round((agendasContadasBajoFiltro / totalLeadsBajoFiltro) * 100) : 0}%`;
-            document.getElementById('kpi-conversion').innerText = `${totalLeadsBajoFiltro > 0 ? Math.round((ventasContadasBajoFiltro / totalLeadsBajoFiltro) * 100) : 0}%`;
+            const kpiPipeline = document.getElementById('kpi-pipeline');
+            if(kpiPipeline) kpiPipeline.innerText = `$${pipelineSum.toFixed(2)}`;
+            const kpiSales = document.getElementById('kpi-sales');
+            if(kpiSales) kpiSales.innerText = `$${salesSum.toFixed(2)}`;
+            const kpiAlerts = document.getElementById('kpi-alerts');
+            if(kpiAlerts) kpiAlerts.innerText = todayAlerts;
+            phases.forEach(p => {
+                const b = document.getElementById(`b-${p}`);
+                if(b) b.innerText = phaseCounts[p];
+            });
+            const kpiSched = document.getElementById('kpi-scheduling-rate');
+            if(kpiSched) kpiSched.innerText = `${totalLeadsBajoFiltro > 0 ? Math.round((agendasContadasBajoFiltro / totalLeadsBajoFiltro) * 100) : 0}%`;
+            const kpiConv = document.getElementById('kpi-conversion');
+            if(kpiConv) kpiConv.innerText = `${totalLeadsBajoFiltro > 0 ? Math.round((ventasContadasBajoFiltro / totalLeadsBajoFiltro) * 100) : 0}%`;
         }
 
         async function importDataEngine(event) {
@@ -1010,29 +1002,36 @@
 
         function initPersonalizationConfig() {
             const selectAudit = document.getElementById('audit-month-selector');
-            selectAudit.innerHTML = "";
-            monthsNames.forEach((m, idx) => { 
-                let opt = document.createElement('option'); opt.value = idx + 1; opt.innerText = m;
-                if(idx + 1 === CURRENT_MONTH_NUM) opt.selected = true;
-                selectAudit.appendChild(opt);
-            });
+            if(selectAudit) {
+                selectAudit.innerHTML = "";
+                monthsNames.forEach((m, idx) => { 
+                    let opt = document.createElement('option'); opt.value = idx + 1; opt.innerText = m;
+                    if(idx + 1 === CURRENT_MONTH_NUM) opt.selected = true;
+                    selectAudit.appendChild(opt);
+                });
+            }
             buildDynamicButtonsFilters();
             renderAdvisersSettingsList();
         }
 
         function buildDynamicButtonsFilters() {
             const box = document.getElementById('managers-buttons-box');
+            if(!box) return;
             box.innerHTML = `<button onclick="setManagerFilter('all')" class="px-3 py-1 bg-slate-100 border rounded-lg font-bold">Todas</button>`;
             listadoGestores.forEach(g => {
                 box.innerHTML += `<button onclick="setManagerFilter('${g}')" class="px-3 py-1 bg-slate-100 border rounded-lg font-bold ml-1">${g}</button>`;
             });
             const selectForm = document.getElementById('form-gestor');
-            selectForm.innerHTML = "";
-            listadoGestores.forEach(g => { selectForm.innerHTML += `<option value="${g}">${g}</option>`; });
+            if(selectForm) {
+                selectForm.innerHTML = "";
+                listadoGestores.forEach(g => { selectForm.innerHTML += `<option value="${g}">${g}</option>`; });
+            }
         }
 
         function renderAdvisersSettingsList() {
-            const container = document.getElementById('advisers-config-list'); container.innerHTML = "";
+            const container = document.getElementById('advisers-config-list'); 
+            if(!container) return;
+            container.innerHTML = "";
             listadoGestores.forEach((g, idx) => {
                 container.innerHTML += `
                     <div class="p-3 bg-white border rounded-xl shadow-2xs space-y-1">
@@ -1057,10 +1056,10 @@
             if (mode === 'create') {
                 document.getElementById('crm-form').reset();
                 document.getElementById('form-id').value = "";
-                deleteBtn.classList.add('hidden'); // Ocultar si es nuevo
+                if(deleteBtn) deleteBtn.classList.add('hidden'); 
                 currentModalAbonosList = []; currentModalBitacoraList = [];
             } else {
-                deleteBtn.classList.remove('hidden'); // Mostrar si ya existe
+                if(deleteBtn) deleteBtn.classList.remove('hidden'); 
                 const lead = mainLeadsRegistry.find(l => l.id === id);
                 if(lead) {
                     document.getElementById('form-id').value = lead.id;
@@ -1080,7 +1079,9 @@
         }
 
         function renderModalAbonosList() {
-            const tbody = document.getElementById('modal-abonos-list-rows'); tbody.innerHTML = "";
+            const tbody = document.getElementById('modal-abonos-list-rows'); 
+            if(!tbody) return;
+            tbody.innerHTML = "";
             currentModalAbonosList.forEach((a, idx) => {
                 tbody.innerHTML += `<tr><td class="p-2">${a.fecha}</td><td class="p-2">${a.metodo}</td><td class="p-2 text-emerald-600 font-bold">$${a.monto}</td><td class="p-2"><button type="button" onclick="removeAbonoRecordFromModal(${idx})" class="text-rose-600">Eliminar</button></td></tr>`;
             });
@@ -1110,14 +1111,21 @@
         }
 
         function calcularFlujoAbonos() {
-            let val = parseFloat(document.getElementById('form-value').value) || 0;
+            const valInput = document.getElementById('form-value');
+            const totalAbonadoEl = document.getElementById('modal-total-abonado');
+            const saldoPendienteEl = document.getElementById('modal-saldo-pendiente');
+            if(!valInput || !totalAbonadoEl || !saldoPendienteEl) return;
+            
+            let val = parseFloat(valInput.value) || 0;
             let paid = currentModalAbonosList.reduce((s, a) => s + a.monto, 0);
-            document.getElementById('modal-total-abonado').innerText = `$${paid}`;
-            document.getElementById('modal-saldo-pendiente').innerText = `$${val - paid}`;
+            totalAbonadoEl.innerText = `$${paid}`;
+            saldoPendienteEl.innerText = `$${val - paid}`;
         }
 
         function renderModalBitacoraList() {
-            const container = document.getElementById('modal-bitacora-timeline'); container.innerHTML = "";
+            const container = document.getElementById('modal-bitacora-timeline'); 
+            if(!container) return;
+            container.innerHTML = "";
             currentModalBitacoraList.forEach(log => {
                 container.innerHTML += `<div class="p-2 bg-white border rounded-xl mb-1"><span class="text-[9px] text-slate-400 font-bold">${log.fecha}</span><p class="text-slate-700">${log.nota}</p></div>`;
             });
@@ -1141,6 +1149,15 @@
             closeModal();
             showToast("Ficha cerrada y asegurada en la red.");
         }
+        
+        function exportBackupExcel() {
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(mainLeadsRegistry);
+            XLSX.utils.book_append_sheet(wb, ws, "Pacientes");
+            XLSX.writeFile(wb, "Backup_CRM_RelaxTherapy.xlsx");
+        }
+        
+        function addNewAdviserPrompt() { alert("Funcionalidad para añadir asesora pendiente de desarrollo en esta v27.0"); }
     </script>
 </body>
 </html>
