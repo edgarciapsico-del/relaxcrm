@@ -898,8 +898,10 @@
                 if(leadMonth >= 1 && leadMonth <= 12) {
                     yearMonthsData[leadMonth - 1].totalLeads++;
                     if(currentPhase === 'agenda') yearMonthsData[leadMonth - 1].agendas++;
-                    if(currentPhase === 'venta' || currentPhase === 'postventa') yearMonthsData[leadMonth - 1].totalSalesLeads++;
-                    yearMonthsData[leadMonth - 1].totalContracted += valContrato;
+                    if(currentPhase === 'venta' || currentPhase === 'postventa') {
+                        yearMonthsData[leadMonth - 1].totalSalesLeads++;
+                        yearMonthsData[leadMonth - 1].totalContracted += valContrato;
+                    }
                     yearMonthsData[leadMonth - 1].totalCollected += totalAbonado;
                 }
 
@@ -951,7 +953,7 @@
                 }
             });
 
-            // --- PINTAR EL DASHBOARD HISTÓRICO COMERCIAL ---
+            // --- PINTAR EL DASHBOARD HISTÓRICO COMERCIAL ACTUALIZADO ---
             const mContainer = document.getElementById('months-grid-container'); 
             if(mContainer) {
                 mContainer.innerHTML = '';
@@ -965,6 +967,7 @@
                             <div class="text-left text-[9px] text-slate-500 space-y-0.5">
                                 <div class="flex justify-between"><span>Leads:</span> <strong class="text-slate-700">${mData.totalLeads}</strong></div>
                                 <div class="flex justify-between"><span>Ventas:</span> <strong class="text-slate-700">${mData.totalSalesLeads}</strong></div>
+                                <div class="flex justify-between font-bold text-blue-600"><span>Vendido:</span> <strong>$${mData.totalContracted.toFixed(0)}</strong></div>
                                 <div class="flex justify-between font-bold text-emerald-600"><span>Cobrado:</span> <strong>$${mData.totalCollected.toFixed(0)}</strong></div>
                                 <div class="flex justify-between text-indigo-600"><span>Cierre:</span> <strong>${cierreRate}%</strong></div>
                                 <div class="flex justify-between text-blue-600"><span>Agenda:</span> <strong>${agendaRate}%</strong></div>
