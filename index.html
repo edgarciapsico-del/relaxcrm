@@ -113,10 +113,6 @@
                     <i class="fa-solid fa-file-arrow-down"></i> Exportar
                 </button>
                 
-                <button onclick="confirmResetDB()" class="bg-rose-600 hover:bg-rose-700 text-white px-3.5 h-10 rounded-xl font-bold flex items-center gap-1.5 shadow-sm transition-all">
-                    <i class="fa-solid fa-trash-can"></i> Purgar Datos
-                </button>
-                
                 <button onclick="openModal('create')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 h-10 rounded-xl font-extrabold shadow-md shadow-emerald-600/15 transition-all">
                     <i class="fa-solid fa-plus mr-1"></i> Registrar Lead
                 </button>
@@ -492,9 +488,15 @@
                     </div>
                 </div>
 
-                <div class="pt-3.5 flex justify-end gap-2.5 border-t">
-                    <button type="button" onclick="closeModal()" class="px-4.5 h-11 font-bold text-slate-500 hover:text-slate-700">Cerrar Ventana</button>
-                    <button type="submit" id="btn-submit-form" class="px-6 h-11 bg-indigo-600 text-white font-extrabold rounded-xl shadow-md">Guardar Cambios</button>
+                <div class="pt-3.5 flex justify-between items-center border-t">
+                    <button type="button" onclick="deleteCurrentLead()" id="btn-delete-lead" class="px-4.5 h-11 font-bold text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-xl flex items-center gap-2 transition-all">
+                        <i class="fa-solid fa-trash-can"></i> Eliminar Ficha
+                    </button>
+                    
+                    <div class="flex gap-2.5">
+                        <button type="button" onclick="closeModal()" class="px-4.5 h-11 font-bold text-slate-500 hover:text-slate-700">Cerrar Ventana</button>
+                        <button type="submit" id="btn-submit-form" class="px-6 h-11 bg-indigo-600 text-white font-extrabold rounded-xl shadow-md">Guardar Cambios</button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -632,27 +634,21 @@
             renderApplicationCore();
         }
 
+        // SOLUCIÓN AL BUG DE DUPLICADOS: Descarga ESTRICTA desde la nube.
         async function loadDataFromCloud() {
             if(!supabaseClient) return;
             try {
                 let { data, error } = await supabaseClient.from('pacientes_crm').select('*');
                 if(error) throw error;
                 
-                let cloudLeads = data.map(item => parseRowToLead(item));
+                // Convertimos la base de la nube y REEMPLAZAMOS la local para matar los fantasmas duplicados.
+                mainLeadsRegistry = data.map(item => parseRowToLead(item));
                 
-                if(mainLeadsRegistry.length > 0) {
-                    mainLeadsRegistry.forEach(localLead => {
-                        let matchIdx = cloudLeads.findIndex(c => c.id === localLead.id);
-                        if(matchIdx === -1) cloudLeads.push(localLead); 
-                    });
-                }
-
-                mainLeadsRegistry = cloudLeads;
                 localStorage.setItem('relax_leads_registry_local', JSON.stringify(mainLeadsRegistry));
                 
                 updateStorageBadges(true);
                 renderApplicationCore();
-                showToast("Sincronización bidireccional completada.");
+                showToast("Sincronización exacta completada. Duplicados fantasma limpiados.");
             } catch(e) {
                 console.error("Error cargando desde Supabase:", e);
                 switchToLocalFallback();
@@ -670,7 +666,6 @@
                 phaseVal = 'caliente';
             }
 
-            // SEGURIDAD DE ID: Evitamos números excesivamente largos que rompen int4 en Postgres
             let safeId = parseInt(item.id);
             if(isNaN(safeId) || safeId > 2147483647) safeId = Math.floor(Math.random() * 1000000) + 50000;
 
@@ -709,7 +704,6 @@
             return lead;
         }
 
-        // MAPEO DE COLUMNAS EXACTO A TU BASE DE DATOS DE RELAX THERAPY
         function prepareLeadToRow(leadData) {
             let abos = [0,0,0,0,0];
             leadData.abonos.forEach((a, idx) => { if(idx < 5) abos[idx] = parseFloat(a.monto) || 0; });
@@ -739,7 +733,6 @@
                 try {
                     const rowPayload = prepareLeadToRow(leadData);
                     
-                    // Comprobación segura apuntando a la columna correcta 'id'
                     let { data: checkExist, error: checkErr } = await supabaseClient
                         .from('pacientes_crm')
                         .select('id')
@@ -763,7 +756,39 @@
             renderApplicationCore();
         }
 
-        // AUTO-GUARDADO INTELIGENTE (SIN CERRAR LA VENTANA)
+        // NUEVA FUNCIÓN PARA ELIMINAR REGISTROS DE RAIZ (NUBE Y LOCAL)
+        async function deleteCurrentLead() {
+            const leadId = parseInt(document.getElementById('form-id').value);
+            if(isNaN(leadId) || !leadId) return;
+
+            const isConfirmed = confirm("⚠️ ATENCIÓN: ¿Estás totalmente seguro de eliminar este paciente?\n\nEsta acción borrará el registro de la nube y desaparecerá de todos los dispositivos conectados de manera permanente.");
+            
+            if(isConfirmed) {
+                // 1. Borrar de la memoria local
+                mainLeadsRegistry = mainLeadsRegistry.filter(l => l.id !== leadId);
+                localStorage.setItem('relax_leads_registry_local', JSON.stringify(mainLeadsRegistry));
+                
+                // 2. Ejecutar borrado nuclear en la nube Supabase
+                if (currentStorageMode === 'supabase' && supabaseClient) {
+                    try {
+                        const { error } = await supabaseClient
+                            .from('pacientes_crm')
+                            .delete()
+                            .eq('id', leadId);
+                            
+                        if(error) throw error;
+                        showToast("Ficha eliminada permanentemente de la red.", "success");
+                    } catch(e) {
+                        console.error("Fallo al eliminar en Supabase:", e);
+                        showToast("Error de conexión al intentar borrar de la nube.", "error");
+                    }
+                }
+                
+                closeModal();
+                renderApplicationCore();
+            }
+        }
+
         async function autoSaveCurrentModal(notify = false) {
             if (!document.getElementById('form-name').value) return; 
 
@@ -972,7 +997,7 @@
                     const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
                     for(let row of rows) {
                         let payload = parseRowToLead(row);
-                        await saveLeadData(payload, false); // Guarda sin notificar cada uno
+                        await saveLeadData(payload, false);
                     }
                     showToast("Base importada a la nube exitosamente.");
                     renderApplicationCore();
@@ -1022,15 +1047,20 @@
         function toggleConfigPanel() { document.getElementById('config-panel').classList.toggle('hidden'); }
         function togglePendingDebtFilter() { filterOnlyPendingDebt = !filterOnlyPendingDebt; renderApplicationCore(); }
         function toggleTodayAlertsFilter() { filterOnlyTodayAlerts = !filterOnlyTodayAlerts; renderApplicationCore(); }
+        
         function closeModal() { document.getElementById('lead-modal').classList.add('hidden'); }
 
         function openModal(mode, id = null) {
             document.getElementById('lead-modal').classList.remove('hidden');
+            const deleteBtn = document.getElementById('btn-delete-lead');
+            
             if (mode === 'create') {
                 document.getElementById('crm-form').reset();
                 document.getElementById('form-id').value = "";
+                deleteBtn.classList.add('hidden'); // Ocultar si es nuevo
                 currentModalAbonosList = []; currentModalBitacoraList = [];
             } else {
+                deleteBtn.classList.remove('hidden'); // Mostrar si ya existe
                 const lead = mainLeadsRegistry.find(l => l.id === id);
                 if(lead) {
                     document.getElementById('form-id').value = lead.id;
@@ -1056,7 +1086,6 @@
             });
         }
 
-        // FUNCIONES CON AUTO-GUARDADO ACTIVO
         async function addNewAbonoRecord() {
             const amt = parseFloat(document.getElementById('new-abono-monto').value) || 0;
             const date = document.getElementById('new-abono-fecha').value;
@@ -1064,10 +1093,10 @@
             
             if(amt > 0 && date) {
                 currentModalAbonosList.push({ monto: amt, fecha: date, metodo: met });
-                document.getElementById('new-abono-monto').value = ""; // Limpia el campo
+                document.getElementById('new-abono-monto').value = ""; 
                 renderModalAbonosList(); 
                 calcularFlujoAbonos();
-                await autoSaveCurrentModal(true); // Guarda inmediatamente en la nube
+                await autoSaveCurrentModal(true); 
             } else {
                 showToast("Por favor ingresa un monto y fecha válidos.", "error");
             }
@@ -1100,7 +1129,7 @@
                 currentModalBitacoraList.unshift({ fecha: new Date().toLocaleString(), nota: note });
                 document.getElementById('new-log-desc').value = "";
                 renderModalBitacoraList();
-                await autoSaveCurrentModal(true); // Guarda inmediatamente en la nube
+                await autoSaveCurrentModal(true); 
             } else {
                 showToast("La nota no puede estar vacía.", "error");
             }
