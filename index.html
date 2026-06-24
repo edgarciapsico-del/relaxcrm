@@ -705,12 +705,14 @@
         }
 
         async function saveLeadData(leadData, notify = true) {
+            // 1. Guardar local siempre
             let idx = mainLeadsRegistry.findIndex(l => l.id === leadData.id);
             if(idx !== -1) mainLeadsRegistry[idx] = leadData;
             else mainLeadsRegistry.push(leadData);
             
             localStorage.setItem('relax_leads_registry_local', JSON.stringify(mainLeadsRegistry));
 
+            // 2. Guardar en Nube con CONTROL ESTRICTO DE ERRORES
             if (currentStorageMode === 'supabase' && supabaseClient) {
                 try {
                     const rowPayload = prepareLeadToRow(leadData);
@@ -719,19 +721,29 @@
                         .select('id')
                         .eq('id', leadData.id);
 
-                    if (checkErr) throw checkErr;
+                    if (checkErr) throw checkErr; // Lanza error si falla el SELECT
 
+                    let dbError;
                     if (checkExist && checkExist.length > 0) {
-                        await supabaseClient.from('pacientes_crm').update(rowPayload).eq('id', leadData.id);
+                        const { error } = await supabaseClient.from('pacientes_crm').update(rowPayload).eq('id', leadData.id);
+                        dbError = error;
                     } else {
-                        await supabaseClient.from('pacientes_crm').insert([rowPayload]);
+                        const { error } = await supabaseClient.from('pacientes_crm').insert([rowPayload]);
+                        dbError = error;
                     }
-                    if(notify) showToast("Guardado seguro en la nube activado.");
+
+                    // VALIDACIÓN CRUCIAL: Verificamos si hubo un error real al insertar/actualizar
+                    if (dbError) throw dbError;
+
+                    if(notify) showToast("Guardado seguro en la nube exitoso.");
                     updateStorageBadges(true);
                 } catch(e) {
-                    console.error("Error al guardar en Supabase:", e);
-                    showToast("Error de conexión a la nube. Guardado en modo local.", "error");
-                    switchToLocalFallback();
+                    console.error("ERROR AL GUARDAR EN NUBE:", e);
+                    // Avisamos al usuario con un Alert nativo para que QA pueda ver qué falló sin abrir la consola
+                    alert(`⚠️ ERROR EN LA NUBE: ${e.message || 'La base de datos rechazó la entrada'}\n\nEl dato SÍ se guardó en este dispositivo, pero NO subió a internet. Solución: Cierra esta alerta, presiona el botón 'Sincronizar' e inténtalo de nuevo.`);
+                    
+                    // IMPORTANTE: Ya NO ejecutamos switchToLocalFallback() aquí.
+                    // No queremos que el sistema se desconecte permanentemente por un solo error.
                 }
             }
             renderApplicationCore();
@@ -771,7 +783,11 @@
             if (!document.getElementById('form-name').value) return; 
 
             let modalId = parseInt(document.getElementById('form-id').value);
-            if (isNaN(modalId)) modalId = Math.floor(Math.random() * 1000000) + 50000;
+            // Generación de ID Seguro para nuevos leads
+            if (isNaN(modalId)) {
+                // Supabase int id seguro
+                modalId = Math.floor(Math.random() * 900000) + 100000;
+            }
             document.getElementById('form-id').value = modalId; 
 
             let payload = {
@@ -1058,6 +1074,8 @@
                 document.getElementById('form-id').value = "";
                 if(deleteBtn) deleteBtn.classList.add('hidden'); 
                 currentModalAbonosList = []; currentModalBitacoraList = [];
+                // Set today's date by default
+                document.getElementById('form-date').value = new Date().toISOString().slice(0, 10);
             } else {
                 if(deleteBtn) deleteBtn.classList.remove('hidden'); 
                 const lead = mainLeadsRegistry.find(l => l.id === id);
@@ -1147,7 +1165,7 @@
             e.preventDefault();
             await autoSaveCurrentModal(true);
             closeModal();
-            showToast("Ficha cerrada y asegurada en la red.");
+            showToast("Ficha cerrada y guardada.");
         }
         
         function exportBackupExcel() {
