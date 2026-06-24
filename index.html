@@ -84,7 +84,7 @@
                         RELAX THERAPY CRM 
                         <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold border border-slate-200">v27.0 Premium</span>
                     </span>
-                    <span id="sync-status" class="block text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider">
+                    <span id="sync-status" class="block text-[11px] font-extrabold text-amber-600 uppercase tracking-wider">
                         <i class="fa-solid fa-circle-notch fa-spin"></i> Conectando...
                     </span>
                 </div>
@@ -501,7 +501,6 @@
     </div>
 
     <script>
-        // CONFIGURACIÓN CORREGIDA A HTTPS EXCLUSIVO PARA REMOVER BLOQUEO MIXTO DE GITHUB
         const DB_CLOUD_URL = "https://eqhsgpwoehcryhmibfhn.supabase.co";
         const DB_CLOUD_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxaHNncHdvZWhjcnlobWliZmhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5NjQzMDAsImV4cCI6MjEwMjU0MDMwMH0.7a92b2-4c87-8143-2fed1056cc25";
 
@@ -551,21 +550,23 @@
             
             document.getElementById('db-setup-url').value = urlSetup;
             document.getElementById('db-setup-key').value = keySetup;
-            updateStorageBadges();
 
             if (currentStorageMode === 'supabase') {
                 try {
                     supabaseClient = supabase.createClient(urlSetup, keySetup);
+                    // Fuerza la actualización del banner inmediatamente al instanciar correctamente
+                    updateStorageBadges(true);
                     loadDataFromCloud();
                 } catch(e) {
                     switchToLocalFallback("Error Supabase");
                 }
             } else {
+                updateStorageBadges(false);
                 loadDataFromLocalStorage();
             }
         }
 
-        function updateStorageBadges() {
+        function updateStorageBadges(isCloudConnected = false) {
             const status = document.getElementById('sync-status');
             const badge = document.getElementById('storage-mode-badge');
             const icon = document.getElementById('storage-icon');
@@ -579,6 +580,11 @@
                 text.innerText = "Base Nube (Supabase)";
                 btnSupa.className = "px-4 py-1.5 rounded-lg text-xs font-bold bg-white text-indigo-700 shadow-2xs border border-indigo-100";
                 btnLocal.className = "px-4 py-1.5 rounded-lg text-xs font-bold text-slate-500";
+                
+                if (isCloudConnected) {
+                    status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sincronizado`;
+                    status.className = "block text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider";
+                }
             } else {
                 badge.className = "px-3 h-10 rounded-xl font-bold flex items-center gap-2 border bg-amber-50 border-amber-100 text-amber-700";
                 icon.className = "fa-solid fa-laptop text-amber-600";
@@ -617,7 +623,7 @@
 
         function switchToLocalFallback(reason = "") {
             currentStorageMode = 'local';
-            updateStorageBadges();
+            updateStorageBadges(false);
             loadDataFromLocalStorage();
         }
 
@@ -635,10 +641,7 @@
                 mainLeadsRegistry = data.map(item => parseRowToLead(item));
                 localStorage.setItem('relax_leads_registry_local', JSON.stringify(mainLeadsRegistry));
                 
-                const status = document.getElementById('sync-status');
-                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sincronizado`;
-                status.className = "block text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider";
-                
+                updateStorageBadges(true);
                 renderApplicationCore();
                 showToast("Sincronizado con la nube.");
             } catch(e) {
@@ -731,29 +734,13 @@
                         await supabaseClient.from('pacientes_crm').insert([rowPayload]);
                     }
                     showToast("Guardado y sincronizado en la Nube.");
+                    updateStorageBadges(true);
                 } catch(e) {
                     console.error("Falla de red en Cloud:", e);
                     switchToLocalFallback();
                 }
             }
             renderApplicationCore();
-        }
-
-        // DRAG AND DROP
-        function handleDragStart(e, id) { e.dataTransfer.setData("text/plain", id); }
-        function handleDragOver(e) { e.preventDefault(); }
-        function handleDragEnter(e, columnId) { document.getElementById(`column-container-${columnId}`).classList.add('drag-over'); }
-        function handleDragLeave(e, columnId) { document.getElementById(`column-container-${columnId}`).classList.remove('drag-over'); }
-        async function handleDrop(e, targetPhase) {
-            e.preventDefault();
-            document.getElementById(`column-container-${targetPhase}`).classList.remove('drag-over');
-            const id = e.dataTransfer.getData("text/plain");
-            const lead = mainLeadsRegistry.find(l => l.id === parseInt(id));
-            if (lead && lead.phase !== targetPhase) {
-                lead.phase = targetPhase;
-                lead.bitacora.unshift({ fecha: new Date().toLocaleString(), asesora: "Sistema", nota: `Cambio de fase a ${targetPhase.toUpperCase()}` });
-                await saveLeadData(lead);
-            }
         }
 
         function switchMobileColumn(columnId) {
