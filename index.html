@@ -704,7 +704,6 @@
         function prepareLeadToRow(leadData) {
             let abos = [0,0,0,0,0];
             
-            // Verificamos que el arreglo de abonos exista y lo limpiamos
             if (leadData.abonos && Array.isArray(leadData.abonos)) {
                 leadData.abonos.forEach((a, idx) => { 
                     if(idx < 5) abos[idx] = safeNum(a.monto); 
@@ -864,7 +863,9 @@
             let gestoresSales = {}, gestoresContracted = {}, gestoresTodayCount = {}, gestoresMonthTotalCount = {};
             listadoGestores.forEach(g => { gestoresSales[g] = 0; gestoresContracted[g] = 0; gestoresTodayCount[g] = 0; gestoresMonthTotalCount[g] = 0; });
             
-            let yearMonthsData = Array.from({ length: 12 }, () => ({ totalLeads: 0, totalSalesLeads: 0, totalContracted: 0, totalCollected: 0 }));
+            // --- NUEVA LÓGICA DE TABLERO DE TASAS ---
+            let yearMonthsData = Array.from({ length: 12 }, () => ({ totalLeads: 0, totalSalesLeads: 0, totalContracted: 0, totalCollected: 0, agendas: 0 }));
+            
             let selectedAuditMonth = parseInt(document.getElementById('audit-month-selector').value) || CURRENT_MONTH_NUM;
 
             phases.forEach(p => {
@@ -893,8 +894,10 @@
                     if(parts.length === 3) leadMonth = parseInt(parts[1]);
                 }
 
+                // LLENAR DATOS DEL HISTORIAL DE TASAS
                 if(leadMonth >= 1 && leadMonth <= 12) {
                     yearMonthsData[leadMonth - 1].totalLeads++;
+                    if(currentPhase === 'agenda') yearMonthsData[leadMonth - 1].agendas++;
                     if(currentPhase === 'venta' || currentPhase === 'postventa') yearMonthsData[leadMonth - 1].totalSalesLeads++;
                     yearMonthsData[leadMonth - 1].totalContracted += valContrato;
                     yearMonthsData[leadMonth - 1].totalCollected += totalAbonado;
@@ -948,16 +951,23 @@
                 }
             });
 
+            // --- PINTAR EL DASHBOARD HISTÓRICO COMERCIAL ---
             const mContainer = document.getElementById('months-grid-container'); 
             if(mContainer) {
                 mContainer.innerHTML = '';
                 yearMonthsData.forEach((mData, idx) => {
+                    let cierreRate = mData.totalLeads > 0 ? Math.round((mData.totalSalesLeads / mData.totalLeads) * 100) : 0;
+                    let agendaRate = mData.totalLeads > 0 ? Math.round((mData.agendas / mData.totalLeads) * 100) : 0;
+
                     mContainer.innerHTML += `
                         <div onclick="triggerMonthInteractiveFilter(${idx})" class="p-2.5 rounded-xl border text-center bg-white cursor-pointer hover:border-indigo-400">
                             <span class="block font-black text-slate-700 text-[10px] uppercase border-b pb-1 mb-1">${monthsNames[idx]}</span>
                             <div class="text-left text-[9px] text-slate-500 space-y-0.5">
                                 <div class="flex justify-between"><span>Leads:</span> <strong class="text-slate-700">${mData.totalLeads}</strong></div>
+                                <div class="flex justify-between"><span>Ventas:</span> <strong class="text-slate-700">${mData.totalSalesLeads}</strong></div>
                                 <div class="flex justify-between font-bold text-emerald-600"><span>Cobrado:</span> <strong>$${mData.totalCollected.toFixed(0)}</strong></div>
+                                <div class="flex justify-between text-indigo-600"><span>Cierre:</span> <strong>${cierreRate}%</strong></div>
+                                <div class="flex justify-between text-blue-600"><span>Agenda:</span> <strong>${agendaRate}%</strong></div>
                             </div>
                         </div>`;
                 });
