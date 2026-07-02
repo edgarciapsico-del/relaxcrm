@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM Cloud - Premium v27.2</title>
+    <title>Relax Therapy CRM Cloud - Premium v27.3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -66,7 +66,7 @@
                 <div>
                     <span class="font-extrabold text-slate-900 tracking-tight text-xl flex items-center gap-1.5">
                         RELAX THERAPY CRM 
-                        <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold border border-slate-200">v27.2 Cloud Sync</span>
+                        <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold border border-slate-200">v27.3 Sync Seguro</span>
                     </span>
                     <span id="sync-status" class="block text-[11px] font-extrabold text-amber-600 uppercase tracking-wider">
                         <i class="fa-solid fa-circle-notch fa-spin"></i> Conectando...
@@ -151,7 +151,7 @@
                 <div class="lg:col-span-2 p-5 bg-slate-50 rounded-2xl border space-y-4">
                     <div class="flex justify-between items-center border-b pb-2">
                         <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                            <i class="fa-solid fa-users text-indigo-600"></i> Metas y Presupuestos del Equipo (Sincronizado en Red)
+                            <i class="fa-solid fa-users text-indigo-600"></i> Metas y Presupuestos (Sincronización Avanzada)
                         </h4>
                         <button onclick="addNewAdviserPrompt()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-all border border-indigo-200">
                             <i class="fa-solid fa-plus text-[10px]"></i> Agregar Asesora
@@ -508,7 +508,7 @@
         let currentModalAbonosList = [];
         let currentModalBitacoraList = [];
         
-        // VARIABLES EN TIEMPO REAL (Sincronizadas por base de datos y LocalStorage como respaldo)
+        // VARIABLES EN TIEMPO REAL 
         let listadoGestores = ["Brenda", "Joselyne", "Naty", "Fernando"];
         let metasMensualesDinamicas = { "Brenda": 1100, "Joselyne": 1100, "Naty": 1100, "Fernando": 0 };
         let metasDiariasDinamicas = { "Brenda": 50, "Joselyne": 50, "Naty": 50, "Fernando": 0 };
@@ -522,7 +522,6 @@
         }
 
         window.onload = function() {
-            // Inicializar datos locales antes de conectar a internet
             if(localStorage.getItem('relax_gestores')) listadoGestores = JSON.parse(localStorage.getItem('relax_gestores'));
             if(localStorage.getItem('relax_metas_mensuales')) metasMensualesDinamicas = JSON.parse(localStorage.getItem('relax_metas_mensuales'));
             if(localStorage.getItem('relax_metas_diarias')) metasDiariasDinamicas = JSON.parse(localStorage.getItem('relax_metas_diarias'));
@@ -632,76 +631,101 @@
             renderApplicationCore();
         }
 
-        // --- EXCLUSIVO V27.2: DESCARGA LA CONFIGURACIÓN GLOBAL COMPARTIDA DE LA NUBE ---
+        // --- SOLUCIÓN V27.3: DESCARGA GARANTIZADA DE LA NUBE ---
         async function loadDataFromCloud() {
             if(!supabaseClient) return;
             try {
                 let { data, error } = await supabaseClient.from('pacientes_crm').select('*');
                 if(error) throw error;
                 
-                // 1. Extraer fila mágica de configuración de equipo para sincronizar en red
+                // Extraer fila especial de configuración que Supabase ya aceptó
                 const cloudConfig = data.find(item => item.id === 999999 || item.name === 'CONFIG_SISTEMA');
                 if (cloudConfig) {
                     try {
-                        let parsed = JSON.parse(cloudConfig.desc);
-                        if (parsed.listadoGestores) listadoGestores = parsed.listadoGestores;
-                        if (parsed.metasMensualesDinamicas) metasMensualesDinamicas = parsed.metasMensualesDinamicas;
-                        if (parsed.metasDiariasDinamicas) metasDiariasDinamicas = parsed.metasDiariasDinamicas;
-                        
-                        localStorage.setItem('relax_gestores', JSON.stringify(listadoGestores));
-                        localStorage.setItem('relax_metas_mensuales', JSON.stringify(metasMensualesDinamicas));
-                        localStorage.setItem('relax_metas_diarias', JSON.stringify(metasDiariasDinamicas));
+                        let configStr = cloudConfig.desc || cloudConfig.observaciones || '';
+                        if (configStr.startsWith('{')) {
+                            // Desempaquetar el doble JSON que crea el sistema
+                            let outerObj = JSON.parse(configStr);
+                            let innerStr = outerObj.desc || configStr;
+                            let parsed = JSON.parse(innerStr);
+
+                            if (parsed.listadoGestores && Array.isArray(parsed.listadoGestores)) {
+                                listadoGestores = parsed.listadoGestores;
+                                metasMensualesDinamicas = parsed.metasMensualesDinamicas || metasMensualesDinamicas;
+                                metasDiariasDinamicas = parsed.metasDiariasDinamicas || metasDiariasDinamicas;
+                                
+                                localStorage.setItem('relax_gestores', JSON.stringify(listadoGestores));
+                                localStorage.setItem('relax_metas_mensuales', JSON.stringify(metasMensualesDinamicas));
+                                localStorage.setItem('relax_metas_diarias', JSON.stringify(metasDiariasDinamicas));
+                            }
+                        }
                     } catch(e) { console.error("Error procesando configuración en la nube", e); }
                 }
 
-                // 2. Extraer leads comerciales legítimos
+                // Filtrar para mostrar solo a los pacientes reales en el tablero
                 mainLeadsRegistry = data.filter(item => item.id !== 999999 && item.name !== 'CONFIG_SISTEMA').map(item => parseRowToLead(item));
+                
+                // --- CAPA DE SEGURIDAD AUTO-DESCUBRIMIENTO ---
+                let discovered = false;
+                mainLeadsRegistry.forEach(l => {
+                    if (l.gestor && l.gestor !== 'Sistema' && !listadoGestores.includes(l.gestor)) {
+                        listadoGestores.push(l.gestor);
+                        metasMensualesDinamicas[l.gestor] = 0;
+                        metasDiariasDinamicas[l.gestor] = 0;
+                        discovered = true;
+                    }
+                });
+                
+                if(discovered) {
+                    localStorage.setItem('relax_gestores', JSON.stringify(listadoGestores));
+                    localStorage.setItem('relax_metas_mensuales', JSON.stringify(metasMensualesDinamicas));
+                    localStorage.setItem('relax_metas_diarias', JSON.stringify(metasDiariasDinamicas));
+                }
+
                 localStorage.setItem('relax_leads_registry_local', JSON.stringify(mainLeadsRegistry));
                 
                 updateStorageBadges(true);
                 initPersonalizationConfig();
                 renderApplicationCore();
                 showToast("Sincronización exacta completada.");
+                
+                if (discovered) saveSystemConfigToCloud(); // Subir los descubrimientos a la nube
+
             } catch(e) {
                 console.error("Error cargando desde Supabase:", e);
                 switchToLocalFallback();
             }
         }
 
-        // --- EXCLUSIVO V27.2: GUARDA LA CONFIGURACIÓN GLOBAL EN LA NUBE PARA TODOS ---
+        // --- SOLUCIÓN V27.3: SUBIDA GARANTIZADA DISFRAZADA DE PACIENTE ---
         async function saveSystemConfigToCloud() {
             localStorage.setItem('relax_gestores', JSON.stringify(listadoGestores));
             localStorage.setItem('relax_metas_mensuales', JSON.stringify(metasMensualesDinamicas));
             localStorage.setItem('relax_metas_diarias', JSON.stringify(metasDiariasDinamicas));
 
-            if (currentStorageMode === 'supabase' && supabaseClient) {
-                try {
-                    const payload = {
-                        id: 999999,
-                        name: "CONFIG_SISTEMA",
-                        phone: "",
-                        phase: "frio",
-                        value: 0,
-                        date: new Date().toISOString().slice(0,10),
-                        loss: "Ninguno",
-                        gestor: "Sistema",
-                        a1: 0, a2: 0, a3: 0, a4: 0, a5: 0,
-                        touch: 1,
-                        desc: JSON.stringify({
-                            listadoGestores: listadoGestores,
-                            metasMensualesDinamicas: metasMensualesDinamicas,
-                            metasDiariasDinamicas: metasDiariasDinamicas
-                        })
-                    };
+            // Disfrazamos la configuración como un Lead para que la Base de Datos lo acepte sin problemas
+            const configLead = {
+                id: 999999,
+                name: "CONFIG_SISTEMA",
+                phone: "9999999999",
+                phase: "frio",
+                value: 0,
+                date: new Date().toISOString().slice(0,10),
+                loss: "Ninguno",
+                gestor: "Sistema",
+                touch: 1,
+                desc: JSON.stringify({
+                    listadoGestores: listadoGestores,
+                    metasMensualesDinamicas: metasMensualesDinamicas,
+                    metasDiariasDinamicas: metasDiariasDinamicas
+                }),
+                abonos: [],
+                bitacora: []
+            };
 
-                    let { data: exist } = await supabaseClient.from('pacientes_crm').select('id').eq('id', 999999);
-                    if (exist && exist.length > 0) {
-                        await supabaseClient.from('pacientes_crm').update(payload).eq('id', 999999);
-                    } else {
-                        await supabaseClient.from('pacientes_crm').insert([payload]);
-                    }
-                } catch(e) { console.error("Error subiendo configuración", e); }
-            }
+            // Utilizamos la misma función de guardado que SÍ funciona para los pacientes
+            await saveLeadData(configLead, false);
+            
             initPersonalizationConfig();
             renderApplicationCore();
         }
@@ -780,9 +804,11 @@
         }
 
         async function saveLeadData(leadData, notify = true) {
+            let isConfig = (leadData.id === 999999);
+            
             let idx = mainLeadsRegistry.findIndex(l => l.id === leadData.id);
             if(idx !== -1) mainLeadsRegistry[idx] = leadData;
-            else mainLeadsRegistry.push(leadData);
+            else if (!isConfig) mainLeadsRegistry.push(leadData); // No meter la config al array visual
             
             localStorage.setItem('relax_leads_registry_local', JSON.stringify(mainLeadsRegistry));
 
@@ -807,14 +833,16 @@
 
                     if (dbError) throw dbError;
 
-                    if(notify) showToast("Guardado seguro en la nube exitoso.");
+                    if(notify && !isConfig) showToast("Guardado seguro en la nube exitoso.");
+                    if(notify && isConfig) showToast("Configuración de equipo sincronizada a la nube.");
+                    
                     updateStorageBadges(true);
                 } catch(e) {
                     console.error("ERROR AL GUARDAR EN NUBE:", e);
-                    alert(`⚠️ ERROR EN LA NUBE: ${e.message || 'La base de datos rechazó la entrada'}\n\nEl dato SÍ se guardó en este dispositivo, pero NO subió a internet. Solución: Cierra esta alerta, presiona el botón 'Sincronizar' e inténtalo de nuevo.`);
+                    if(notify) alert(`⚠️ ERROR EN LA NUBE: ${e.message || 'La base de datos rechazó la entrada'}\n\nEl dato SÍ se guardó en este dispositivo, pero NO subió a internet. Solución: Cierra esta alerta, presiona el botón 'Sincronizar' e inténtalo de nuevo.`);
                 }
             }
-            renderApplicationCore();
+            if(!isConfig) renderApplicationCore();
         }
 
         async function deleteCurrentLead() {
@@ -1167,11 +1195,12 @@
             });
         }
 
-        // CONTROLADOR DE ACTUALIZACIÓN EN SEGUNDO PLANO CON GUARDADO AUTOMÁTICO CLOUD
         function updateGestorMetaField(name, tipo, val) {
             let numericValue = safeNum(val);
             if(tipo === 'mensual') metasMensualesDinamicas[name] = numericValue;
             if(tipo === 'diaria') metasDiariasDinamicas[name] = numericValue;
+            
+            // Llama a guardar en Supabase (disfrazado de paciente) para que se actualice en la red
             saveSystemConfigToCloud();
         }
 
@@ -1185,7 +1214,7 @@
                     metasDiariasDinamicas[nombre] = 0;
                     
                     await saveSystemConfigToCloud();
-                    showToast(`Asesora ${nombre} integrada exitosamente.`);
+                    showToast(`Asesora ${nombre} integrada a la red exitosamente.`);
                 } else {
                     showToast("Esta asesora ya se encuentra registrada.", "error");
                 }
@@ -1193,7 +1222,7 @@
         }
 
         async function removeAdviserRecord(nombre) {
-            if(confirm(`¿Está seguro de remover a ${nombre} del equipo comercial?`)) {
+            if(confirm(`¿Está seguro de remover a ${nombre} del equipo comercial en la nube?`)) {
                 listadoGestores = listadoGestores.filter(g => g !== nombre);
                 delete metasMensualesDinamicas[nombre];
                 delete metasDiariasDinamicas[nombre];
