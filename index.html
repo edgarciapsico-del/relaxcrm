@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM Cloud - Premium v27.0</title>
+    <title>Relax Therapy CRM Cloud - Premium v27.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -66,7 +66,7 @@
                 <div>
                     <span class="font-extrabold text-slate-900 tracking-tight text-xl flex items-center gap-1.5">
                         RELAX THERAPY CRM 
-                        <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold border border-slate-200">v27.0 Premium</span>
+                        <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold border border-slate-200">v27.1 Premium</span>
                     </span>
                     <span id="sync-status" class="block text-[11px] font-extrabold text-amber-600 uppercase tracking-wider">
                         <i class="fa-solid fa-circle-notch fa-spin"></i> Conectando...
@@ -296,7 +296,7 @@
             </div>
 
             <div id="column-container-caliente" class="kanban-column bg-slate-100 p-3.5 rounded-2xl flex flex-col flex-shrink-0 min-h-[550px] border border-slate-200/80" ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event, 'caliente')" ondragleave="handleDragLeave(event, 'caliente')" ondrop="handleDrop(event, 'caliente')">
-                <div class="flex items-center justify-between mb-3.5 px-1 font-extrabold text-xs uppercase text-slate-600">
+                <div class="flex items-center justify-between mb-3.5 px-1 font-extrabold text-xs uppercase text-rose-500">
                     <span><i class="fa-solid fa-fire-flame-curved text-rose-500"></i> Leads Caliente</span>
                     <span id="b-caliente" class="bg-white text-slate-600 px-2 py-0.5 rounded-md border font-extrabold">0</span>
                 </div>
@@ -508,14 +508,13 @@
         let currentModalAbonosList = [];
         let currentModalBitacoraList = [];
         
-        let listadoGestores = ["Brenda", "Joselyne", "Naty", "Fernando"];
-        let metasMensualesDinamicas = { "Brenda": 1100, "Joselyne": 1100, "Naty": 1100, "Fernando": 0 };
-        let metasDiariasDinamicas = { "Brenda": 50, "Joselyne": 50, "Naty": 50, "Fernando": 0 };
+        // --- UPGRADE: CARGA DINÁMICA DE GESTORES Y METAS DESDE LOCALSTORAGE ---
+        let listadoGestores = JSON.parse(localStorage.getItem('relax_gestores')) || ["Brenda", "Joselyne", "Naty", "Fernando"];
+        let metasMensualesDinamicas = JSON.parse(localStorage.getItem('relax_metas_mensuales')) || { "Brenda": 1100, "Joselyne": 1100, "Naty": 1100, "Fernando": 0 };
+        let metasDiariasDinamicas = JSON.parse(localStorage.getItem('relax_metas_diarias')) || { "Brenda": 50, "Joselyne": 50, "Naty": 50, "Fernando": 0 };
+        
         const monthsNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
-        // =========================================================
-        // ESCUDO ANTI-NaN (NUEVA FUNCIÓN DE SEGURIDAD)
-        // =========================================================
         function safeNum(val) {
             if (val === null || val === undefined || val === '') return 0;
             let parsed = parseFloat(val);
@@ -634,7 +633,6 @@
                 if(error) throw error;
                 
                 mainLeadsRegistry = data.map(item => parseRowToLead(item));
-                
                 localStorage.setItem('relax_leads_registry_local', JSON.stringify(mainLeadsRegistry));
                 
                 updateStorageBadges(true);
@@ -646,9 +644,6 @@
             }
         }
 
-        // =================================================
-        // APLICANDO ESCUDO AL PARSEAR DATOS DESDE LA NUBE
-        // =================================================
         function parseRowToLead(item) {
             let nameVal = String(item.name || item.nombre || '');
             let phaseVal = String(item.phase || item.estado || 'frio').toLowerCase().trim();
@@ -698,9 +693,6 @@
             return lead;
         }
 
-        // =================================================
-        // APLICANDO ESCUDO ANTES DE ENVIAR A LA NUBE
-        // =================================================
         function prepareLeadToRow(leadData) {
             let abos = [0,0,0,0,0];
             
@@ -793,9 +785,6 @@
             }
         }
 
-        // =================================================
-        // APLICANDO ESCUDO AL LEER DEL FORMULARIO
-        // =================================================
         async function autoSaveCurrentModal(notify = false) {
             if (!document.getElementById('form-name').value) return; 
 
@@ -854,6 +843,9 @@
             renderApplicationCore();
         }
 
+        // =========================================================
+        // CORE INTEGRADO CON EL CONTEO EXACTO DE GESTIÓN DIARIA
+        // =========================================================
         function renderApplicationCore() {
             const phases = ['frio', 'tibio', 'caliente', 'agenda', 'venta', 'postventa'];
             let pipelineSum = 0, salesSum = 0, todayAlerts = 0;
@@ -863,7 +855,6 @@
             let gestoresSales = {}, gestoresContracted = {}, gestoresTodayCount = {}, gestoresMonthTotalCount = {};
             listadoGestores.forEach(g => { gestoresSales[g] = 0; gestoresContracted[g] = 0; gestoresTodayCount[g] = 0; gestoresMonthTotalCount[g] = 0; });
             
-            // --- NUEVA LÓGICA DE TABLERO DE TASAS ---
             let yearMonthsData = Array.from({ length: 12 }, () => ({ totalLeads: 0, totalSalesLeads: 0, totalContracted: 0, totalCollected: 0, agendas: 0 }));
             
             let selectedAuditMonth = parseInt(document.getElementById('audit-month-selector').value) || CURRENT_MONTH_NUM;
@@ -894,7 +885,6 @@
                     if(parts.length === 3) leadMonth = parseInt(parts[1]);
                 }
 
-                // LLENAR DATOS DEL HISTORIAL DE TASAS
                 if(leadMonth >= 1 && leadMonth <= 12) {
                     yearMonthsData[leadMonth - 1].totalLeads++;
                     if(currentPhase === 'agenda') yearMonthsData[leadMonth - 1].agendas++;
@@ -910,6 +900,25 @@
                     gestoresSales[gName] += totalAbonado; 
                     gestoresContracted[gName] += valContrato; 
                     gestoresMonthTotalCount[gName]++;
+                }
+
+                // --- MEJORA 2: CÁLCULO SEGURO Y ACUMULATIVO DE GESTIÓN DIARIA ---
+                if (lead.bitacora && Array.isArray(lead.bitacora)) {
+                    lead.bitacora.forEach(log => {
+                        if (log.fecha) {
+                            let logDate = new Date(log.fecha);
+                            if (!isNaN(logDate.getTime())) {
+                                let today = new Date();
+                                if (logDate.getDate() === today.getDate() && 
+                                    logDate.getMonth() === today.getMonth() && 
+                                    logDate.getFullYear() === today.getFullYear()) {
+                                    if (gestoresTodayCount[gName] !== undefined) {
+                                        gestoresTodayCount[gName]++;
+                                    }
+                                }
+                            }
+                        }
+                    });
                 }
 
                 const matchesManager = (currentManagerFilter === 'all' || lead.gestor === currentManagerFilter);
@@ -953,7 +962,6 @@
                 }
             });
 
-            // --- PINTAR EL DASHBOARD HISTÓRICO COMERCIAL ACTUALIZADO ---
             const mContainer = document.getElementById('months-grid-container'); 
             if(mContainer) {
                 mContainer.innerHTML = '';
@@ -1075,16 +1083,80 @@
             }
         }
 
+        // --- MEJORA 1: PANEL TOTALMENTE DINÁMICO E INTERACTIVO PARA METAS Y ASESORAS ---
         function renderAdvisersSettingsList() {
             const container = document.getElementById('advisers-config-list'); 
             if(!container) return;
             container.innerHTML = "";
             listadoGestores.forEach((g, idx) => {
                 container.innerHTML += `
-                    <div class="p-3 bg-white border rounded-xl shadow-2xs space-y-1">
-                        <div class="flex justify-between font-extrabold text-slate-800 uppercase text-xs"><span>${g}</span></div>
+                    <div class="p-3 bg-white border rounded-xl shadow-2xs space-y-2 border-slate-200">
+                        <div class="flex justify-between items-center font-extrabold text-slate-800 uppercase text-xs">
+                            <span>${g}</span>
+                            <button onclick="removeAdviserRecord('${g}')" class="text-rose-600 hover:text-rose-800 text-[10px] font-black"><i class="fa-solid fa-trash"></i> Quitar</button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-[11px]">
+                            <div>
+                                <label class="block text-[9px] font-black text-slate-400 uppercase">Meta Diaria ($)</label>
+                                <input type="number" value="${metasDiariasDinamicas[g] || 0}" oninput="updateGestorMeta('${g}', 'diaria', this.value)" class="w-full px-2 py-1 border rounded bg-slate-50 font-bold focus:outline-hidden">
+                            </div>
+                            <div>
+                                <label class="block text-[9px] font-black text-slate-400 uppercase">Meta Mensual ($)</label>
+                                <input type="number" value="${metasMensualesDinamicas[g] || 0}" oninput="updateGestorMeta('${g}', 'mensual', this.value)" class="w-full px-2 py-1 border rounded bg-slate-50 font-bold focus:outline-hidden">
+                            </div>
+                        </div>
                     </div>`;
             });
+        }
+
+        function updateGestorMeta(name, tipo, val) {
+            let numericValue = safeNum(val);
+            if(tipo === 'mensual') metasMensualesDinamicas[name] = numericValue;
+            if(tipo === 'diaria') metasDiariasDinamicas[name] = numericValue;
+            
+            localStorage.setItem('relax_metas_mensuales', JSON.stringify(metasMensualesDinamicas));
+            localStorage.setItem('relax_metas_diarias', JSON.stringify(metasDiariasDinamicas));
+            renderApplicationCore();
+        }
+
+        function addNewAdviserPrompt() {
+            let nombre = prompt("Ingrese el nombre completo de la nueva asesora comercial:");
+            if(nombre && nombre.trim() !== "") {
+                nombre = nombre.trim();
+                if(!listadoGestores.includes(nombre)) {
+                    listadoGestores.push(nombre);
+                    metasMensualesDinamicas[nombre] = 0;
+                    metasDiariasDinamicas[nombre] = 0;
+                    
+                    localStorage.setItem('relax_gestores', JSON.stringify(listadoGestores));
+                    localStorage.setItem('relax_metas_mensuales', JSON.stringify(metasMensualesDinamicas));
+                    localStorage.setItem('relax_metas_diarias', JSON.stringify(metasDiariasDinamicas));
+                    
+                    buildDynamicButtonsFilters();
+                    renderAdvisersSettingsList();
+                    renderApplicationCore();
+                    showToast(`Asesora ${nombre} integrada exitosamente.`);
+                } else {
+                    showToast("Esta asesora ya se encuentra registrada.", "error");
+                }
+            }
+        }
+
+        function removeAdviserRecord(nombre) {
+            if(confirm(`¿Está seguro de remover a ${nombre} del equipo comercial?`)) {
+                listadoGestores = listadoGestores.filter(g => g !== nombre);
+                delete metasMensualesDinamicas[nombre];
+                delete metasDiariasDinamicas[nombre];
+                
+                localStorage.setItem('relax_gestores', JSON.stringify(listadoGestores));
+                localStorage.setItem('relax_metas_mensuales', JSON.stringify(metasMensualesDinamicas));
+                localStorage.setItem('relax_metas_diarias', JSON.stringify(metasDiariasDinamicas));
+                
+                buildDynamicButtonsFilters();
+                renderAdvisersSettingsList();
+                renderApplicationCore();
+                showToast(`Asesora ${nombre} removida.`);
+            }
         }
 
         function setManagerFilter(m) { currentManagerFilter = m; renderApplicationCore(); }
@@ -1135,9 +1207,6 @@
             });
         }
 
-        // =================================================
-        // APLICANDO ESCUDO AL NUEVO ABONO Y CÁLCULOS
-        // =================================================
         async function addNewAbonoRecord() {
             const amt = safeNum(document.getElementById('new-abono-monto').value);
             const date = document.getElementById('new-abono-fecha').value;
@@ -1207,8 +1276,6 @@
             XLSX.utils.book_append_sheet(wb, ws, "Pacientes");
             XLSX.writeFile(wb, "Backup_CRM_RelaxTherapy.xlsx");
         }
-        
-        function addNewAdviserPrompt() { alert("Funcionalidad para añadir asesora pendiente de desarrollo en esta v27.0"); }
     </script>
 </body>
 </html>
