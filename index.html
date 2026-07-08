@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM Cloud - Premium v27.3</title>
+    <title>Relax Therapy CRM Cloud - Premium v27.5</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -66,7 +66,7 @@
                 <div>
                     <span class="font-extrabold text-slate-900 tracking-tight text-xl flex items-center gap-1.5">
                         RELAX THERAPY CRM 
-                        <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold border border-slate-200">v27.3 Sync Seguro</span>
+                        <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold border border-slate-200">v27.5 Fix Absoluto</span>
                     </span>
                     <span id="sync-status" class="block text-[11px] font-extrabold text-amber-600 uppercase tracking-wider">
                         <i class="fa-solid fa-circle-notch fa-spin"></i> Conectando...
@@ -220,7 +220,7 @@
             <div class="bg-slate-50 p-4.5 rounded-xl border border-slate-200 space-y-3">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b pb-2">
                     <h4 class="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-trophy text-amber-500"></i> Rendimiento Comercial de Asesoras
+                        <i class="fa-solid fa-trophy text-amber-500"></i> Dashboard Diario: Trazabilidad Comercial y Ventas
                     </h4>
                     <div class="flex items-center gap-2 text-xs">
                         <span class="text-[11px] text-slate-400 font-bold uppercase">Mes Evaluado:</span>
@@ -232,13 +232,14 @@
                         <thead>
                             <tr class="bg-slate-800 text-white font-extrabold uppercase text-center border-b">
                                 <th class="p-3.5 text-left font-bold">Asesora</th>
-                                <th class="p-3.5 font-bold">Contratado ($)</th>
-                                <th class="p-3.5 font-bold">Cobrado Real ($)</th>
-                                <th class="p-3.5 bg-fuchsia-900 text-fuchsia-100 font-bold">Gestiones Hoy</th>
-                                <th class="p-3.5 font-bold">Leads Atendidos</th>
+                                <th class="p-3.5 bg-emerald-900 text-emerald-100 font-bold border-r border-emerald-800" title="Cobros registrados el día de hoy">💰 Venta Hoy ($)</th>
+                                <th class="p-3.5 bg-fuchsia-900 text-fuchsia-100 font-bold border-r border-fuchsia-800" title="Llamadas, agendas o mensajes de hoy">📱 Gestiones Hoy</th>
+                                <th class="p-3.5 font-bold">Cobrado Mes ($)</th>
+                                <th class="p-3.5 font-bold">Contratado Mes ($)</th>
+                                <th class="p-3.5 font-bold bg-indigo-50 text-indigo-800" title="Total de Gestiones (Bitácora) en el mes">📋 Gestiones Mes</th>
                                 <th class="p-3.5 font-bold">Meta Diaria</th>
                                 <th class="p-3.5 font-bold">Meta Mensual</th>
-                                <th class="p-3.5 w-60 font-bold text-left">Progreso de Ventas</th>
+                                <th class="p-3.5 w-48 font-bold text-left">Progreso Mensual</th>
                             </tr>
                         </thead>
                         <tbody id="goals-table-body" class="text-center font-medium divide-y divide-slate-100"></tbody>
@@ -392,7 +393,7 @@
                 </div>
 
                 <div class="bg-slate-50 p-4.5 rounded-xl border space-y-4">
-                    <span class="block text-xs font-black text-slate-800 uppercase tracking-wider"><i class="fa-solid fa-wallet text-emerald-600"></i> Control de Abonos</span>
+                    <span class="block text-xs font-black text-slate-800 uppercase tracking-wider"><i class="fa-solid fa-wallet text-emerald-600"></i> Control de Abonos y Ventas</span>
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-3 bg-white p-3 rounded-xl border items-end">
                         <div>
                             <label class="block text-[10px] font-bold text-slate-500 mb-1">Monto ($)</label>
@@ -444,8 +445,8 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="bg-slate-50 p-4.5 rounded-xl border space-y-3">
-                        <span class="block text-xs font-black text-slate-800 uppercase tracking-wider">Nueva Gestión</span>
-                        <textarea id="new-log-desc" rows="3" placeholder="Descripción de la llamada..." class="w-full p-2.5 bg-white border border-slate-200 rounded-xl focus:outline-hidden"></textarea>
+                        <span class="block text-xs font-black text-slate-800 uppercase tracking-wider">Nueva Gestión Diaria</span>
+                        <textarea id="new-log-desc" rows="3" placeholder="Descripción de la llamada, mensaje o agenda..." class="w-full p-2.5 bg-white border border-slate-200 rounded-xl focus:outline-hidden"></textarea>
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block font-bold text-slate-500 mb-1">Resultado</label>
@@ -463,11 +464,11 @@
                                 <input type="number" id="form-touch" value="1" min="1" class="w-full px-3 h-9 bg-white border rounded-xl font-bold text-center">
                             </div>
                         </div>
-                        <button type="button" onclick="registerNewLog()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white h-9 rounded-xl font-bold shadow-sm transition-all">Registrar Nota</button>
+                        <button type="button" onclick="registerNewLog()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white h-9 rounded-xl font-bold shadow-sm transition-all">Guardar Gestión</button>
                     </div>
 
                     <div class="bg-slate-50 p-4.5 rounded-xl border flex flex-col h-[270px]">
-                        <span class="block text-xs font-black text-slate-800 uppercase tracking-wider mb-2">Historial de Contactos</span>
+                        <span class="block text-xs font-black text-slate-800 uppercase tracking-wider mb-2">Historial de Contactos (Bitácora)</span>
                         <div class="flex-1 overflow-y-auto space-y-3.5 pr-1.5 scrollbar-custom" id="modal-bitacora-timeline"></div>
                     </div>
                 </div>
@@ -479,7 +480,7 @@
                     
                     <div class="flex gap-2.5">
                         <button type="button" onclick="closeModal()" class="px-4.5 h-11 font-bold text-slate-500 hover:text-slate-700">Cerrar Ventana</button>
-                        <button type="submit" id="btn-submit-form" class="px-6 h-11 bg-indigo-600 text-white font-extrabold rounded-xl shadow-md">Guardar Cambios</button>
+                        <button type="submit" id="btn-submit-form" class="px-6 h-11 bg-indigo-600 text-white font-extrabold rounded-xl shadow-md">Guardar Todo</button>
                     </div>
                 </div>
             </form>
@@ -519,6 +520,22 @@
             if (val === null || val === undefined || val === '') return 0;
             let parsed = parseFloat(val);
             return isNaN(parsed) ? 0 : parsed;
+        }
+
+        // --- FUNCION CLAVE: EXTRAE FECHAS SIN IMPORTAR FORMATOS LOCALES ("7/7/2026", "07/07/2026", "2026-07-07") ---
+        function parseCustomDate(dateStr) {
+            if(!dateStr) return null;
+            let str = dateStr.split(',')[0].split(' ')[0]; // Toma solo la parte de fecha
+            let parts = str.split(/[-/]/);
+            if(parts.length !== 3) return null;
+            
+            let y, m, d;
+            if (parts[0].length === 4) { // Formato YYYY-MM-DD
+                y = parseInt(parts[0]); m = parseInt(parts[1]); d = parseInt(parts[2]);
+            } else { // Formato DD/MM/YYYY o D/M/YYYY
+                d = parseInt(parts[0]); m = parseInt(parts[1]); y = parseInt(parts[2]);
+            }
+            return { year: y, month: m, day: d };
         }
 
         window.onload = function() {
@@ -631,20 +648,17 @@
             renderApplicationCore();
         }
 
-        // --- SOLUCIÓN V27.3: DESCARGA GARANTIZADA DE LA NUBE ---
         async function loadDataFromCloud() {
             if(!supabaseClient) return;
             try {
                 let { data, error } = await supabaseClient.from('pacientes_crm').select('*');
                 if(error) throw error;
                 
-                // Extraer fila especial de configuración que Supabase ya aceptó
                 const cloudConfig = data.find(item => item.id === 999999 || item.name === 'CONFIG_SISTEMA');
                 if (cloudConfig) {
                     try {
                         let configStr = cloudConfig.desc || cloudConfig.observaciones || '';
                         if (configStr.startsWith('{')) {
-                            // Desempaquetar el doble JSON que crea el sistema
                             let outerObj = JSON.parse(configStr);
                             let innerStr = outerObj.desc || configStr;
                             let parsed = JSON.parse(innerStr);
@@ -659,16 +673,17 @@
                                 localStorage.setItem('relax_metas_diarias', JSON.stringify(metasDiariasDinamicas));
                             }
                         }
-                    } catch(e) { console.error("Error procesando configuración en la nube", e); }
+                    } catch(e) {}
                 }
 
-                // Filtrar para mostrar solo a los pacientes reales en el tablero
-                mainLeadsRegistry = data.filter(item => item.id !== 999999 && item.name !== 'CONFIG_SISTEMA').map(item => parseRowToLead(item));
+                mainLeadsRegistry = data.filter(item => {
+                    let idCheck = parseInt(item.id);
+                    return idCheck !== 999999 && idCheck !== 100 && item.name !== 'CONFIG_SISTEMA';
+                }).map(item => parseRowToLead(item));
                 
-                // --- CAPA DE SEGURIDAD AUTO-DESCUBRIMIENTO ---
                 let discovered = false;
                 mainLeadsRegistry.forEach(l => {
-                    if (l.gestor && l.gestor !== 'Sistema' && !listadoGestores.includes(l.gestor)) {
+                    if (l.gestor && l.gestor !== 'Sistema' && !listadoGestores.includes(l.gestor) && l.gestor !== '100') {
                         listadoGestores.push(l.gestor);
                         metasMensualesDinamicas[l.gestor] = 0;
                         metasDiariasDinamicas[l.gestor] = 0;
@@ -689,21 +704,18 @@
                 renderApplicationCore();
                 showToast("Sincronización exacta completada.");
                 
-                if (discovered) saveSystemConfigToCloud(); // Subir los descubrimientos a la nube
+                if (discovered) saveSystemConfigToCloud(); 
 
             } catch(e) {
-                console.error("Error cargando desde Supabase:", e);
                 switchToLocalFallback();
             }
         }
 
-        // --- SOLUCIÓN V27.3: SUBIDA GARANTIZADA DISFRAZADA DE PACIENTE ---
         async function saveSystemConfigToCloud() {
             localStorage.setItem('relax_gestores', JSON.stringify(listadoGestores));
             localStorage.setItem('relax_metas_mensuales', JSON.stringify(metasMensualesDinamicas));
             localStorage.setItem('relax_metas_diarias', JSON.stringify(metasDiariasDinamicas));
 
-            // Disfrazamos la configuración como un Lead para que la Base de Datos lo acepte sin problemas
             const configLead = {
                 id: 999999,
                 name: "CONFIG_SISTEMA",
@@ -723,9 +735,7 @@
                 bitacora: []
             };
 
-            // Utilizamos la misma función de guardado que SÍ funciona para los pacientes
             await saveLeadData(configLead, false);
-            
             initPersonalizationConfig();
             renderApplicationCore();
         }
@@ -808,7 +818,7 @@
             
             let idx = mainLeadsRegistry.findIndex(l => l.id === leadData.id);
             if(idx !== -1) mainLeadsRegistry[idx] = leadData;
-            else if (!isConfig) mainLeadsRegistry.push(leadData); // No meter la config al array visual
+            else if (!isConfig) mainLeadsRegistry.push(leadData);
             
             localStorage.setItem('relax_leads_registry_local', JSON.stringify(mainLeadsRegistry));
 
@@ -865,11 +875,9 @@
                         if(error) throw error;
                         showToast("Ficha eliminada permanentemente de la red.", "success");
                     } catch(e) {
-                        console.error("Fallo al eliminar en Supabase:", e);
                         showToast("Error de conexión al intentar borrar de la nube.", "error");
                     }
                 }
-                
                 closeModal();
                 renderApplicationCore();
             }
@@ -933,18 +941,31 @@
             renderApplicationCore();
         }
 
+        // ==========================================
+        // MOTOR V27.5: PARSEO INTELIGENTE DE FECHAS Y GESTIONES MES
+        // ==========================================
         function renderApplicationCore() {
             const phases = ['frio', 'tibio', 'caliente', 'agenda', 'venta', 'postventa'];
             let pipelineSum = 0, salesSum = 0, todayAlerts = 0;
             let phaseCounts = { frio: 0, tibio: 0, caliente: 0, agenda: 0, venta: 0, postventa: 0 };
             let totalLeadsBajoFiltro = 0, agendasContadasBajoFiltro = 0, ventasContadasBajoFiltro = 0;
 
-            let gestoresSales = {}, gestoresContracted = {}, gestoresTodayCount = {}, gestoresMonthTotalCount = {};
-            listadoGestores.forEach(g => { gestoresSales[g] = 0; gestoresContracted[g] = 0; gestoresTodayCount[g] = 0; gestoresMonthTotalCount[g] = 0; });
+            let gestoresSales = {}, gestoresContracted = {}, gestoresTodayCount = {}, gestoresMonthTotalCount = {}, gestoresDailySales = {};
+            listadoGestores.forEach(g => { 
+                gestoresSales[g] = 0; 
+                gestoresContracted[g] = 0; 
+                gestoresTodayCount[g] = 0; 
+                gestoresMonthTotalCount[g] = 0; 
+                gestoresDailySales[g] = 0; 
+            });
             
             let yearMonthsData = Array.from({ length: 12 }, () => ({ totalLeads: 0, totalSalesLeads: 0, totalContracted: 0, totalCollected: 0, agendas: 0 }));
-            
             let selectedAuditMonth = parseInt(document.getElementById('audit-month-selector').value) || CURRENT_MONTH_NUM;
+
+            const today = new Date();
+            const todayYear = today.getFullYear();
+            const todayMonth = today.getMonth() + 1;
+            const todayDay = today.getDate();
 
             phases.forEach(p => {
                 const colContainer = document.getElementById(`column-container-${p}`);
@@ -986,23 +1007,33 @@
                 if(leadMonth === selectedAuditMonth && gestoresSales[gName] !== undefined) {
                     gestoresSales[gName] += totalAbonado; 
                     gestoresContracted[gName] += valContrato; 
-                    gestoresMonthTotalCount[gName]++;
                 }
 
-                // CONTEO REAL DESDE LA BITÁCORA DEL DÍA DE HOY
+                // NUEVA TRAZABILIDAD EXACTA: BITÁCORA Y MES
                 if (lead.bitacora && Array.isArray(lead.bitacora)) {
                     lead.bitacora.forEach(log => {
-                        if (log.fecha) {
-                            let logDate = new Date(log.fecha);
-                            if (!isNaN(logDate.getTime())) {
-                                let today = new Date();
-                                if (logDate.getDate() === today.getDate() && 
-                                    logDate.getMonth() === today.getMonth() && 
-                                    logDate.getFullYear() === today.getFullYear()) {
-                                    if (gestoresTodayCount[gName] !== undefined) {
-                                        gestoresTodayCount[gName]++;
-                                    }
-                                }
+                        let parsedLogDate = parseCustomDate(log.fecha);
+                        if(parsedLogDate) {
+                            // 1. Contador de Llamadas/Gestiones Hoy
+                            if (parsedLogDate.year === todayYear && parsedLogDate.month === todayMonth && parsedLogDate.day === todayDay) {
+                                if (gestoresTodayCount[gName] !== undefined) gestoresTodayCount[gName]++;
+                                todayAlerts++; 
+                            }
+                            // 2. Contador de GESTIONES MES (Todo lo trabajado en el mes seleccionado)
+                            if (parsedLogDate.year === todayYear && parsedLogDate.month === selectedAuditMonth) {
+                                if (gestoresMonthTotalCount[gName] !== undefined) gestoresMonthTotalCount[gName]++;
+                            }
+                        }
+                    });
+                }
+
+                // TRAZABILIDAD EXACTA: ABONOS DE HOY
+                if (lead.abonos && Array.isArray(lead.abonos)) {
+                    lead.abonos.forEach(abo => {
+                        let parsedAboDate = parseCustomDate(abo.fecha);
+                        if(parsedAboDate) {
+                            if (parsedAboDate.year === todayYear && parsedAboDate.month === todayMonth && parsedAboDate.day === todayDay) {
+                                if (gestoresDailySales[gName] !== undefined) gestoresDailySales[gName] += safeNum(abo.monto);
                             }
                         }
                     });
@@ -1078,7 +1109,11 @@
                     let totCobradoMes = gestoresSales[g] || 0;
                     let totContratadoMes = gestoresContracted[g] || 0;
                     let hoyGestiones = gestoresTodayCount[g] || 0;
-                    let acumuladoMesLeads = gestoresMonthTotalCount[g] || 0;
+                    let hoyVentasReal = gestoresDailySales[g] || 0;
+                    
+                    // Ahora gestoresMonthTotalCount es el total de la bitácora trabajada en el mes!
+                    let acumuladoGestionesMes = gestoresMonthTotalCount[g] || 0;
+                    
                     let metaMensualBase = metasMensualesDinamicas[g] || 0;
                     let metaDiariaBase = metasDiariasDinamicas[g] || 0;
                     let pctAvance = metaMensualBase > 0 ? Math.min(Math.round((totCobradoMes / metaMensualBase) * 100), 100) : 0;
@@ -1086,10 +1121,11 @@
                     gBody.innerHTML += `
                         <tr class="border-b h-12 hover:bg-slate-50/50">
                             <td class="p-2.5 font-extrabold text-slate-800 text-left pl-4">${g}</td>
+                            <td class="p-2.5 font-extrabold text-emerald-700 bg-emerald-50/40 border-r border-emerald-100">$${hoyVentasReal.toFixed(0)}</td>
+                            <td class="p-2.5 font-extrabold text-fuchsia-700 bg-fuchsia-50/40 border-r border-fuchsia-100">${hoyGestiones}</td>
+                            <td class="p-2.5 font-bold text-slate-700">$${totCobradoMes.toFixed(0)}</td>
                             <td class="p-2.5 font-bold text-slate-500">$${totContratadoMes.toFixed(0)}</td>
-                            <td class="p-2.5 font-extrabold text-emerald-600">$${totCobradoMes.toFixed(0)}</td>
-                            <td class="p-2.5 font-extrabold text-fuchsia-700">${hoyGestiones}</td>
-                            <td class="p-2.5 font-bold text-slate-700">${acumuladoMesLeads}</td>
+                            <td class="p-2.5 font-bold text-indigo-700 bg-indigo-50/40">${acumuladoGestionesMes}</td>
                             <td class="p-2.5 font-bold text-blue-600">$${metaDiariaBase}</td>
                             <td class="p-2.5 font-bold text-indigo-600">$${metaMensualBase}</td>
                             <td class="p-2.5">
@@ -1097,7 +1133,7 @@
                                     <div class="w-full bg-slate-200 rounded-full h-2">
                                         <div class="bg-indigo-600 h-2 rounded-full" style="width: ${pctAvance}%"></div>
                                     </div>
-                                    <span class="font-extrabold text-slate-600">${pctAvance}%</span>
+                                    <span class="font-extrabold text-slate-600 text-[10px]">${pctAvance}%</span>
                                 </div>
                             </td>
                         </tr>`;
@@ -1108,8 +1144,11 @@
             if(kpiPipeline) kpiPipeline.innerText = `$${pipelineSum.toFixed(2)}`;
             const kpiSales = document.getElementById('kpi-sales');
             if(kpiSales) kpiSales.innerText = `$${salesSum.toFixed(2)}`;
+            
+            // ACTUALIZADO: El KPI superior mostrará el total de llamadas hechas hoy por todas las asesoras
             const kpiAlerts = document.getElementById('kpi-alerts');
             if(kpiAlerts) kpiAlerts.innerText = todayAlerts;
+            
             phases.forEach(p => {
                 const b = document.getElementById(`b-${p}`);
                 if(b) b.innerText = phaseCounts[p];
@@ -1199,8 +1238,6 @@
             let numericValue = safeNum(val);
             if(tipo === 'mensual') metasMensualesDinamicas[name] = numericValue;
             if(tipo === 'diaria') metasDiariasDinamicas[name] = numericValue;
-            
-            // Llama a guardar en Supabase (disfrazado de paciente) para que se actualice en la red
             saveSystemConfigToCloud();
         }
 
@@ -1212,7 +1249,6 @@
                     listadoGestores.push(nombre);
                     metasMensualesDinamicas[nombre] = 0;
                     metasDiariasDinamicas[nombre] = 0;
-                    
                     await saveSystemConfigToCloud();
                     showToast(`Asesora ${nombre} integrada a la red exitosamente.`);
                 } else {
@@ -1226,7 +1262,6 @@
                 listadoGestores = listadoGestores.filter(g => g !== nombre);
                 delete metasMensualesDinamicas[nombre];
                 delete metasDiariasDinamicas[nombre];
-                
                 await saveSystemConfigToCloud();
                 showToast(`Asesora ${nombre} removida.`);
             }
