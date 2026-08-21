@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM Cloud - Premium v28.2</title>
+    <title>Relax Therapy CRM Cloud - Premium v28.3 Cuadre Perfecto</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -66,7 +66,7 @@
                 <div>
                     <span class="font-extrabold text-slate-900 tracking-tight text-xl flex items-center gap-1.5">
                         RELAX THERAPY CRM 
-                        <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold border border-slate-200">v28.2 UX Seguimiento</span>
+                        <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold border border-slate-200">v28.3 Cuadre Perfecto</span>
                     </span>
                     <span id="sync-status" class="block text-[11px] font-extrabold text-amber-600 uppercase tracking-wider">
                         <i class="fa-solid fa-circle-notch fa-spin"></i> Conectando...
@@ -211,7 +211,7 @@
             <div class="bg-slate-50 p-4.5 rounded-xl border border-slate-200 space-y-3">
                 <div class="flex items-center justify-between border-b pb-1.5">
                     <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-chart-simple text-indigo-500"></i> Historial Comercial Mensual
+                        <i class="fa-solid fa-chart-simple text-indigo-500"></i> Historial Comercial Mensual (Ventas vs Cobros Efectivos)
                     </h4>
                 </div>
                 <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-12 gap-3.5" id="months-grid-container"></div>
@@ -231,7 +231,7 @@
                     <table class="w-full text-left border-collapse bg-white text-xs">
                         <thead>
                             <tr class="bg-slate-800 text-white font-extrabold uppercase text-center border-b">
-                                <th class="p-3.5 text-left font-bold">Asesora</th>
+                                <th class="p-3.5 text-left font-bold pl-4">Asesora</th>
                                 <th class="p-3.5 bg-emerald-900 text-emerald-100 font-bold border-r border-emerald-800" title="Cobros registrados el día de hoy">💰 Venta Hoy ($)</th>
                                 <th class="p-3.5 bg-fuchsia-900 text-fuchsia-100 font-bold border-r border-fuchsia-800" title="Gestiones y llamadas de hoy">📱 Gestiones Hoy</th>
                                 <th class="p-3.5 font-bold">Cobrado Mes ($)</th>
@@ -529,7 +529,7 @@
         function parseCustomDate(dateStr) {
             if(!dateStr) return null;
             try {
-                let str = dateStr.split(',')[0].trim();
+                let str = String(dateStr).split(',')[0].trim();
                 str = str.split(' ')[0].trim();
                 let parts = str.split(/[-/]/);
                 if(parts.length !== 3) return null;
@@ -873,7 +873,7 @@
         }
 
         // ==========================================
-        // RENDERIZADO Y TABLEROS (ACTUALIZADO V28.2)
+        // RENDERIZADO Y TABLEROS (ACTUALIZADO V28.3 - CUADRE PERFECTO)
         // ==========================================
         function renderApplicationCore() {
             const phases = ['frio', 'tibio', 'caliente', 'agenda', 'venta', 'postventa'];
@@ -936,6 +936,7 @@
                 }
             });
 
+            // PASO 1: Procesar Leads, Ventas y Contratos por Mes de Creación
             mainLeadsRegistry.forEach(lead => {
                 let currentPhase = lead.phase;
                 if (!phases.includes(currentPhase)) currentPhase = 'frio';
@@ -957,7 +958,6 @@
                         yearMonthsData[leadMonth - 1].totalSalesLeads++;
                         yearMonthsData[leadMonth - 1].totalContracted += valContrato;
                     }
-                    yearMonthsData[leadMonth - 1].totalCollected += totalAbonado;
                 }
 
                 let gName = (lead.gestor || 'Brenda').trim();
@@ -1026,7 +1026,7 @@
                     
                     let cardBorderClass = lead.loss && lead.loss !== 'Ninguno' ? 'border-rose-300 bg-rose-50/20' : (currentPhase === 'venta' ? 'border-emerald-300' : 'border-slate-200');
                     if (isTodayAction) {
-                        cardBorderClass = 'border-2 border-fuchsia-500 bg-fuchsia-50/30 shadow-md ring-2 ring-fuchsia-200'; // Borde morado/fucsia llamativo
+                        cardBorderClass = 'border-2 border-fuchsia-500 bg-fuchsia-50/30 shadow-md ring-2 ring-fuchsia-200';
                     }
 
                     let actionBadge = '';
@@ -1057,6 +1057,32 @@
                 }
             });
 
+            // PASO 2: Recálculo Estricto de Cobros por Fecha Real de Pago (Evita distorsiones en Julio/Agosto)
+            mainLeadsRegistry.forEach(lead => {
+                if (lead.abonos && Array.isArray(lead.abonos) && lead.abonos.length > 0) {
+                    lead.abonos.forEach(abo => {
+                        let parsedAboDate = parseCustomDate(abo.fecha);
+                        if (parsedAboDate && parsedAboDate.year === todayYear) {
+                            let mIdx = parsedAboDate.month - 1;
+                            if (mIdx >= 0 && mIdx < 12) {
+                                yearMonthsData[mIdx].totalCollected += safeNum(abo.monto);
+                            }
+                        }
+                    });
+                } else if (['venta', 'postventa'].includes(lead.phase) && lead.value > 0) {
+                    // Fallback para ventas sin abonos explícitos registrados
+                    let leadMonth = CURRENT_MONTH_NUM;
+                    if (lead.date) {
+                        let parts = lead.date.split('-');
+                        if(parts.length >= 2) leadMonth = parseInt(parts[1]);
+                    }
+                    if (leadMonth >= 1 && leadMonth <= 12) {
+                        yearMonthsData[leadMonth - 1].totalCollected += safeNum(lead.value);
+                    }
+                }
+            });
+
+            // RENDERIZAR HISTORIAL COMERCIAL MENSUAL
             const mContainer = document.getElementById('months-grid-container'); 
             if(mContainer) {
                 mContainer.innerHTML = '';
@@ -1065,22 +1091,31 @@
                     let cobroRate = mData.totalContracted > 0 ? Math.round((mData.totalCollected / mData.totalContracted) * 100) : 0;
 
                     mContainer.innerHTML += `
-                        <div onclick="triggerMonthInteractiveFilter(${idx})" class="p-2.5 rounded-xl border text-center bg-white cursor-pointer hover:border-indigo-400">
+                        <div onclick="triggerMonthInteractiveFilter(${idx})" class="p-2.5 rounded-xl border text-center bg-white cursor-pointer hover:border-indigo-400 shadow-2xs">
                             <span class="block font-black text-slate-700 text-[10px] uppercase border-b pb-1 mb-1">${monthsNames[idx]}</span>
                             <div class="text-left text-[9px] text-slate-500 space-y-0.5">
                                 <div class="flex justify-between"><span>Leads:</span> <strong class="text-slate-700">${mData.totalLeads}</strong></div>
-                                <div class="flex justify-between"><span>Ventas:</span> <strong class="text-slate-700">${mData.totalSalesLeads}</strong></div>
-                                <div class="flex justify-between font-bold text-emerald-600 mb-1"><span>Cobrado:</span> <strong>$${mData.totalCollected.toFixed(0)}</strong></div>
-                                <div class="flex justify-between text-indigo-600 border-t pt-0.5 mt-0.5"><span>Tasa Cierre:</span> <strong>${cierreRate}%</strong></div>
+                                <div class="flex justify-between"><span>Ventas (Cierres):</span> <strong class="text-indigo-600">${mData.totalSalesLeads}</strong></div>
+                                <div class="flex justify-between font-bold text-emerald-600 mb-1"><span>Cobrado Real:</span> <strong>$${mData.totalCollected.toFixed(0)}</strong></div>
+                                <div class="flex justify-between text-slate-600 border-t pt-0.5 mt-0.5"><span>Tasa Cierre:</span> <strong>${cierreRate}%</strong></div>
                                 <div class="flex justify-between text-emerald-600"><span>Vta Efectiva:</span> <strong>${cobroRate}%</strong></div>
                             </div>
                         </div>`;
                 });
             }
 
+            // RENDERIZAR TABLA DE ASESORAS + FILA TOTALIZADORA GENERAL
             const gBody = document.getElementById('goals-table-body'); 
             if(gBody) {
                 gBody.innerHTML = '';
+                
+                let sumVentaHoy = 0;
+                let sumGestionesHoy = 0;
+                let sumCobradoMes = 0;
+                let sumGestionesMes = 0;
+                let sumMetaDiaria = 0;
+                let sumMetaMensual = 0;
+
                 Object.keys(gestoresSales).forEach(g => {
                     let totCobradoMes = gestoresSales[g] || 0;
                     let hoyGestiones = gestoresTodayCount[g] || 0;
@@ -1089,6 +1124,13 @@
                     let metaMensualBase = metasMensualesDinamicas[g] || 0;
                     let metaDiariaBase = metasDiariasDinamicas[g] || 0;
                     let pctAvance = metaMensualBase > 0 ? Math.min(Math.round((totCobradoMes / metaMensualBase) * 100), 100) : 0;
+
+                    sumVentaHoy += hoyVentasReal;
+                    sumGestionesHoy += hoyGestiones;
+                    sumCobradoMes += totCobradoMes;
+                    sumGestionesMes += acumuladoGestionesMes;
+                    sumMetaDiaria += metaDiariaBase;
+                    sumMetaMensual += metaMensualBase;
 
                     gBody.innerHTML += `
                         <tr class="border-b h-12 hover:bg-slate-50/50">
@@ -1109,6 +1151,27 @@
                             </td>
                         </tr>`;
                 });
+
+                // FILA TOTALIZADORA GENERAL SOLICITADA PARA EL CUADRE DE CAJA
+                let globalPct = sumMetaMensual > 0 ? Math.min(Math.round((sumCobradoMes / sumMetaMensual) * 100), 100) : 0;
+                gBody.innerHTML += `
+                    <tr class="bg-slate-100 font-extrabold text-slate-900 border-t-2 border-slate-300 h-13">
+                        <td class="p-3 text-left pl-4 uppercase text-slate-900">TOTALES GENERALES</td>
+                        <td class="p-3 text-emerald-700 bg-emerald-100/60">$${sumVentaHoy.toFixed(0)}</td>
+                        <td class="p-3 text-fuchsia-700 bg-fuchsia-100/60">${sumGestionesHoy}</td>
+                        <td class="p-3 text-slate-900 font-black text-sm">$${sumCobradoMes.toFixed(0)}</td>
+                        <td class="p-3 text-indigo-700 bg-indigo-100/60">${sumGestionesMes}</td>
+                        <td class="p-3 text-blue-700">$${sumMetaDiaria}</td>
+                        <td class="p-3 text-indigo-700">$${sumMetaMensual}</td>
+                        <td class="p-3">
+                            <div class="flex items-center gap-2">
+                                <div class="w-full bg-slate-200 rounded-full h-2">
+                                    <div class="bg-indigo-600 h-2 rounded-full" style="width: ${globalPct}%"></div>
+                                </div>
+                                <span class="font-extrabold text-slate-700 text-[10px]">${globalPct}% Global</span>
+                            </div>
+                        </td>
+                    </tr>`;
             }
 
             const kpiPipeline = document.getElementById('kpi-pipeline'); if(kpiPipeline) kpiPipeline.innerText = `$${pipelineSum.toFixed(2)}`;
@@ -1224,6 +1287,7 @@
                 if(deleteBtn) deleteBtn.classList.add('hidden'); 
                 currentModalAbonosList = []; currentModalBitacoraList = [];
                 document.getElementById('form-date').value = new Date().toISOString().slice(0, 10);
+                document.getElementById('new-abono-fecha').value = new Date().toISOString().slice(0, 10);
                 document.getElementById('form-next-action').value = "";
             } else {
                 if(deleteBtn) deleteBtn.classList.remove('hidden'); 
@@ -1239,6 +1303,7 @@
                     document.getElementById('form-loss').value = lead.loss;
                     document.getElementById('form-touch').value = lead.touch;
                     document.getElementById('form-next-action').value = lead.next_action || "";
+                    document.getElementById('new-abono-fecha').value = new Date().toISOString().slice(0, 10);
                     currentModalAbonosList = lead.abonos || [];
                     currentModalBitacoraList = lead.bitacora || [];
                 }
