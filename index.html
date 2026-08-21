@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM Cloud - Premium v28.4 Auditoría Unificada</title>
+    <title>Relax Therapy CRM Cloud - Premium v28.5 Cuadre Exacto</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -66,7 +66,7 @@
                 <div>
                     <span class="font-extrabold text-slate-900 tracking-tight text-xl flex items-center gap-1.5">
                         RELAX THERAPY CRM 
-                        <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold border border-slate-200">v28.4 Auditoría Unificada</span>
+                        <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold border border-slate-200">v28.5 Cuadre Exacto</span>
                     </span>
                     <span id="sync-status" class="block text-[11px] font-extrabold text-amber-600 uppercase tracking-wider">
                         <i class="fa-solid fa-circle-notch fa-spin"></i> Conectando...
@@ -874,47 +874,8 @@
         }
 
         // ==========================================
-        // MOTOR DE CÁLCULO UNIFICADO Y RENDERIZADO V28.4
+        // MOTOR DE CÁLCULO 100% UNIFICADO V28.5 (CUADRE EXACTO)
         // ==========================================
-        function getLeadCollectedInMonth(lead, targetMonth, targetYear) {
-            let collected = 0;
-            if (lead.abonos && Array.isArray(lead.abonos) && lead.abonos.length > 0) {
-                lead.abonos.forEach(abo => {
-                    let pDate = parseCustomDate(abo.fecha);
-                    if (pDate && pDate.month === targetMonth && pDate.year === targetYear) {
-                        collected += safeNum(abo.monto);
-                    }
-                });
-            } else if (['venta', 'postventa'].includes(lead.phase) && lead.value > 0) {
-                let leadMonth = CURRENT_MONTH_NUM;
-                let leadYear = CURRENT_YEAR_NUM;
-                if (lead.date) {
-                    let parts = lead.date.split('-');
-                    if(parts.length >= 2) { leadYear = parseInt(parts[0]); leadMonth = parseInt(parts[1]); }
-                }
-                if (leadMonth === targetMonth && leadYear === targetYear) {
-                    collected += safeNum(lead.value);
-                }
-            }
-            return collected;
-        }
-
-        function getLeadContractedInMonth(lead, targetMonth, targetYear) {
-            let contracted = 0;
-            if (['venta', 'postventa'].includes(lead.phase) && lead.value > 0) {
-                let leadMonth = CURRENT_MONTH_NUM;
-                let leadYear = CURRENT_YEAR_NUM;
-                if (lead.date) {
-                    let parts = lead.date.split('-');
-                    if(parts.length >= 2) { leadYear = parseInt(parts[0]); leadMonth = parseInt(parts[1]); }
-                }
-                if (leadMonth === targetMonth && leadYear === targetYear) {
-                    contracted += safeNum(lead.value);
-                }
-            }
-            return contracted;
-        }
-
         function renderApplicationCore() {
             const phases = ['frio', 'tibio', 'caliente', 'agenda', 'venta', 'postventa'];
             let pipelineSum = 0, salesSum = 0, todayAlerts = 0;
@@ -923,20 +884,33 @@
 
             let selectedAuditMonth = parseInt(document.getElementById('audit-month-selector').value) || CURRENT_MONTH_NUM;
 
-            let gestoresSales = {}, gestoresContracted = {}, gestoresTodayCount = {}, gestoresMonthTotalCount = {}, gestoresDailySales = {};
-            listadoGestores.forEach(g => { 
-                gestoresSales[g] = 0; gestoresContracted[g] = 0; 
-                gestoresTodayCount[g] = 0; gestoresMonthTotalCount[g] = 0; gestoresDailySales[g] = 0; 
-            });
-            
+            // Estructuras de acumulación unificadas
             let yearMonthsData = Array.from({ length: 12 }, () => ({ totalLeads: 0, totalSalesLeads: 0, totalContracted: 0, totalCollected: 0, agendas: 0 }));
+            
+            let adviserMonthCollected = {};
+            let adviserMonthContracted = {};
+            let gestoresTodayCount = {};
+            let gestoresMonthTotalCount = {};
+            let gestoresDailySales = {};
+
+            listadoGestores.forEach(g => { 
+                adviserMonthCollected[g] = {};
+                adviserMonthContracted[g] = {};
+                for(let m=1; m<=12; m++) {
+                    adviserMonthCollected[g][m] = 0;
+                    adviserMonthContracted[g][m] = 0;
+                }
+                gestoresTodayCount[g] = 0; 
+                gestoresMonthTotalCount[g] = 0; 
+                gestoresDailySales[g] = 0; 
+            });
 
             const today = new Date();
             const todayYear = today.getFullYear();
             const todayMonth = today.getMonth() + 1;
             const todayDay = today.getDate();
 
-            // UI: Update filter buttons style
+            // UI: Actualizar estilo de filtros activos
             const btnDebt = document.getElementById('btn-kpi-sales');
             const iconDebt = document.getElementById('kpi-filter-debt-icon');
             if(btnDebt && iconDebt) {
@@ -977,7 +951,7 @@
                 }
             });
 
-            // PASO 1: Recorrer leads y calcular mediante el Motor Unificado
+            // PASO ÚNICO Y UNIFICADO: Procesar todos los leads y acumular finanzas con estricto rigor contable
             mainLeadsRegistry.forEach(lead => {
                 let currentPhase = lead.phase;
                 if (!phases.includes(currentPhase)) currentPhase = 'frio';
@@ -993,36 +967,47 @@
                     if(parts.length >= 2) { leadYear = parseInt(parts[0]); leadMonth = parseInt(parts[1]); }
                 }
 
-                if(leadMonth >= 1 && leadMonth <= 12) {
+                let gName = (lead.gestor || 'Brenda').trim();
+                if (!adviserMonthCollected[gName]) {
+                    adviserMonthCollected[gName] = {};
+                    adviserMonthContracted[gName] = {};
+                    for(let m=1; m<=12; m++) { adviserMonthCollected[gName][m] = 0; adviserMonthContracted[gName][m] = 0; }
+                    gestoresTodayCount[gName] = 0; gestoresMonthTotalCount[gName] = 0; gestoresDailySales[gName] = 0;
+                }
+
+                // 1. Acumular contratos por mes de creación
+                if(leadYear === todayYear && leadMonth >= 1 && leadMonth <= 12) {
                     yearMonthsData[leadMonth - 1].totalLeads++;
                     if(currentPhase === 'agenda') yearMonthsData[leadMonth - 1].agendas++;
                     if(currentPhase === 'venta' || currentPhase === 'postventa') {
                         yearMonthsData[leadMonth - 1].totalSalesLeads++;
                         yearMonthsData[leadMonth - 1].totalContracted += valContrato;
+                        adviserMonthContracted[gName][leadMonth] += valContrato;
                     }
                 }
 
-                let gName = (lead.gestor || 'Brenda').trim();
-                
-                // Cálculo exacto unificado para el mes auditado seleccionado
-                let collectedInAuditMonth = getLeadCollectedInMonth(lead, selectedAuditMonth, todayYear);
-                let contractedInAuditMonth = getLeadContractedInMonth(lead, selectedAuditMonth, todayYear);
-
-                if(gestoresSales[gName] !== undefined) {
-                    gestoresSales[gName] += collectedInAuditMonth; 
-                    gestoresContracted[gName] += contractedInAuditMonth; 
-                }
-
-                // Venta de Hoy
-                if (lead.abonos && Array.isArray(lead.abonos)) {
+                // 2. Acumular cobros reales por fecha exacta de cada abono (o fallback si no hay abonos)
+                if (lead.abonos && Array.isArray(lead.abonos) && lead.abonos.length > 0) {
                     lead.abonos.forEach(abo => {
                         let pAboDate = parseCustomDate(abo.fecha);
+                        if (pAboDate && pAboDate.year === todayYear && pAboDate.month >= 1 && pAboDate.month <= 12) {
+                            let mIndex = pAboDate.month - 1;
+                            yearMonthsData[mIndex].totalCollected += safeNum(abo.monto);
+                            adviserMonthCollected[gName][pAboDate.month] += safeNum(abo.monto);
+                        }
+                        // Venta de hoy
                         if(pAboDate && pAboDate.year === todayYear && pAboDate.month === todayMonth && pAboDate.day === todayDay) {
-                            if (gestoresDailySales[gName] !== undefined) gestoresDailySales[gName] += safeNum(abo.monto);
+                            gestoresDailySales[gName] += safeNum(abo.monto);
                         }
                     });
+                } else if (['venta', 'postventa'].includes(lead.phase) && valContrato > 0) {
+                    if (leadYear === todayYear && leadMonth >= 1 && leadMonth <= 12) {
+                        yearMonthsData[leadMonth - 1].totalCollected += valContrato;
+                        adviserMonthCollected[gName][leadMonth] += valContrato;
+                    }
                 }
 
+                // Bitácora y Gestiones de Hoy
                 let hasTodayLog = false;
                 if (lead.bitacora && Array.isArray(lead.bitacora)) {
                     lead.bitacora.forEach(log => {
@@ -1032,13 +1017,13 @@
                                 hasTodayLog = true;
                             }
                             if (parsedLogDate.year === todayYear && parsedLogDate.month === selectedAuditMonth) {
-                                if (gestoresMonthTotalCount[gName] !== undefined) gestoresMonthTotalCount[gName]++;
+                                gestoresMonthTotalCount[gName]++;
                             }
                         }
                     });
                 }
                 
-                if (hasTodayLog && gestoresTodayCount[gName] !== undefined) {
+                if (hasTodayLog) {
                     gestoresTodayCount[gName]++;
                     todayAlerts++; 
                 }
@@ -1100,16 +1085,6 @@
                 }
             });
 
-            // PASO 2: Recálculo Estricto de Cobros Reales en el Historial Mensual usando el Motor Unificado
-            mainLeadsRegistry.forEach(lead => {
-                for(let m = 1; m <= 12; m++) {
-                    let colForMonth = getLeadCollectedInMonth(lead, m, todayYear);
-                    if(colForMonth > 0) {
-                        yearMonthsData[m - 1].totalCollected += colForMonth;
-                    }
-                }
-            });
-
             // RENDERIZAR HISTORIAL COMERCIAL MENSUAL
             const mContainer = document.getElementById('months-grid-container'); 
             if(mContainer) {
@@ -1132,7 +1107,7 @@
                 });
             }
 
-            // RENDERIZAR TABLA DE ASESORAS + COLUMNA CONTRATADO VS COBRADO + TOTALES GENERALES
+            // RENDERIZAR TABLA DE ASESORAS (CON CUADRE 100% GARANTIZADO)
             const gBody = document.getElementById('goals-table-body'); 
             if(gBody) {
                 gBody.innerHTML = '';
@@ -1145,9 +1120,9 @@
                 let sumMetaDiaria = 0;
                 let sumMetaMensual = 0;
 
-                Object.keys(gestoresSales).forEach(g => {
-                    let totContratadoMes = gestoresContracted[g] || 0;
-                    let totCobradoMes = gestoresSales[g] || 0;
+                Object.keys(adviserMonthCollected).forEach(g => {
+                    let totContratadoMes = adviserMonthContracted[g][selectedAuditMonth] || 0;
+                    let totCobradoMes = adviserMonthCollected[g][selectedAuditMonth] || 0;
                     let hoyGestiones = gestoresTodayCount[g] || 0;
                     let hoyVentasReal = gestoresDailySales[g] || 0;
                     let acumuladoGestionesMes = gestoresMonthTotalCount[g] || 0;
