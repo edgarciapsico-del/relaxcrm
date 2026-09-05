@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>Relax Therapy CRM Cloud - Premium v28.5 Cuadre Exacto</title>
+    <title>Relax Therapy CRM Cloud - Premium v28.8 Campo Email</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -66,7 +66,7 @@
                 <div>
                     <span class="font-extrabold text-slate-900 tracking-tight text-xl flex items-center gap-1.5">
                         RELAX THERAPY CRM 
-                        <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold border border-slate-200">v28.5 Cuadre Exacto</span>
+                        <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold border border-slate-200">v28.8 Campo Email</span>
                     </span>
                     <span id="sync-status" class="block text-[11px] font-extrabold text-amber-600 uppercase tracking-wider">
                         <i class="fa-solid fa-circle-notch fa-spin"></i> Conectando...
@@ -211,7 +211,7 @@
             <div class="bg-slate-50 p-4.5 rounded-xl border border-slate-200 space-y-3">
                 <div class="flex items-center justify-between border-b pb-1.5">
                     <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-chart-simple text-indigo-500"></i> Historial Comercial Mensual (Contratado vs Cobrado Efectivo)
+                        <i class="fa-solid fa-chart-simple text-indigo-500"></i> Historial Comercial Mensual (Ventas USD vs Cobro Efectivo USD en Porcentajes)
                     </h4>
                 </div>
                 <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-12 gap-3.5" id="months-grid-container"></div>
@@ -236,7 +236,7 @@
                                 <th class="p-3.5 bg-fuchsia-900 text-fuchsia-100 font-bold border-r border-fuchsia-800" title="Gestiones y llamadas de hoy">📱 Gestiones Hoy</th>
                                 <th class="p-3.5 bg-blue-900 text-blue-100 font-bold" title="Valor total de ventas contratadas en el mes">📦 Valor Contratado ($)</th>
                                 <th class="p-3.5 bg-indigo-900 text-indigo-100 font-bold" title="Dinero real cobrado en el mes">💵 Cobrado Mes ($)</th>
-                                <th class="p-3.5 font-bold bg-indigo-50 text-indigo-800" title="Historial total de gestiones del mes">📋 Gestiones Mes</th>
+                                <th class="p-3.5 font-bold bg-indigo-50 text-indigo-800" title="Historial total de gestiones manuales del mes">📋 Gestiones Mes</th>
                                 <th class="p-3.5 font-bold">Meta Diaria</th>
                                 <th class="p-3.5 font-bold">Meta Mensual</th>
                                 <th class="p-3.5 w-44 font-bold text-left">Progreso Mensual</th>
@@ -345,7 +345,7 @@
             
             <form id="crm-form" onsubmit="handleFormSubmit(event)" class="space-y-6 text-xs">
                 <input type="hidden" id="form-id">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
                         <label class="block font-bold text-slate-500 mb-1">Nombre Completo</label>
                         <input type="text" id="form-name" required class="w-full px-3 h-10 bg-slate-50 border border-slate-200 rounded-xl font-medium">
@@ -353,6 +353,10 @@
                     <div>
                         <label class="block font-bold text-slate-500 mb-1">WhatsApp</label>
                         <input type="text" id="form-phone" required class="w-full px-3 h-10 bg-slate-50 border border-slate-200 rounded-xl font-medium">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-500 mb-1">Correo Electrónico</label>
+                        <input type="email" id="form-email" placeholder="correo@ejemplo.com" class="w-full px-3 h-10 bg-slate-50 border border-slate-200 rounded-xl font-medium">
                     </div>
                     <div>
                         <label class="block font-bold text-slate-500 mb-1">Fecha de Ingreso</label>
@@ -515,9 +519,9 @@
         let currentModalAbonosList = [];
         let currentModalBitacoraList = [];
         
-        let listadoGestores = ["Brenda", "Joselyne", "Naty", "Fernando"];
-        let metasMensualesDinamicas = { "Brenda": 1100, "Joselyne": 1100, "Naty": 1100, "Fernando": 0 };
-        let metasDiariasDinamicas = { "Brenda": 50, "Joselyne": 50, "Naty": 50, "Fernando": 0 };
+        let listadoGestores = ["Brenda", "Joselyne", "Naty", "Fernando", "David"];
+        let metasMensualesDinamicas = { "Brenda": 1100, "Joselyne": 1100, "Naty": 1100, "Fernando": 1100, "David": 1100 };
+        let metasDiariasDinamicas = { "Brenda": 50, "Joselyne": 50, "Naty": 50, "Fernando": 50, "David": 50 };
         
         const monthsNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
@@ -678,17 +682,23 @@
                     } catch(e) {}
                 }
 
-                mainLeadsRegistry = data.filter(item => {
+                let cloudLeads = data.filter(item => {
                     let idCheck = parseInt(item.id);
                     return idCheck !== 999999 && idCheck !== 100 && item.name !== 'CONFIG_SISTEMA';
                 }).map(item => parseRowToLead(item));
                 
+                let localLeads = JSON.parse(localStorage.getItem('relax_leads_registry_local') || '[]');
+                let mergedMap = new Map();
+                localLeads.forEach(l => mergedMap.set(l.id, l));
+                cloudLeads.forEach(l => mergedMap.set(l.id, l));
+                mainLeadsRegistry = Array.from(mergedMap.values());
+
                 let discovered = false;
                 mainLeadsRegistry.forEach(l => {
                     if (l.gestor && l.gestor !== 'Sistema' && !listadoGestores.includes(l.gestor) && l.gestor !== '100') {
                         listadoGestores.push(l.gestor);
-                        metasMensualesDinamicas[l.gestor] = 0;
-                        metasDiariasDinamicas[l.gestor] = 0;
+                        metasMensualesDinamicas[l.gestor] = 1100;
+                        metasDiariasDinamicas[l.gestor] = 50;
                         discovered = true;
                     }
                 });
@@ -718,6 +728,7 @@
                 id: 999999,
                 name: "CONFIG_SISTEMA",
                 phone: "9999999999",
+                email: "",
                 phase: "frio",
                 value: 0,
                 date: new Date().toISOString().slice(0,10),
@@ -743,6 +754,7 @@
             let nameVal = String(item.name || item.nombre || '');
             let phaseVal = String(item.phase || item.estado || 'frio').toLowerCase().trim();
             let phoneVal = String(item.phone || item.whatsapp || '');
+            let emailVal = String(item.email || item.correo || '');
 
             if(nameVal.toUpperCase() === 'CALIENTE' && item.phone) {
                 nameVal = item.phone;
@@ -757,6 +769,7 @@
                 id: safeId, 
                 name: nameVal, 
                 phone: phoneVal, 
+                email: emailVal,
                 phase: phaseVal,
                 value: safeNum(item.value || item.valor), 
                 date: item.date || item.fecha || new Date().toISOString().slice(0,10), 
@@ -774,6 +787,7 @@
                 try {
                     let parsed = JSON.parse(obsVal);
                     lead.desc = parsed.desc || lead.desc;
+                    lead.email = parsed.email || lead.email;
                     lead.abonos = parsed.abonos || [];
                     lead.bitacora = parsed.bitacora || [];
                     lead.next_action = parsed.next_action || '';
@@ -800,6 +814,7 @@
                 id: safeNum(leadData.id) || new Date().getTime(),
                 name: String(leadData.name || '').trim(), 
                 phone: String(leadData.phone || '').trim(), 
+                email: String(leadData.email || '').trim(),
                 phase: String(leadData.phase || 'frio').trim(),
                 value: safeNum(leadData.value), 
                 date: String(leadData.date || ''), 
@@ -807,7 +822,7 @@
                 gestor: String(leadData.gestor || 'Brenda').trim(), 
                 a1: abos[0], a2: abos[1], a3: abos[2], a4: abos[3], a5: abos[4], 
                 touch: safeNum(leadData.touch) || 1, 
-                desc: JSON.stringify({ desc: leadData.desc, abonos: leadData.abonos, bitacora: leadData.bitacora, next_action: leadData.next_action })
+                desc: JSON.stringify({ desc: leadData.desc, email: leadData.email, abonos: leadData.abonos, bitacora: leadData.bitacora, next_action: leadData.next_action })
             };
         }
 
@@ -857,6 +872,7 @@
                 id: modalId,
                 name: document.getElementById('form-name').value,
                 phone: document.getElementById('form-phone').value,
+                email: document.getElementById('form-email').value,
                 phase: document.getElementById('form-phase').value,
                 value: safeNum(document.getElementById('form-value').value),
                 date: document.getElementById('form-date').value,
@@ -873,8 +889,23 @@
             await saveLeadData(payload, notify);
         }
 
+        async function deleteCurrentLead() {
+            let id = safeNum(document.getElementById('form-id').value);
+            if(!id) return;
+            if(confirm("¿Estás segura de eliminar esta ficha comercial permanentemente?")) {
+                mainLeadsRegistry = mainLeadsRegistry.filter(l => l.id !== id);
+                localStorage.setItem('relax_leads_registry_local', JSON.stringify(mainLeadsRegistry));
+                if (currentStorageMode === 'supabase' && supabaseClient) {
+                    await supabaseClient.from('pacientes_crm').delete().eq('id', id);
+                }
+                closeModal();
+                showToast("Ficha eliminada correctamente.");
+                renderApplicationCore();
+            }
+        }
+
         // ==========================================
-        // MOTOR DE CÁLCULO 100% UNIFICADO V28.5 (CUADRE EXACTO)
+        // MOTOR DE CÁLCULO ESTRICTO 100% UNIFICADO V28.8
         // ==========================================
         function renderApplicationCore() {
             const phases = ['frio', 'tibio', 'caliente', 'agenda', 'venta', 'postventa'];
@@ -884,7 +915,6 @@
 
             let selectedAuditMonth = parseInt(document.getElementById('audit-month-selector').value) || CURRENT_MONTH_NUM;
 
-            // Estructuras de acumulación unificadas
             let yearMonthsData = Array.from({ length: 12 }, () => ({ totalLeads: 0, totalSalesLeads: 0, totalContracted: 0, totalCollected: 0, agendas: 0 }));
             
             let adviserMonthCollected = {};
@@ -910,7 +940,6 @@
             const todayMonth = today.getMonth() + 1;
             const todayDay = today.getDate();
 
-            // UI: Actualizar estilo de filtros activos
             const btnDebt = document.getElementById('btn-kpi-sales');
             const iconDebt = document.getElementById('kpi-filter-debt-icon');
             if(btnDebt && iconDebt) {
@@ -951,7 +980,7 @@
                 }
             });
 
-            // PASO ÚNICO Y UNIFICADO: Procesar todos los leads y acumular finanzas con estricto rigor contable
+            // PROCESAMIENTO DE LEADS Y CAJA
             mainLeadsRegistry.forEach(lead => {
                 let currentPhase = lead.phase;
                 if (!phases.includes(currentPhase)) currentPhase = 'frio';
@@ -975,7 +1004,6 @@
                     gestoresTodayCount[gName] = 0; gestoresMonthTotalCount[gName] = 0; gestoresDailySales[gName] = 0;
                 }
 
-                // 1. Acumular contratos por mes de creación
                 if(leadYear === todayYear && leadMonth >= 1 && leadMonth <= 12) {
                     yearMonthsData[leadMonth - 1].totalLeads++;
                     if(currentPhase === 'agenda') yearMonthsData[leadMonth - 1].agendas++;
@@ -986,7 +1014,6 @@
                     }
                 }
 
-                // 2. Acumular cobros reales por fecha exacta de cada abono (o fallback si no hay abonos)
                 if (lead.abonos && Array.isArray(lead.abonos) && lead.abonos.length > 0) {
                     lead.abonos.forEach(abo => {
                         let pAboDate = parseCustomDate(abo.fecha);
@@ -995,22 +1022,18 @@
                             yearMonthsData[mIndex].totalCollected += safeNum(abo.monto);
                             adviserMonthCollected[gName][pAboDate.month] += safeNum(abo.monto);
                         }
-                        // Venta de hoy
                         if(pAboDate && pAboDate.year === todayYear && pAboDate.month === todayMonth && pAboDate.day === todayDay) {
                             gestoresDailySales[gName] += safeNum(abo.monto);
                         }
                     });
-                } else if (['venta', 'postventa'].includes(lead.phase) && valContrato > 0) {
-                    if (leadYear === todayYear && leadMonth >= 1 && leadMonth <= 12) {
-                        yearMonthsData[leadMonth - 1].totalCollected += valContrato;
-                        adviserMonthCollected[gName][leadMonth] += valContrato;
-                    }
                 }
 
-                // Bitácora y Gestiones de Hoy
                 let hasTodayLog = false;
                 if (lead.bitacora && Array.isArray(lead.bitacora)) {
                     lead.bitacora.forEach(log => {
+                        let noteText = String(log.nota || '');
+                        if (noteText.startsWith('Cambio a')) return;
+
                         let parsedLogDate = parseCustomDate(log.fecha);
                         if(parsedLogDate) {
                             if (parsedLogDate.year === todayYear && parsedLogDate.month === todayMonth && parsedLogDate.day === todayDay) {
@@ -1033,7 +1056,7 @@
 
                 const matchesManager = (currentManagerFilter === 'all' || gName === currentManagerFilter);
                 const matchesMonth = (selectedMonthInteractiveFilter === null || leadMonth === selectedMonthInteractiveFilter);
-                const matchesSearch = (activeSearchQuery === "" || lead.name.toLowerCase().includes(activeSearchQuery) || lead.phone.includes(activeSearchQuery));
+                const matchesSearch = (activeSearchQuery === "" || lead.name.toLowerCase().includes(activeSearchQuery) || lead.phone.includes(activeSearchQuery) || lead.email.toLowerCase().includes(activeSearchQuery));
                 
                 const matchesDebt = filterOnlyPendingDebt ? (saldoPendiente > 0) : true;
                 const matchesAlerts = filterOnlyTodayAlerts ? (isTodayAction || hasTodayLog) : true;
@@ -1063,12 +1086,15 @@
                         actionBadge = `<div class="text-[10px] border px-2 py-0.5 rounded-md ${badgeColor} block mt-1.5"><i class="fa-regular fa-calendar-check mr-1"></i> Próxima Gestión: ${lead.next_action}</div>`;
                     }
 
+                    let emailBadge = lead.email ? `<div class="text-[10px] text-slate-500 truncate"><i class="fa-regular fa-envelope mr-1"></i> ${lead.email}</div>` : '';
+
                     card.className = `lead-card p-3 rounded-xl border bg-white shadow-xs space-y-2 hover:shadow-md transition-all ${cardBorderClass}`;
                     card.innerHTML = `
                         <div class="flex justify-between font-bold text-xs">
                             <span onclick="openModal('edit', ${lead.id})" class="underline cursor-pointer text-indigo-600 font-extrabold">${lead.name}</span>
                             <span class="text-[9px] bg-slate-100 px-1.5 py-0.5 rounded font-black">${lead.loss !== 'Ninguno' ? 'Descarte' : `Int: ${lead.touch}`}</span>
                         </div>
+                        ${emailBadge}
                         <p class="text-[10px] text-slate-500 font-medium line-clamp-2">${lead.desc || 'Sin notas'}</p>
                         ${actionBadge}
                         <div class="text-[10px] font-extrabold flex justify-between bg-slate-50 p-1.5 rounded-lg mt-1">
@@ -1085,7 +1111,6 @@
                 }
             });
 
-            // RENDERIZAR HISTORIAL COMERCIAL MENSUAL
             const mContainer = document.getElementById('months-grid-container'); 
             if(mContainer) {
                 mContainer.innerHTML = '';
@@ -1098,16 +1123,16 @@
                             <span class="block font-black text-slate-700 text-[10px] uppercase border-b pb-1 mb-1">${monthsNames[idx]}</span>
                             <div class="text-left text-[9px] text-slate-500 space-y-0.5">
                                 <div class="flex justify-between"><span>Leads:</span> <strong class="text-slate-700">${mData.totalLeads}</strong></div>
-                                <div class="flex justify-between"><span>Ventas (Cierres):</span> <strong class="text-indigo-600">${mData.totalSalesLeads}</strong></div>
-                                <div class="flex justify-between font-bold text-emerald-600 mb-1"><span>Cobrado Real:</span> <strong>$${mData.totalCollected.toFixed(0)}</strong></div>
+                                <div class="flex justify-between"><span>Cierres:</span> <strong class="text-indigo-600">${mData.totalSalesLeads}</strong></div>
+                                <div class="flex justify-between font-bold text-blue-700"><span>Ventas ($):</span> <strong>$${mData.totalContracted.toFixed(0)}</strong></div>
+                                <div class="flex justify-between font-bold text-emerald-600 mb-1"><span>Cobrado ($):</span> <strong>$${mData.totalCollected.toFixed(0)}</strong></div>
                                 <div class="flex justify-between text-slate-600 border-t pt-0.5 mt-0.5"><span>Tasa Cierre:</span> <strong>${cierreRate}%</strong></div>
-                                <div class="flex justify-between text-emerald-600"><span>Vta Efectiva:</span> <strong>${cobroRate}%</strong></div>
+                                <div class="flex justify-between text-emerald-600 font-bold"><span>Vta Efectiva:</span> <strong>${cobroRate}%</strong></div>
                             </div>
                         </div>`;
                 });
             }
 
-            // RENDERIZAR TABLA DE ASESORAS (CON CUADRE 100% GARANTIZADO)
             const gBody = document.getElementById('goals-table-body'); 
             if(gBody) {
                 gBody.innerHTML = '';
@@ -1126,8 +1151,8 @@
                     let hoyGestiones = gestoresTodayCount[g] || 0;
                     let hoyVentasReal = gestoresDailySales[g] || 0;
                     let acumuladoGestionesMes = gestoresMonthTotalCount[g] || 0;
-                    let metaMensualBase = metasMensualesDinamicas[g] || 0;
-                    let metaDiariaBase = metasDiariasDinamicas[g] || 0;
+                    let metaMensualBase = metasMensualesDinamicas[g] || 1100;
+                    let metaDiariaBase = metasDiariasDinamicas[g] || 50;
                     let pctAvance = metaMensualBase > 0 ? Math.min(Math.round((totCobradoMes / metaMensualBase) * 100), 100) : 0;
 
                     sumVentaHoy += hoyVentasReal;
@@ -1159,7 +1184,6 @@
                         </tr>`;
                 });
 
-                // FILA TOTALIZADORA GENERAL
                 let globalPct = sumMetaMensual > 0 ? Math.min(Math.round((sumCobradoMes / sumMetaMensual) * 100), 100) : 0;
                 gBody.innerHTML += `
                     <tr class="bg-slate-100 font-extrabold text-slate-900 border-t-2 border-slate-300 h-13">
@@ -1244,8 +1268,8 @@
                             <button onclick="removeAdviserRecord('${g}')" class="text-rose-600 hover:text-rose-800 text-[10px] font-black">Quitar</button>
                         </div>
                         <div class="grid grid-cols-2 gap-2 text-[11px]">
-                            <div><label>Meta Diaria</label><input type="number" value="${metasDiariasDinamicas[g] || 0}" oninput="updateGestorMetaField('${g}', 'diaria', this.value)" class="w-full px-2 py-1 border rounded bg-slate-50"></div>
-                            <div><label>Meta Mensual</label><input type="number" value="${metasMensualesDinamicas[g] || 0}" oninput="updateGestorMetaField('${g}', 'mensual', this.value)" class="w-full px-2 py-1 border rounded bg-slate-50"></div>
+                            <div><label>Meta Diaria</label><input type="number" value="${metasDiariasDinamicas[g] || 50}" oninput="updateGestorMetaField('${g}', 'diaria', this.value)" class="w-full px-2 py-1 border rounded bg-slate-50"></div>
+                            <div><label>Meta Mensual</label><input type="number" value="${metasMensualesDinamicas[g] || 1100}" oninput="updateGestorMetaField('${g}', 'mensual', this.value)" class="w-full px-2 py-1 border rounded bg-slate-50"></div>
                         </div>
                     </div>`;
             });
@@ -1263,7 +1287,7 @@
             if(nombre && nombre.trim() !== "") {
                 nombre = nombre.trim();
                 if(!listadoGestores.includes(nombre)) {
-                    listadoGestores.push(nombre); metasMensualesDinamicas[nombre] = 0; metasDiariasDinamicas[nombre] = 0;
+                    listadoGestores.push(nombre); metasMensualesDinamicas[nombre] = 1100; metasDiariasDinamicas[nombre] = 50;
                     await saveSystemConfigToCloud(); showToast(`Asesora ${nombre} añadida.`);
                 }
             }
@@ -1304,6 +1328,7 @@
                     document.getElementById('form-id').value = lead.id;
                     document.getElementById('form-name').value = lead.name;
                     document.getElementById('form-phone').value = lead.phone;
+                    document.getElementById('form-email').value = lead.email || "";
                     document.getElementById('form-phase').value = lead.phase;
                     document.getElementById('form-value').value = lead.value;
                     document.getElementById('form-date').value = lead.date;
